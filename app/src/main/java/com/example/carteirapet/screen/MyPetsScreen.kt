@@ -1,10 +1,14 @@
 package com.example.carteirapet.screen
 
+import android.content.Intent
 import android.content.res.Resources.Theme
 import android.graphics.drawable.shapes.Shape
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +56,11 @@ import com.example.carteirapet.ui.theme.CarteiraPetTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPetsScreen() {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { /* Handle the result if needed */ }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,8 +85,8 @@ fun MyPetsScreen() {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(100.dp),
-                onClick = {  },
-                icon = { Icon(Icons.Filled.Add, "Extended floating action button.", ) },
+                onClick = { },
+                icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
                 text = { Text(text = "Registrar Novo Pet") },
             )
         }
@@ -95,7 +105,14 @@ fun MyPetsScreen() {
             LazyVerticalGrid(columns = GridCells.Fixed(2), content = {
                 items(100) { i ->
 
-                    CardPet()
+                    CardPet({
+                        val intent = Intent(context, PetInformationScreen::class.java).apply {
+                            // Pass data as an extra with the intent
+                            putExtra("MESSAGE", "Hello from Compose!")
+                        }
+                        // Start the activity using the launcher
+                        launcher.launch(intent)
+                    })
 
 
                 }
@@ -114,8 +131,12 @@ fun MyPetsScreenPreview() {
 
 
 @Composable
-fun CardPet() {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(8.dp)) {
+fun CardPet(showPetInfos: () -> Unit) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier
+        .padding(8.dp)
+        .clickable {
+            showPetInfos()
+        }) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,13 +157,5 @@ fun CardPet() {
             )
             Text(text = "Bolinha")
         }
-    }
-}
-
-@Composable
-@Preview
-fun CardPreview() {
-    CarteiraPetTheme {
-        CardPet()
     }
 }
