@@ -62,9 +62,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.EmojiSupportMatch
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,8 +89,8 @@ fun MyPetsScreen() {
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    // val pets = remember { mutableStateListOf("Bolinha", "Peludinho", "Rex") }
-    val pets = remember { mutableStateListOf<String>() }
+     val pets = remember { mutableStateListOf("Bolinha", "Peludinho", "Rex") }
+//    val pets = remember { mutableStateListOf<String>() }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -215,7 +219,7 @@ fun MyPetsScreen() {
                                     defaultElevation = 6.dp
                                 ),
                                 modifier = Modifier
-                                    .size(width = 80.dp, height = 80.dp),
+                                    .size(width = 80.dp, height = 92.dp),
                                 onClick = {
                                     val intent =
                                         Intent(context, PetInformationScreen::class.java).apply {
@@ -226,29 +230,52 @@ fun MyPetsScreen() {
                                     launcher.launch(intent)
                                 }
                             ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.Start,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.bolinha),
-                                        contentDescription = "Imagem do pet",
+                                Column (modifier = Modifier.padding(8.dp)) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.Start,
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier
-                                            .border(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.onPrimaryContainer,
-                                                CircleShape
+                                            .fillMaxWidth()
+
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.bolinha),
+                                            contentDescription = "Imagem do pet",
+                                            modifier = Modifier
+                                                .border(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    CircleShape
+                                                )
+                                                .size(60.dp)
+                                        )
+                                        Text(
+                                            text = pets[i],
+                                            modifier = Modifier.padding(start = 4.dp)
+                                        )
+
+                                    }
+
+                                    Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .size(16.dp) // Define o tamanho do círculo
+                                                .background(MaterialTheme.colorScheme.onPrimaryContainer, shape = androidx.compose.foundation.shape.CircleShape)
+                                        ) {
+                                            Text(
+                                                text = "\uD83D\uDC36", // Emoji do texto
+                                                style = TextStyle(
+                                                    color = Color.White, // Cor do texto
+                                                    textAlign = TextAlign.Center,
+                                                    fontWeight = FontWeight.Bold
+                                                )
                                             )
-                                            .size(60.dp)
-                                    )
-                                    Text(
-                                        text = pets[i],
-                                        modifier = Modifier.padding(start = 4.dp)
-                                    )
+                                        }
+                                    }
                                 }
+
+
 
                             }
                         }
