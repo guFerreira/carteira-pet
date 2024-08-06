@@ -260,13 +260,13 @@ fun MyPetsScreen() {
                                         Box(
                                             contentAlignment = Alignment.Center,
                                             modifier = Modifier
-                                                .size(16.dp) // Define o tamanho do círculo
+                                                .size(24.dp)
                                                 .background(MaterialTheme.colorScheme.onPrimaryContainer, shape = androidx.compose.foundation.shape.CircleShape)
                                         ) {
                                             Text(
                                                 text = "\uD83D\uDC36", // Emoji do texto
                                                 style = TextStyle(
-                                                    color = Color.White, // Cor do texto
+                                                    color = Color.White,
                                                     textAlign = TextAlign.Center,
                                                     fontWeight = FontWeight.Bold
                                                 )
