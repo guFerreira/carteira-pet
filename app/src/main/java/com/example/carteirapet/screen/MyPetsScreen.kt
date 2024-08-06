@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,32 +28,52 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,24 +83,55 @@ fun MyPetsScreen() {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { /* Handle the result if needed */ }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
+    // val pets = remember { mutableStateListOf("Bolinha", "Peludinho", "Rex") }
+    val pets = remember { mutableStateListOf<String>() }
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSecondary
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Meus Pets") },
-                actions = {
-                    IconButton(onClick = {}) {
+                title = {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu"
+                            imageVector = Icons.Filled.Pets,
+                            contentDescription = "Pets Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            "Moo",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                })
+
+                },
+//                navigationIcon = {
+//                    IconButton(onClick = { /* do something */ }) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = "Localized description"
+//                        )
+//                    }
+//                },
+                actions = {
+                    IconButton(onClick = { /* do something */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "Localized description"
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -93,30 +146,114 @@ fun MyPetsScreen() {
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(innerPadding)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Visualize as vacinas selecionando um de seus pets",
-            )
 
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Olá, Tutor-teste!",
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
 
-            LazyVerticalGrid(columns = GridCells.Fixed(2), content = {
-                items(100) { i ->
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    fontWeight = FontWeight.Light,
+                    text = "Selecione um de seus pets para visualizar as suas vacinas",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
 
-                    CardPet({
-                        val intent = Intent(context, PetInformationScreen::class.java).apply {
-                            // Pass data as an extra with the intent
-                            putExtra("MESSAGE", "Hello from Compose!")
-                        }
-                        // Start the activity using the launcher
-                        launcher.launch(intent)
-                    })
-
-
+            if (pets.isEmpty()) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Warning,
+                        contentDescription = "Pets Icon",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Nenhum pet encontrado.",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Light,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "Cadastre um novo pet para começar!",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
-            })
+
+            } else {
+                LazyVerticalGrid(columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    content = {
+
+                        items(pets.size) { i ->
+
+                            ElevatedCard(
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 6.dp
+                                ),
+                                modifier = Modifier
+                                    .size(width = 80.dp, height = 80.dp),
+                                onClick = {
+                                    val intent =
+                                        Intent(context, PetInformationScreen::class.java).apply {
+                                            // Pass data as an extra with the intent
+                                            putExtra("MESSAGE", "Hello from Compose!")
+                                        }
+                                    // Start the activity using the launcher
+                                    launcher.launch(intent)
+                                }
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.bolinha),
+                                        contentDescription = "Imagem do pet",
+                                        modifier = Modifier
+                                            .border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.onPrimaryContainer,
+                                                CircleShape
+                                            )
+                                            .size(60.dp)
+                                    )
+                                    Text(
+                                        text = pets[i],
+                                        modifier = Modifier.padding(start = 4.dp)
+                                    )
+                                }
+
+                            }
+                        }
+                    })
+            }
         }
     }
 }

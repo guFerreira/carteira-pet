@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="Theme.CarteiraPet.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@color/white</item>
+    </style>
+
     <style name="Theme.CarteiraPet" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
