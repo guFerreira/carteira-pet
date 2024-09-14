@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "359714958909",
+    "project_id": "appmoo-1568e",
+    "storage_bucket": "appmoo-1568e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359714958909:android:4e4c02be71d6189c258454",
+        "android_client_info": {
+          "package_name": "com.example.carteirapet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPN_VvjMEc7jOb3u7Llwtv1o0CSf2gqwo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
