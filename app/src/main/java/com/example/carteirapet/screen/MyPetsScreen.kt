@@ -81,7 +81,7 @@ import com.example.carteirapet.ui.theme.CarteiraPetTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPetsScreen() {
+fun MyPetsScreen(goToRegisterPetScreen : () -> Unit) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -116,18 +116,9 @@ fun MyPetsScreen() {
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-
                 },
-//                navigationIcon = {
-//                    IconButton(onClick = { /* do something */ }) {
-//                        Icon(
-//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                            contentDescription = "Localized description"
-//                        )
-//                    }
-//                },
                 actions = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
                             contentDescription = "Localized description"
@@ -142,7 +133,7 @@ fun MyPetsScreen() {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(100.dp),
-                onClick = { },
+                onClick = goToRegisterPetScreen,
                 icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
                 text = { Text(text = "Registrar Novo Pet") },
             )
@@ -289,7 +280,7 @@ fun MyPetsScreen() {
 @Preview
 fun MyPetsScreenPreview() {
     CarteiraPetTheme {
-        MyPetsScreen()
+        MyPetsScreen({})
     }
 }
 

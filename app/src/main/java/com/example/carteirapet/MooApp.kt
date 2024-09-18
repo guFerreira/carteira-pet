@@ -35,6 +35,7 @@ import com.example.carteirapet.screen.LoginScreen
 import com.example.carteirapet.screen.MyPetsScreen
 import com.example.carteirapet.screen.PetInformation
 import com.example.carteirapet.screen.PetInformationScreen
+import com.example.carteirapet.screen.RegisterPetScreen
 import com.example.carteirapet.screen.SignupScreen
 
 @Composable
@@ -42,7 +43,10 @@ fun MooApp() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "login") {
         composable("home") {
-            MyPetsScreen()
+            MyPetsScreen(goToRegisterPetScreen = { navController.navigate("registerPet") })
+        }
+        composable("registerPet"){
+            RegisterPetScreen(backToHomeScreen = { navController.popBackStack() })
         }
         composable("vaccinationCard") {
             PetInformation()
