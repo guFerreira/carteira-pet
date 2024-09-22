@@ -13,11 +13,6 @@
         android:theme="@style/Theme.CarteiraPet"
         tools:targetApi="31" >
         <activity
-            android:name=".screen.RegisterPet"
-            android:exported="false"
-            android:label="@string/title_activity_register_pet"
-            android:theme="@style/Theme.CarteiraPet" />
-        <activity
             android:name=".screen.PetInformationScreen"
             android:exported="false" />
         <activity
@@ -27,8 +22,11 @@
             android:theme="@style/Theme.CarteiraPet" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                <data android:scheme="meupetscheme" android:host="paginaexemplo" />-->
             </intent-filter>
         </activity>
     </application>

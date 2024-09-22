@@ -1,8 +1,5 @@
 package com.example.carteirapet.screen
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -59,28 +56,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
-import com.example.carteirapet.ui.theme.CarteiraPetTheme
-
-class PetInformationScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            CarteiraPetTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    PetInformation()
-                }
-            }
-        }
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetInformation() {
+fun PetInformation(goToHomeScreen: () -> Unit, goRegisterVaccineScreen: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
@@ -110,7 +89,7 @@ fun PetInformation() {
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = goToHomeScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description"
@@ -125,7 +104,7 @@ fun PetInformation() {
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(120.dp),
-                onClick = { },
+                onClick = goRegisterVaccineScreen,
                 icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
                 text = { Text(text = "Registrar vacina") },
             )
@@ -325,5 +304,5 @@ fun VaccineItem(modifier: Modifier) {
 @Composable
 @Preview
 fun PetInformationPreview() {
-    PetInformation()
+    PetInformation({}, {})
 }

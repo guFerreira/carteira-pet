@@ -333,7 +333,7 @@ fun PetForm(
                 )
                 onSave(petData)
             },
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.End).fillMaxWidth()
         ) {
             Text(text = "Salvar")
         }
