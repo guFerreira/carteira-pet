@@ -57,8 +57,8 @@ fun RegisterProfileUserScreen(goToLoginScreen: () -> Unit, goToHomeScreen: () ->
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
                     Row(
@@ -76,7 +76,8 @@ fun RegisterProfileUserScreen(goToLoginScreen: () -> Unit, goToHomeScreen: () ->
                     IconButton(onClick = { goToLoginScreen() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            contentDescription = "Localized description",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },

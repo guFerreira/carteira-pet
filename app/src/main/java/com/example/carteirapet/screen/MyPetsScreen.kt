@@ -94,10 +94,15 @@ import com.example.carteirapet.ui.theme.CarteiraPetTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: () -> Unit,  goToLoginScreen: () -> Unit, goToPetInformation: () -> Unit) {
+fun MyPetsScreen(
+    goToRegisterPetScreen: () -> Unit,
+    goToEditUserProfileScreen: () -> Unit,
+    goToLoginScreen: () -> Unit,
+    goToPetInformation: () -> Unit
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-     val pets = remember { mutableStateListOf("Bolinha", "Peludinho", "Rex") }
+    val pets = remember { mutableStateListOf("Bolinha", "Peludinho", "Rex") }
 //    val pets = remember { mutableStateListOf<String>() }
 
     var expanded by remember { mutableStateOf(false) }
@@ -107,8 +112,8 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
                     Row(
@@ -143,7 +148,11 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
 //                    }
 
                     IconButton(onClick = { expanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Localized description")
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "Localized description",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         DropdownMenuItem(
@@ -155,7 +164,12 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
                         DropdownMenuItem(
                             text = { Text("Sair") },
                             onClick = goToLoginScreen,
-                            leadingIcon = { Icon(Icons.Outlined.Logout, contentDescription = null) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.Logout,
+                                    contentDescription = null
+                                )
+                            },
                         )
                     }
                 },
@@ -243,11 +257,15 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
                                 elevation = CardDefaults.cardElevation(
                                     defaultElevation = 6.dp
                                 ),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                ),
                                 modifier = Modifier
                                     .size(width = 80.dp, height = 92.dp),
                                 onClick = goToPetInformation
                             ) {
-                                Column (modifier = Modifier.padding(8.dp)) {
+                                Column(modifier = Modifier.padding(8.dp)) {
                                     Row(
                                         horizontalArrangement = Arrangement.Start,
                                         verticalAlignment = Alignment.CenterVertically,
@@ -273,12 +291,18 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
 
                                     }
 
-                                    Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
                                         Box(
                                             contentAlignment = Alignment.Center,
                                             modifier = Modifier
                                                 .size(24.dp)
-                                                .background(MaterialTheme.colorScheme.onPrimaryContainer, shape = androidx.compose.foundation.shape.CircleShape)
+                                                .background(
+                                                    MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    shape = androidx.compose.foundation.shape.CircleShape
+                                                )
                                         ) {
                                             Text(
                                                 text = "\uD83D\uDC36", // Emoji do texto
@@ -291,7 +315,6 @@ fun MyPetsScreen(goToRegisterPetScreen : () -> Unit, goToEditUserProfileScreen: 
                                         }
                                     }
                                 }
-
 
 
                             }

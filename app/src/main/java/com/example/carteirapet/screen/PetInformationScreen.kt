@@ -27,6 +27,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,8 +68,8 @@ fun PetInformation(goToHomeScreen: () -> Unit, goRegisterVaccineScreen: () -> Un
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
                     Row(
@@ -92,7 +93,8 @@ fun PetInformation(goToHomeScreen: () -> Unit, goRegisterVaccineScreen: () -> Un
                     IconButton(onClick = goToHomeScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            contentDescription = "Localized description",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -147,7 +149,7 @@ fun PetInformations() {
             painter = painterResource(id = R.drawable.bolinha),
             contentDescription = "Imagem do pet",
             Modifier
-                .border(3.dp, MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
+                .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
                 .size(120.dp)
         )
         Column {
@@ -197,10 +199,18 @@ fun Vaccines() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccineItem(modifier: Modifier) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    Card(onClick = { showBottomSheet = true },  elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), modifier = modifier) {
+    Card(
+        onClick = { showBottomSheet = true },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,// Defina a cor desejada aqui
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer // Defina a cor do texto desejada aqui
+        )
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -228,7 +238,7 @@ fun VaccineItem(modifier: Modifier) {
                 modifier = Modifier.padding(bottom = 2.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Divider(modifier = Modifier.height(1.dp))
+            HorizontalDivider(modifier = Modifier.height(1.dp))
 
             if (showBottomSheet) {
                 ModalBottomSheet(
@@ -238,7 +248,6 @@ fun VaccineItem(modifier: Modifier) {
                     sheetState = sheetState,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.height(420.dp)
                 ) {
                     Column(
                         modifier = Modifier
@@ -278,7 +287,10 @@ fun VaccineItem(modifier: Modifier) {
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        Divider(color = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.padding(vertical = 8.dp))
+                        Divider(
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                         Text(
                             text = "Assinado Digitalmente",
                             fontSize = 14.sp,

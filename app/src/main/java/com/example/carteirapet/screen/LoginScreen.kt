@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.viewModels.LoginState
+import com.example.carteirapet.viewModels.LoginViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit) {
-    var text by remember { mutableStateOf("") }
+fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit, viewModel: LoginViewModel = koinViewModel()) {
+    val loginState = viewModel.loginState
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,7 +47,12 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(bottom = 48.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 48.dp)
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo",
@@ -52,25 +65,29 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit) {
         }
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
+                value = viewModel.username,
+                onValueChange = { viewModel.onUsernameChanged(it) },
                 label = { Text("Usuário") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
+                value = viewModel.password,
+                onValueChange = { viewModel.onPasswordChanged(it) },
                 label = { Text("Senha") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation() // Para ocultar o texto
             )
-            }
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp)) {
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp)
+        ) {
             Button(
-                onClick = { onLoginSuccess() },
-                modifier= Modifier.fillMaxWidth()
+                onClick = { viewModel.login(onLoginSuccess)},
+                enabled = viewModel.isLoginEnabled,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Entrar")
             }
@@ -79,10 +96,28 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit) {
 
             ElevatedButton(
                 onClick = { onSignUpClick() },
-                modifier= Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary, // Cor de fundo baseada no tema
+                    contentColor = MaterialTheme.colorScheme.onSecondary // Cor do conteúdo (texto/ícone) baseada no tema
+                )
             ) {
                 Text("Criar conta")
             }
+        }
+
+        // Observa o estado do login e exibe a UI apropriada
+        when (loginState) {
+            is LoginState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is LoginState.Success -> {
+                Text(text = (loginState as LoginState.Success).message)
+            }
+            is LoginState.Error -> {
+                Text(text = (loginState as LoginState.Error).error, color = MaterialTheme.colorScheme.error)
+            }
+            else -> {}
         }
     }
 }
@@ -91,6 +126,7 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit) {
 @Preview(showBackground = true)
 fun LoginScreenPreview() {
     CarteiraPetTheme {
-        LoginScreen({}, {})
+        LoginScreen({}, {}, )
     }
 }
+

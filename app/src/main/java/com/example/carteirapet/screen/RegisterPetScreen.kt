@@ -79,8 +79,8 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit) {
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
                     Text(
@@ -94,7 +94,8 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit) {
                     IconButton(onClick = backToHomeScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            contentDescription = "Localized description",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
