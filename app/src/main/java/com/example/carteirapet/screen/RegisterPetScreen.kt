@@ -1,6 +1,7 @@
 package com.example.carteirapet.screen
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -24,21 +25,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,22 +53,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.carteirapet.R
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.viewModels.RegisterPetViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPetScreen(backToHomeScreen: () -> Unit) {
+fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewModel = koinViewModel()) {
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
-    var petImageUri by remember { mutableStateOf<Uri?>(null) }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -110,13 +107,107 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ImagePicker(onImageSelected = { petImageUri = it })
-            SpeciesSelection { selectedSpecies ->
-                // Ação ao selecionar a espécie (pode ser um log ou uma atualização de estado)
-                println("Espécie selecionada: $selectedSpecies")
-            }
+            ImagePicker(onImageSelected = { viewModel.petImageUri = it })
+            SpeciesSelection(viewModel.species, { viewModel.species = it })
 
-            PetForm({})
+//            PetForm(viewModel, backToHomeScreen)
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Campo de Nome
+                OutlinedTextField(
+                    value = viewModel.name,
+                    onValueChange = { viewModel.name = it },
+                    label = { Text("Nome") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Campo de Data de Nascimento
+                OutlinedTextField(
+                    value = viewModel.birthDate,
+                    onValueChange = { viewModel.birthDate = it },
+                    label = { Text("Data de Nascimento") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("DD/MM/AAAA") }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Campo de Microchip
+                OutlinedTextField(
+                    value = viewModel.microchip,
+                    onValueChange = { viewModel.microchip = it },
+                    label = { Text("Microchip") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Dropdown de Raça
+                DropdownMenuField(
+                    label = "Raça",
+                    options = viewModel.breeds,
+                    selectedOption = viewModel.breed,
+                    onOptionSelected = { viewModel.breed = it }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Dropdown de Sexo
+                DropdownMenuField(
+                    label = "Sexo",
+                    options = viewModel.sexes,
+                    selectedOption = viewModel.sex,
+                    onOptionSelected = { viewModel.sex = it}
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Checkbox de Castrado
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = viewModel.neutered,
+                        onCheckedChange = { viewModel.neutered = it }
+                    )
+                    Text(text = "Castrado")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Campo de Condições Pré-existentes
+                OutlinedTextField(
+                    value = viewModel.conditions,
+                    onValueChange = { viewModel.conditions = it },
+                    label = { Text("Condições Pré-existentes") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Campo de Peso
+                OutlinedTextField(
+                    value = viewModel.weight,
+                    onValueChange = { viewModel.weight = it },
+                    label = { Text("Peso (kg)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Botão de Salvar
+                Button(
+                    onClick = {
+                        viewModel.registerPet(backToHomeScreen, { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() })
+                    },
+                    modifier = Modifier.align(Alignment.End).fillMaxWidth()
+                ) {
+                    Text(text = "Salvar")
+                }
+            }
         }
     }
 }
@@ -177,13 +268,11 @@ fun ImagePicker(
 
 @Composable
 fun SpeciesSelection(
+    selectedSpecies: String,
     onSpeciesSelected: (String) -> Unit
 ) {
-    var selectedSpecies by remember { mutableStateOf<String?>(null) }
-
     Column {
         Text(text = "Espécie:")
-
         Row {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -192,7 +281,6 @@ fun SpeciesSelection(
                 RadioButton(
                     selected = selectedSpecies == "Cachorro",
                     onClick = {
-                        selectedSpecies = "Cachorro"
                         onSpeciesSelected("Cachorro")
                     }
                 )
@@ -206,137 +294,11 @@ fun SpeciesSelection(
                 RadioButton(
                     selected = selectedSpecies == "Gato",
                     onClick = {
-                        selectedSpecies = "Gato"
                         onSpeciesSelected("Gato")
                     }
                 )
                 Text(text = "Gato")
             }
-        }
-    }
-}
-
-@Composable
-fun PetForm(
-    onSave: (PetData) -> Unit
-) {
-    // Estados para armazenar os valores dos campos
-    var name by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var microchip by remember { mutableStateOf("") }
-    var selectedBreed by remember { mutableStateOf("Selecionar raça") }
-    var selectedSex by remember { mutableStateOf("Selecionar sexo") }
-    var isNeutered by remember { mutableStateOf(false) }
-    var conditions by remember { mutableStateOf("") }
-    var weight by remember { mutableStateOf("") }
-
-    val breeds = listOf("Labrador", "Bulldog", "Poodle", "Vira-lata", "Outra")
-    val sexes = listOf("Macho", "Fêmea")
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Campo de Nome
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nome") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo de Data de Nascimento
-        OutlinedTextField(
-            value = birthDate,
-            onValueChange = { birthDate = it },
-            label = { Text("Data de Nascimento") },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("DD/MM/AAAA") }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo de Microchip
-        OutlinedTextField(
-            value = microchip,
-            onValueChange = { microchip = it },
-            label = { Text("Microchip") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Dropdown de Raça
-        DropdownMenuField(
-            label = "Raça",
-            options = breeds,
-            selectedOption = selectedBreed,
-            onOptionSelected = { selectedBreed = it }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Dropdown de Sexo
-        DropdownMenuField(
-            label = "Sexo",
-            options = sexes,
-            selectedOption = selectedSex,
-            onOptionSelected = { selectedSex = it }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Checkbox de Castrado
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = isNeutered,
-                onCheckedChange = { isNeutered = it }
-            )
-            Text(text = "Castrado")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo de Condições Pré-existentes
-        OutlinedTextField(
-            value = conditions,
-            onValueChange = { conditions = it },
-            label = { Text("Condições Pré-existentes") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo de Peso
-        OutlinedTextField(
-            value = weight,
-            onValueChange = { weight = it },
-            label = { Text("Peso (kg)") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botão de Salvar
-        Button(
-            onClick = {
-                val petData = PetData(
-                    name = name,
-                    birthDate = birthDate,
-                    microchip = microchip,
-                    breed = selectedBreed,
-                    sex = selectedSex,
-                    neutered = isNeutered,
-                    conditions = conditions,
-                    weight = weight
-                )
-                onSave(petData)
-            },
-            modifier = Modifier.align(Alignment.End).fillMaxWidth()
-        ) {
-            Text(text = "Salvar")
         }
     }
 }
@@ -356,24 +318,25 @@ fun DropdownMenuField(
             onValueChange = {},
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = false, // Desabilitado para evitar edição direta
+            enabled = true, // Desabilitado para evitar edição direta
             trailingIcon = {
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
         )
-//        DropdownMenu(
-//            expanded = expanded,
-//            onDismissRequest = { expanded = false }
-//        ) {
-//            options.forEach { option ->
-//                DropdownMenuItem(onClick = {
-//                    onOptionSelected(option)
-//                    expanded = false
-//                }) {
-//                    Text(text = option)
-//                }
-//            }
-//        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEachIndexed { index, option ->
+                DropdownMenuItem(
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                    text = { Text(option) }
+                )
+            }
+        }
 
         // Expande o Dropdown ao clicar no campo
         Spacer(modifier = Modifier
@@ -382,17 +345,6 @@ fun DropdownMenuField(
         )
     }
 }
-
-data class PetData(
-    val name: String,
-    val birthDate: String,
-    val microchip: String,
-    val breed: String,
-    val sex: String,
-    val neutered: Boolean,
-    val conditions: String,
-    val weight: String
-)
 
 
 @OptIn(ExperimentalMaterial3Api::class)

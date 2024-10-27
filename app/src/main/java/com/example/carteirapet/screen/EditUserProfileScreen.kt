@@ -46,6 +46,7 @@ fun EditUserProfileScreen(goToHomeScreen: () -> Unit) {
     // Step 2: Address information
     var cep by remember { mutableStateOf("") }
     var street by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf("") }
     var complement by remember { mutableStateOf("") }
     var neighborhood by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -105,6 +106,8 @@ fun EditUserProfileScreen(goToHomeScreen: () -> Unit) {
                 onCepChange = { cep = it },
                 street = street,
                 onStreetChange = { street = it },
+                number = number,
+                onNumberChange = { number = it},
                 complement = complement,
                 onComplementChange = { complement = it },
                 neighborhood = neighborhood,

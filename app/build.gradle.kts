@@ -67,6 +67,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+    implementation("io.ktor:ktor-client-auth:$ktor_version")
+
+    implementation("com.auth0.android:jwtdecode:2.0.0")
 
 
     implementation("network.chaintech:qr-kit:2.0.0")

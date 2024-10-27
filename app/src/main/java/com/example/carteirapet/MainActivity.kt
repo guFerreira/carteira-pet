@@ -13,6 +13,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import org.koin.android.ext.android.get
 import org.koin.compose.KoinContext
 
 class MainActivity : ComponentActivity() {
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
 //                        HandleQrCodeUri(intent.data, navController)
 //                    }else{
                     KoinContext() {
-                        MooApp(navController)
+                        MooApp(navController, get(), get())
                     }
 //                    }
 

@@ -1,5 +1,6 @@
 package com.example.carteirapet.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,11 +47,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
+import com.example.carteirapet.viewModels.SignupViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterProfileUserScreen(goToLoginScreen: () -> Unit, goToHomeScreen: () -> Unit) {
+fun RegisterProfileUserScreen(
+    goToLoginScreen: () -> Unit,
+    goToHomeScreen: () -> Unit,
+    viewModel: RegisterProfileUserViewModel = koinViewModel()
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
@@ -73,7 +82,7 @@ fun RegisterProfileUserScreen(goToLoginScreen: () -> Unit, goToHomeScreen: () ->
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { goToLoginScreen() }) {
+                    IconButton(onClick = { viewModel.logout(goToLoginScreen) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
@@ -97,31 +106,14 @@ fun RegisterProfileUserScreen(goToLoginScreen: () -> Unit, goToHomeScreen: () ->
 
             Text(text = "Olá, para continuar, você deve preencher alguns dados referentes ao seu perfil.")
 
-            UserRegistrationForm(goToHomeScreen)
+            UserRegistrationForm(goToHomeScreen, viewModel)
         }
     }
 }
 
 @Composable
-fun UserRegistrationForm(goToHomeScreen: () -> Unit) {
-    var currentStep by remember { mutableStateOf(1) }
-
-    // Step 1: User personal information
-    var isVet by remember { mutableStateOf(true) }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var cpf by remember { mutableStateOf("") }
-
-    // Step 2: Address information
-    var cep by remember { mutableStateOf("") }
-    var street by remember { mutableStateOf("") }
-    var complement by remember { mutableStateOf("") }
-    var neighborhood by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var state by remember { mutableStateOf("") }
-
+fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileUserViewModel) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -129,9 +121,9 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ProgressBar(2, currentStep)
+        ProgressBar(2, viewModel.currentStep)
 
-        when (currentStep) {
+        when (viewModel.currentStep) {
             1 -> {
                 // Step 1: Personal information
                 Text(
@@ -148,18 +140,16 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
 
                         RadioButton(
-                            selected = !isVet,
-                            onClick = { isVet = false }
+                            selected = !viewModel.isVet,
+                            onClick = { viewModel.updateIsVet(false) }
                         )
                         Text("Tutor")
                         Spacer(modifier = Modifier.width(16.dp))
                         RadioButton(
-                            selected = isVet,
-                            onClick = { isVet = true }
+                            selected = viewModel.isVet,
+                            onClick = { viewModel.updateIsVet(true) }
                         )
                         Text("Médico Veterinário")
-
-
                     }
                 }
 
@@ -167,21 +157,21 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit) {
 
                 // Personal information fields
                 PersonalInformationForm(
-                    firstName = firstName,
-                    onFirstNameChange = { firstName = it },
-                    lastName = lastName,
-                    onLastNameChange = {lastName = it},
-                    phoneNumber = phoneNumber,
-                    onPhoneNumberChange = { phoneNumber = it },
-                    email = email,
-                    onEmailChange = { email = it },
-                    cpf = cpf,
-                    onCpfChange = { cpf = it }
+                    firstName = viewModel.firstName,
+                    onFirstNameChange = viewModel::updateFirstName,
+                    lastName = viewModel.lastName,
+                    onLastNameChange = viewModel::updateLastName,
+                    phoneNumber = viewModel.phoneNumber,
+                    onPhoneNumberChange = viewModel::updatePhoneNumber,
+                    email = viewModel.email,
+                    onEmailChange = viewModel::updateEmail,
+                    cpf = viewModel.cpf,
+                    onCpfChange = viewModel::updateCpf
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Button to go to step 2
-                Button(onClick = { currentStep = 2 }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { viewModel.goToNextStep() }, modifier = Modifier.fillMaxWidth()) {
                     Text("Próximo")
                 }
             }
@@ -196,28 +186,36 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressInformationForm(
-                    cep = cep,
-                    onCepChange = { cep = it },
-                    street = street,
-                    onStreetChange = { street = it },
-                    complement = complement,
-                    onComplementChange = { complement = it },
-                    neighborhood = neighborhood,
-                    onNeighborhoodChange = { neighborhood = it },
-                    city = city,
-                    onCityChange = { city = it },
-                    state = state,
-                    onStateChange = { state = it }
+                    cep = viewModel.cep,
+                    onCepChange = viewModel::updateCep,
+                    street = viewModel.street,
+                    onStreetChange = viewModel::updateStreet,
+                    number = viewModel.number,
+                    onNumberChange = viewModel::updateNumber,
+                    complement = viewModel.complement,
+                    onComplementChange = viewModel::updateComplement,
+                    neighborhood = viewModel.neighborhood,
+                    onNeighborhoodChange = viewModel::updateNeighborhood,
+                    city = viewModel.city,
+                    onCityChange = viewModel::updateCity,
+                    state = viewModel.state,
+                    onStateChange = viewModel::updateState
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Navigation buttons
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(onClick = { currentStep = 1 }, modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick = { viewModel.goToPreviousStep() },
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Voltar")
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = { goToHomeScreen() }, modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick = { viewModel.registerProfileData(goToHomeScreen, onError = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }) },
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Concluir")
                     }
                 }
@@ -285,7 +283,10 @@ fun AddressInformationForm(
     cep: String,
     onCepChange: (String) -> Unit,
     street: String,
-    onStreetChange: (String) -> Unit, complement: String,
+    onStreetChange: (String) -> Unit,
+    number: String,
+    onNumberChange: (String) -> Unit,
+    complement: String,
     onComplementChange: (String) -> Unit,
     neighborhood: String,
     onNeighborhoodChange: (String) -> Unit,
@@ -308,6 +309,20 @@ fun AddressInformationForm(
             label = { Text("Rua") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = number,
+            onValueChange = { newValue ->
+                // Permite apenas números inteiros
+                if (newValue.all { it.isDigit() }) {
+                    onNumberChange(newValue)
+                }
+            },
+            label = { Text("Número") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = complement,

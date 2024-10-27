@@ -1,6 +1,11 @@
 package com.example.carteirapet
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,9 +17,31 @@ import com.example.carteirapet.screen.RegisterPetScreen
 import com.example.carteirapet.screen.RegisterProfileUserScreen
 import com.example.carteirapet.screen.RegisterVaccineScreen
 import com.example.carteirapet.screen.SignupScreen
+import com.example.carteirapet.service.AuthService
+import com.example.carteirapet.service.UserService
 
 @Composable
-fun MooApp(navController: NavHostController) {
+fun MooApp(navController: NavHostController, authService: AuthService, userService: UserService) {
+    var isLoggedIn by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        isLoggedIn = authService.getAccessToken() != null && authService.getRefreshToken() != null
+        if (isLoggedIn) {
+            var userResponse = userService.getUserInformations()
+            if (userResponse != null) {
+                if (userResponse.petGuardian == null) {
+                    navController.navigate("registerUserProfileInfos")
+                }
+            }
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        } else {
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
+
     NavHost(navController = navController, startDestination = "login") {
         composable("home") {
             MyPetsScreen(
@@ -46,7 +73,8 @@ fun MooApp(navController: NavHostController) {
         composable("login") {
             LoginScreen(
                 onSignUpClick = { navController.navigate("signup") },
-                onLoginSuccess = { navController.navigate("registerUserProfileInfos") })
+                onLoginSuccess = { navController.navigate("home") },
+                onRegisterProfileUserNavigate = { navController.navigate("registerUserProfileInfos") })
         }
 
         composable("registerUserProfileInfos") {

@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.service.AuthService
+import com.example.carteirapet.service.UserService
 import kotlinx.coroutines.launch
 
 // Estado do login
@@ -18,7 +19,7 @@ sealed class LoginState {
     data class Error(val error: String) : LoginState() // Estado de erro
 }
 
-open class LoginViewModel(private val authService: AuthService) : ViewModel() {
+open class LoginViewModel(private val authService: AuthService, private val userService: UserService) : ViewModel() {
     var username by mutableStateOf("")
         private set
 
@@ -29,6 +30,9 @@ open class LoginViewModel(private val authService: AuthService) : ViewModel() {
     var loginState by mutableStateOf<LoginState>(LoginState.Idle)
         private set
 
+    var isPasswordVisible by mutableStateOf(false)
+        private set
+
     fun onUsernameChanged(newUsername: String) {
         username = newUsername
     }
@@ -37,11 +41,15 @@ open class LoginViewModel(private val authService: AuthService) : ViewModel() {
         password = newPassword
     }
 
+    fun togglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible
+    }
+
     // Estado que valida se o login pode ser habilitado
     val isLoginEnabled: Boolean
         get() = username.isNotEmpty() && password.isNotEmpty()
 
-    fun login(onSuccess: () -> Unit) {
+    fun login(onHomePageNavigate: () -> Unit, onRegisterProfileUserNavigate: () -> Unit) {
         // Define o estado como carregando
         loginState = LoginState.Loading
 
@@ -50,8 +58,20 @@ open class LoginViewModel(private val authService: AuthService) : ViewModel() {
             try {
                 val isLoginSuccess = authService.login(username, password)
                 if (isLoginSuccess) {
-                    loginState = LoginState.Success("Login realizado com sucesso!")
-                    onSuccess()
+                    val accessToken = authService.getAccessToken()
+                    val refreshToken = authService.getRefreshToken()
+                    val userInformation = userService.getUserInformations()
+                    if (userInformation != null) {
+                        if (userInformation.petGuardian != null){
+                            loginState = LoginState.Success("Login realizado com sucesso!")
+                            onHomePageNavigate()
+                        }else{
+                          onRegisterProfileUserNavigate()
+                        }
+                    }else {
+                        loginState = LoginState.Error("Erro ao obter informações do usuário.")
+                    }
+
                 } else {
                     loginState = LoginState.Error("Credenciais inválidas.")
                 }
