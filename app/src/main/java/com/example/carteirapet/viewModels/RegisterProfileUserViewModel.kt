@@ -20,6 +20,8 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
     // Personal information (Step 1)
     var isVet by mutableStateOf(true)
         private set
+    var isRegistered by mutableStateOf(false)
+        private set
     var firstName by mutableStateOf("")
         private set
     var lastName by mutableStateOf("")
@@ -39,8 +41,6 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
     var number by mutableStateOf("")
         private set
     var complement by mutableStateOf("")
-        private set
-    var neighborhood by mutableStateOf("")
         private set
     var city by mutableStateOf("")
         private set
@@ -88,10 +88,6 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         complement = value
     }
 
-    fun updateNeighborhood(value: String) {
-        neighborhood = value
-    }
-
     fun updateCity(value: String) {
         city = value
     }
@@ -114,8 +110,8 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
     }
 
     fun registerProfileData(onRegister: () -> Unit, onError: (String) -> Unit){
-        val address =  Address(cep.toInt(), street, number.toInt(), complement, neighborhood, city, state)
-        val profile = Profile(isVet, firstName, lastName, email, phoneNumber, cpf, address)
+        val address =  Address(cep.toInt(), street, number.toInt(), complement, city, state)
+        val profile = Profile(isVet, isRegistered, firstName, lastName, email, phoneNumber, cpf, address)
 
         // Lança a operação de login
         viewModelScope.launch {

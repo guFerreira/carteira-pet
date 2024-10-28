@@ -52,7 +52,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService) : View
                     neutered = neutered,
                     conditions = conditions,
                     weight = weight?.toFloat() ?: 0f,
-                    id = null,
+                    id = 0,
                     species = species
                 )
                 animalService.registerAnimal(animal)

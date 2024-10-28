@@ -14,9 +14,23 @@ import java.time.LocalDateTime
 
 @Serializable
 data class Animal(
-    val id: Int?,
+    val id: Int,
     val name: String,
     val microchip: String?, // Microchip é opcional
+    val species: String,
+    val sex: String,
+    val neutered: Boolean,
+    val birthDate: String,
+    val weight: Float,
+    val conditions: String?, // Condições preexistentes
+    val breeds: List<Breed>
+)
+
+@Serializable
+data class VaccineRequest(
+    val id: Int?,
+    val status: String,
+    val name: String,
     val species: String,
     val sex: String,
     val neutered: Boolean,
@@ -46,6 +60,20 @@ class AnimalRepository(private val client: HttpClient) {
             return pets
         } else {
             emptyList()
+        }
+    }
+
+    suspend fun getAnimalById(animalId: Int): Animal? {
+        val response: HttpResponse = client.get("http://35.239.21.191/animal/$animalId") {
+            contentType(ContentType.Application.Json)
+        }
+
+        // Verifica se o login foi bem-sucedido e retorna o token JWT
+        return if (response.status == HttpStatusCode.OK) {
+            val pets = response.body<Animal>()
+            return pets
+        } else {
+            null
         }
     }
 

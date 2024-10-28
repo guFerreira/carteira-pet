@@ -21,7 +21,7 @@ open class MyPetsViewModel(private val authService: AuthService, private val use
     var name by mutableStateOf<String>("")
         private set
 
-    var userProfile by mutableStateOf<UserResponse?>(null)
+    var userProfile by mutableStateOf<Profile?>(null)
         private set
 
     var animals by mutableStateOf<List<Animal>>(emptyList())
@@ -35,9 +35,9 @@ open class MyPetsViewModel(private val authService: AuthService, private val use
         viewModelScope.launch {
             try {
                 userProfile = userService.getUserInformations()
-                name = userProfile?.petGuardian?.firstName
-                    ?: userProfile?.veterinaryDoctor?.lastName
-                            ?: ""
+                if(userProfile != null){
+                    name = userProfile!!.firstName
+                }
             } catch (e: Exception) {
                 onError("Erro ao buscar perfil do usuário: ${e.message}")
             }

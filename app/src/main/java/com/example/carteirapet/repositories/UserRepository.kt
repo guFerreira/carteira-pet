@@ -43,6 +43,7 @@ data class VeterinaryDoctor(
 @Serializable
 data class Profile(
     val isVet: Boolean,
+    val isRegistered: Boolean,
     val firstName: String,
     val lastName: String,
     val email: String,
@@ -56,20 +57,19 @@ data class Address(
     val street: String,
     val number: Int,
     val complement: String,
-    val neighborhood: String,
     val city: String,
     val state: String,
 )
 
 class UserRepository(private val client: HttpClient) {
-    suspend fun getUserInformations(): UserResponse? {
+    suspend fun getUserInformations(): Profile? {
         val response: HttpResponse = client.get("http://35.239.21.191/users") {
             contentType(ContentType.Application.Json)
         }
 
         // Verifica se o login foi bem-sucedido e retorna o token JWT
         return if (response.status == HttpStatusCode.OK) {
-            val userResponse = response.body<UserResponse>()
+            val userResponse = response.body<Profile>()
             return userResponse
         } else {
             null
@@ -88,13 +88,13 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun updatePetGuardian(profile: Profile): PetGuardian? {
+    suspend fun updatePetGuardian(profile: Profile): Profile? {
         val response: HttpResponse = client.put("http://35.239.21.191/petguardian/update") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
         return if (response.status == HttpStatusCode.OK) {
-            response.body<PetGuardian>()
+            response.body<Profile>()
         } else {
             throw Exception("Erro ao atualizar perfil do tutor")
         }

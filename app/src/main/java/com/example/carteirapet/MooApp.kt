@@ -7,8 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.carteirapet.screen.EditUserProfileScreen
 import com.example.carteirapet.screen.LoginScreen
 import com.example.carteirapet.screen.MyPetsScreen
@@ -26,9 +28,9 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
     LaunchedEffect(Unit) {
         isLoggedIn = authService.getAccessToken() != null && authService.getRefreshToken() != null
         if (isLoggedIn) {
-            var userResponse = userService.getUserInformations()
-            if (userResponse != null) {
-                if (userResponse.petGuardian == null) {
+            var userProfile = userService.getUserInformations()
+            if (userProfile != null) {
+                if (!userProfile.isRegistered) {
                     navController.navigate("registerUserProfileInfos")
                 }
             }
@@ -48,15 +50,22 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
                 goToRegisterPetScreen = { navController.navigate("registerPet") },
                 goToEditUserProfileScreen = { navController.navigate("editUserProfileInfos") },
                 goToLoginScreen = { navController.navigate("login") },
-                goToPetInformation = { navController.navigate("vaccinationCard") }
+                goToPetInformation = { petId ->
+                    navController.navigate("vaccinationCard/$petId")
+                }
             )
         }
 
         composable("registerPet") {
             RegisterPetScreen(backToHomeScreen = { navController.popBackStack() })
         }
-        composable("vaccinationCard") {
+        composable(
+            "vaccinationCard/{animalId}",
+            arguments = listOf(navArgument("animalId") { type = NavType.IntType })
+        ) {
+            val petId = it.arguments?.getInt("animalId")
             PetInformation(
+                petId = petId,
                 goToHomeScreen = { navController.popBackStack() },
                 goRegisterVaccineScreen = { navController.navigate("registerVaccine") })
         }

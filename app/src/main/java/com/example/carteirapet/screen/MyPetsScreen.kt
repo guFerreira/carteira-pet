@@ -71,7 +71,7 @@ fun MyPetsScreen(
     goToRegisterPetScreen: () -> Unit,
     goToEditUserProfileScreen: () -> Unit,
     goToLoginScreen: () -> Unit,
-    goToPetInformation: () -> Unit,
+    goToPetInformation: (petId: Int) -> Unit,
     viewModel: MyPetsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -252,7 +252,7 @@ fun MyPetsScreen(
                                 ),
                                 modifier = Modifier
                                     .size(width = 80.dp, height = 92.dp),
-                                onClick = goToPetInformation
+                                onClick = { goToPetInformation(viewModel.animals[i].id) }
                             ) {
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     Row(

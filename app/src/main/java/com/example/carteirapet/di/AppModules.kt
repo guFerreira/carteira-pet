@@ -9,8 +9,10 @@ import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
+import com.example.carteirapet.viewModels.EditUserProfileViewModel
 import com.example.carteirapet.viewModels.LoginViewModel
 import com.example.carteirapet.viewModels.MyPetsViewModel
+import com.example.carteirapet.viewModels.PetInformationViewModel
 import com.example.carteirapet.viewModels.RegisterPetViewModel
 import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
 import com.example.carteirapet.viewModels.SignupViewModel
@@ -44,6 +46,8 @@ val appModule = module {
     viewModelOf(::RegisterProfileUserViewModel)
     viewModelOf(::MyPetsViewModel)
     viewModelOf(::RegisterPetViewModel)
+    viewModelOf(::EditUserProfileViewModel)
+    viewModelOf(::PetInformationViewModel)
 }
 
 val networkModule = module {

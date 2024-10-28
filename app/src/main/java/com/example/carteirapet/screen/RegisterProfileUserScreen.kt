@@ -194,8 +194,6 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     onNumberChange = viewModel::updateNumber,
                     complement = viewModel.complement,
                     onComplementChange = viewModel::updateComplement,
-                    neighborhood = viewModel.neighborhood,
-                    onNeighborhoodChange = viewModel::updateNeighborhood,
                     city = viewModel.city,
                     onCityChange = viewModel::updateCity,
                     state = viewModel.state,
@@ -288,8 +286,6 @@ fun AddressInformationForm(
     onNumberChange: (String) -> Unit,
     complement: String,
     onComplementChange: (String) -> Unit,
-    neighborhood: String,
-    onNeighborhoodChange: (String) -> Unit,
     city: String,
     onCityChange: (String) -> Unit,
     state: String,
@@ -328,13 +324,6 @@ fun AddressInformationForm(
             value = complement,
             onValueChange = onComplementChange,
             label = { Text("Complemento") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = neighborhood,
-            onValueChange = onNeighborhoodChange,
-            label = { Text("Bairro") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))

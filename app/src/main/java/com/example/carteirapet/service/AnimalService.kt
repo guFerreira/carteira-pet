@@ -8,6 +8,10 @@ class AnimalService(private val animalRepository: AnimalRepository) {
         return animalRepository.getAnimals()
     }
 
+    suspend fun getAnimalById(animalId: Int): Animal? {
+        return animalRepository.getAnimalById(animalId)
+    }
+
     suspend fun registerAnimal(animal: Animal) {
         animalRepository.registerAnimal(animal)
     }

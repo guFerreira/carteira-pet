@@ -54,11 +54,12 @@ android {
 
 dependencies {
 
-    val ktor_version="2.3.12"
+    val ktor_version = "2.3.12"
     val koin_version = "4.0.0"
+    val compose_version = "1.7.2" // Versão do Compose que você deseja usar
 
-    implementation ("io.insert-koin:koin-android:$koin_version")
-    implementation ("io.insert-koin:koin-androidx-compose:$koin_version")
+    implementation("io.insert-koin:koin-android:$koin_version")
+    implementation("io.insert-koin:koin-androidx-compose:$koin_version")
 
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
@@ -66,18 +67,18 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+    implementation("androidx.security:security-crypto:1.1.0-alpha03")
     implementation("io.ktor:ktor-client-auth:$ktor_version")
 
     implementation("com.auth0.android:jwtdecode:2.0.0")
-
-
     implementation("network.chaintech:qr-kit:2.0.0")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("androidx.navigation:navigation-compose:2.8.1")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.2")
+
+    // Utilizando o BOM para Compose
     implementation(platform("androidx.compose:compose-bom:2024.09.02"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -85,18 +86,26 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.0")
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0")
+
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation ("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Dependências de teste
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5") // Certifique-se de que essa versão é compatível
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0") // Comentado, agora deve estar corrigido
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.02"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    // Removido aqui, pois já está incluído pelo BOM
+    // implementation("androidx.compose.ui:ui:1.7.2")
+    // implementation("androidx.compose.material:material:1.7.2")
+    // implementation("androidx.compose.ui:ui-tooling-preview:1.7.2")
 }

@@ -58,11 +58,9 @@ open class LoginViewModel(private val authService: AuthService, private val user
             try {
                 val isLoginSuccess = authService.login(username, password)
                 if (isLoginSuccess) {
-                    val accessToken = authService.getAccessToken()
-                    val refreshToken = authService.getRefreshToken()
                     val userInformation = userService.getUserInformations()
                     if (userInformation != null) {
-                        if (userInformation.petGuardian != null){
+                        if (userInformation.isRegistered){
                             loginState = LoginState.Success("Login realizado com sucesso!")
                             onHomePageNavigate()
                         }else{
@@ -71,7 +69,6 @@ open class LoginViewModel(private val authService: AuthService, private val user
                     }else {
                         loginState = LoginState.Error("Erro ao obter informações do usuário.")
                     }
-
                 } else {
                     loginState = LoginState.Error("Credenciais inválidas.")
                 }

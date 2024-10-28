@@ -1,6 +1,6 @@
 package com.example.carteirapet.screen
 
-import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,36 +23,40 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.viewModels.EditUserProfileViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditUserProfileScreen(goToHomeScreen: () -> Unit) {
+fun EditUserProfileScreen(
+    goToHomeScreen: () -> Unit,
+    viewModel: EditUserProfileViewModel = koinViewModel()
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var cpf by remember { mutableStateOf("") }
-    // Step 2: Address information
-    var cep by remember { mutableStateOf("") }
-    var street by remember { mutableStateOf("") }
-    var number by remember { mutableStateOf("") }
-    var complement by remember { mutableStateOf("") }
-    var neighborhood by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var state by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.isLoading = true
+        viewModel.loadUserProfile { message ->
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        viewModel.isLoading = false
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -83,40 +89,57 @@ fun EditUserProfileScreen(goToHomeScreen: () -> Unit) {
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxWidth().verticalScroll(state = scrollState),
+                .padding(8.dp)
+                .fillMaxWidth()
+                .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Personal information fields
-            PersonalInformationForm(
-                firstName = firstName,
-                onFirstNameChange = { firstName = it },
-                lastName = lastName,
-                onLastNameChange = {lastName = it},
-                phoneNumber = phoneNumber,
-                onPhoneNumberChange = { phoneNumber = it },
-                email = email,
-                onEmailChange = { email = it },
-                cpf = cpf,
-                onCpfChange = { cpf = it }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            AddressInformationForm(
-                cep = cep,
-                onCepChange = { cep = it },
-                street = street,
-                onStreetChange = { street = it },
-                number = number,
-                onNumberChange = { number = it},
-                complement = complement,
-                onComplementChange = { complement = it },
-                neighborhood = neighborhood,
-                onNeighborhoodChange = { neighborhood = it },
-                city = city,
-                onCityChange = { city = it },
-                state = state,
-                onStateChange = { state = it }
-            )
+            if (viewModel.isLoading){
+                CircularProgressIndicator()
+            } else{
+                // Personal information fields
+                PersonalInformationForm(
+                    firstName = viewModel.firstName,
+                    onFirstNameChange = { viewModel.firstName = it },
+                    lastName = viewModel.lastName,
+                    onLastNameChange = { viewModel.lastName = it },
+                    phoneNumber = viewModel.phoneNumber,
+                    onPhoneNumberChange = { viewModel.phoneNumber = it },
+                    email = viewModel.email,
+                    onEmailChange = { viewModel.email = it },
+                    cpf = viewModel.cpf,
+                    onCpfChange = { viewModel.cpf = it }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AddressInformationForm(
+                    cep = viewModel.cep,
+                    onCepChange = { viewModel.cep = it },
+                    street = viewModel.street,
+                    onStreetChange = { viewModel.street = it },
+                    number = viewModel.number,
+                    onNumberChange = { viewModel.number = it },
+                    complement = viewModel.complement,
+                    onComplementChange = { viewModel.complement = it },
+                    city = viewModel.city,
+                    onCityChange = { viewModel.city = it },
+                    state = viewModel.state,
+                    onStateChange = { viewModel.state = it }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        viewModel.updateProfileData(
+                            goToHomeScreen,
+                            onError = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            })
+                    },
+                ) {
+                    Text("Concluir")
+                }
+            }
+
         }
     }
 }
