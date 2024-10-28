@@ -19,4 +19,12 @@ class UserService(private val userRepository: UserRepository) {
             userRepository.registerPetGuardian(profile)
         }
     }
+
+    suspend fun updaterUserProfile(profile: Profile) {
+        if(profile.isVet){
+            userRepository.updateVeterinaryDoctor(profile)
+        } else {
+            userRepository.updatePetGuardian(profile)
+        }
+    }
 }

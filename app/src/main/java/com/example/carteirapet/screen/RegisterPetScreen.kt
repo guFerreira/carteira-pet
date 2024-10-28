@@ -1,6 +1,8 @@
 package com.example.carteirapet.screen
 
+import android.app.DatePickerDialog
 import android.net.Uri
+import android.widget.DatePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +29,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,9 +56,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,11 +69,15 @@ import coil.compose.AsyncImage
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.RegisterPetViewModel
 import org.koin.androidx.compose.koinViewModel
+import java.util.Calendar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewModel = koinViewModel()) {
+fun RegisterPetScreen(
+    backToHomeScreen: () -> Unit,
+    viewModel: RegisterPetViewModel = koinViewModel()
+) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
@@ -103,7 +114,8 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewMo
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxWidth().verticalScroll(state = scrollState),
+                .fillMaxWidth()
+                .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -123,14 +135,16 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewMo
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de Data de Nascimento
-                OutlinedTextField(
-                    value = viewModel.birthDate,
-                    onValueChange = { viewModel.birthDate = it },
-                    label = { Text("Data de Nascimento") },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("DD/MM/AAAA") }
-                )
+//                // Campo de Data de Nascimento
+//                OutlinedTextField(
+//                    value = viewModel.birthDate,
+//                    onValueChange = { viewModel.birthDate = it },
+//                    label = { Text("Data de Nascimento") },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    placeholder = { Text("DD/MM/AAAA") }
+//                )
+
+                DateOfBirthField(viewModel.birthDate, { viewModel.birthDate = it })
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -159,7 +173,7 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewMo
                     label = "Sexo",
                     options = viewModel.sexes,
                     selectedOption = viewModel.sex,
-                    onOptionSelected = { viewModel.sex = it}
+                    onOptionSelected = { viewModel.sex = it }
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -201,9 +215,15 @@ fun RegisterPetScreen(backToHomeScreen: () -> Unit, viewModel: RegisterPetViewMo
                 // Botão de Salvar
                 Button(
                     onClick = {
-                        viewModel.registerPet(backToHomeScreen, { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() })
+                        viewModel.registerPet(
+                            backToHomeScreen,
+                            { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            })
                     },
-                    modifier = Modifier.align(Alignment.End).fillMaxWidth()
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .fillMaxWidth()
                 ) {
                     Text(text = "Salvar")
                 }
@@ -346,6 +366,61 @@ fun DropdownMenuField(
     }
 }
 
+@Composable
+fun DateOfBirthField(
+    birthdate: String,
+    onDateSelected: (String) -> Unit
+) {
+    val context = LocalContext.current
+
+    // Controla a exibição do DatePickerDialog
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // Configurações de calendário
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    // Função de callback para o DatePicker
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+            val formattedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+            onDateSelected(formattedDate)
+        },
+        year,
+        month,
+        day
+    )
+    //TODO Alterar a cor do datepicker para o tema do projeto
+    OutlinedTextField(
+        value = birthdate,
+        onValueChange = {},
+        label = { Text("Data de Nascimento") },
+        readOnly = true,
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = {
+            Text(
+                text = "dd/mm/yyyy"
+            )
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = { showDatePicker = true },
+            ) {
+                Icon(imageVector = Icons.Filled.CalendarMonth, contentDescription = "Data de Nascimento")
+            }
+        }
+    )
+
+
+    // Exibir o DatePickerDialog ao clicar no campo
+    if (showDatePicker) {
+        datePickerDialog.show()
+        showDatePicker = false
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
