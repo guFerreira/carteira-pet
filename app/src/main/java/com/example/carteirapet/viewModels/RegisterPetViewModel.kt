@@ -33,7 +33,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService) : View
 
     var weight by mutableStateOf("")
 
-    var species by mutableStateOf("")
+    var species by mutableStateOf("Cachorro")
 
     val breeds = listOf("Labrador", "Bulldog", "Poodle", "Vira-lata", "Outra")
     val sexes = listOf("Macho", "Fêmea")
