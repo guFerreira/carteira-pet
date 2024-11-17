@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
 import com.example.carteirapet.repositories.Animal
+import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.viewModels.PetInformationViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -150,7 +151,7 @@ fun PetInformation(
                     CircularProgressIndicator()
                 } else {
                     PetInformations(viewModel.pet)
-                    Vaccines()
+                    Vaccines(viewModel.vaccines)
                 }
             }
         }
@@ -175,61 +176,67 @@ fun PetInformations(pet: Animal?) {
     ) {
         if (pet == null){
             Text(text = "Carregando informações do pet...")
-        }
-        Image(
-            painter = painterResource(id = R.drawable.bolinha),
-            contentDescription = "Imagem do pet",
-            Modifier
-                .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
-                .size(120.dp)
-        )
-        Column {
-            Text(
-                text = "Bolinha", style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 24.sp,
-                )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.bolinha),
+                contentDescription = "Imagem do pet",
+                Modifier
+                    .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
+                    .size(120.dp)
             )
-            Text(
-                text = "Raça: Dálmata", style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp,
+            Column {
+                Text(
+                    text = pet.name, style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 24.sp,
+                    )
                 )
-            )
-            Text(
-                text = "Data de Nascimento: 01/01/2024", style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp,
+                Text(
+                    text = "Raça: ${pet.breeds.first().name}", style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                    )
                 )
-            )
-            Text(
-                text = "Sexo: Macho", style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp,
+                Text(
+                    text = "Data de Nascimento: ${pet.birthDate}", style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                    )
                 )
-            )
-            Text(
-                text = "Castrado: Sim", style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 14.sp,
+                Text(
+                    text = "Sexo: ${pet.sex}", style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                    )
                 )
-            )
+                Text(
+                    text = "Castrado: ${if (pet.neutered == true) "Sim" else "Não"}",
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,fontSize = 14.sp,
+                    )
+                )
+            }
         }
     }
 }
 
 @Composable
-fun Vaccines() {
-    LazyColumn() {
-        items(20) { item ->
-            VaccineItem(modifier = Modifier.padding(4.dp))
+fun Vaccines(vaccines: List<Vaccine>) {
+    if (vaccines.isEmpty()){
+        Text(text = "Nenhuma vacina registrada")
+    } else{
+        LazyColumn() {
+            items(vaccines.size) { item ->
+                VaccineItem(vaccines[item], modifier = Modifier.padding(4.dp))
+            }
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VaccineItem(modifier: Modifier) {
+fun VaccineItem(vaccine: Vaccine, modifier: Modifier) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -248,25 +255,20 @@ fun VaccineItem(modifier: Modifier) {
                 .padding(8.dp)
         ) {
             Text(
-                text = "10/10/2024",
+                text = vaccine.applicationDate,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = "Vacina contra raiva",
+                text = vaccine.name,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = "Assinatura digital:",
+                text = "Status da assinatura: ${vaccine.status}",
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 0.dp)
-            )
-            Text(
-                text = "12a636fcab5953233706dadacfff3ba8",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 2.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
             HorizontalDivider(modifier = Modifier.height(1.dp))
@@ -286,7 +288,7 @@ fun VaccineItem(modifier: Modifier) {
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Vacina contra Raiva",
+                            text = vaccine.name,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
@@ -294,27 +296,32 @@ fun VaccineItem(modifier: Modifier) {
                                 .padding(bottom = 8.dp)
                         )
                         Text(
-                            text = "Data da aplicação: 10/10/2023/ às 14:54",
+                            text = "Data da aplicação: ${vaccine.applicationDate}",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "Lote: 123456789",
+                            text = "Lote: ${vaccine.batchCode}",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "Fabricante: Pfizer",
+                            text = "Fabricante: ${vaccine.manufacturer}",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "Médico veterinário: João da Silva Teste",
+                            text = "Médico veterinário: ${vaccine.veterinaryDoctorName}",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "CRMV: 12345",
+                            text = "CRMV: ${vaccine.crmv}",
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Text(
+                            text = "Status do documento: ${vaccine.status}",
                             fontSize = 14.sp,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -323,7 +330,7 @@ fun VaccineItem(modifier: Modifier) {
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                         Text(
-                            text = "Assinado Digitalmente",
+                            text = "Documento assinado digitalmente",
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -331,7 +338,7 @@ fun VaccineItem(modifier: Modifier) {
                                 .padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "12a636fcab5953233706dadacfff3ba8",
+                            text = vaccine.signedPdf,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()

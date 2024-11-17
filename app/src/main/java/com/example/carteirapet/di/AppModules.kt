@@ -5,10 +5,12 @@ import com.example.carteirapet.exceptions.UnauthorizedException
 import com.example.carteirapet.repositories.AnimalRepository
 import com.example.carteirapet.repositories.AuthRepository
 import com.example.carteirapet.repositories.UserRepository
+import com.example.carteirapet.repositories.VaccineRepository
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
+import com.example.carteirapet.service.VaccineService
 import com.example.carteirapet.viewModels.EditUserProfileViewModel
 import com.example.carteirapet.viewModels.LoginViewModel
 import com.example.carteirapet.viewModels.MyPetsViewModel
@@ -36,10 +38,12 @@ val appModule = module {
     singleOf(::AuthRepository)
     singleOf(::UserRepository)
     singleOf(::AnimalRepository)
+    singleOf(::VaccineRepository)
 
     singleOf(::AuthService)
     singleOf(::UserService)
     singleOf(::AnimalService)
+    singleOf(::VaccineService)
 
     viewModelOf(::LoginViewModel)
     viewModelOf(::SignupViewModel)

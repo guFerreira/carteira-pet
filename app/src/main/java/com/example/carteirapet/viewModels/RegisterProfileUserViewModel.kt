@@ -104,9 +104,15 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         if (currentStep > 1) currentStep--
     }
 
-    fun logout(onLogout: () -> Unit){
-        authService.logout()
-        onLogout()
+    fun logout(onLogout: () -> Unit, onError: (String) -> Unit){
+        viewModelScope.launch {
+            try {
+                authService.logout()
+                onLogout()
+            } catch (e: Exception) {
+                onError("Erro ao realizar logout")
+            }
+        }
     }
 
     fun registerProfileData(onRegister: () -> Unit, onError: (String) -> Unit){

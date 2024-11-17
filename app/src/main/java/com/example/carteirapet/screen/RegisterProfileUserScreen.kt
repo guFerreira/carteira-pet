@@ -60,7 +60,7 @@ fun RegisterProfileUserScreen(
     viewModel: RegisterProfileUserViewModel = koinViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -82,7 +82,7 @@ fun RegisterProfileUserScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { viewModel.logout(goToLoginScreen) }) {
+                    IconButton(onClick = { viewModel.logout(goToLoginScreen, { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",

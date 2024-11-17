@@ -22,30 +22,15 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         setContent {
             val navController = rememberNavController()
-
-//            NavHost(navController = navController, startDestination = "paginaExemplo") {
-//                composable("paginaExemplo") {
-//                    Column {
-//                        Text(text = "deu bom?")
-//                    }
-//                }
-//            }
             CarteiraPetTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
-//                    if (intent.action == Intent.ACTION_VIEW) {
-//                        HandleQrCodeUri(intent.data, navController)
-//                    }else{
                     KoinContext() {
                         MooApp(navController, get(), get())
                     }
-//                    }
-
-//                    MyPetsScreen()
                 }
             }
         }

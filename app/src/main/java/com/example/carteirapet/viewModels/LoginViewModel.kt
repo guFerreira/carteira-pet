@@ -58,9 +58,9 @@ open class LoginViewModel(private val authService: AuthService, private val user
             try {
                 val isLoginSuccess = authService.login(username, password)
                 if (isLoginSuccess) {
-                    val userInformation = userService.getUserInformations()
-                    if (userInformation != null) {
-                        if (userInformation.isRegistered){
+                    val user = userService.checkUserRegister()
+                    if (user != null) {
+                        if (user.isRegistered){
                             loginState = LoginState.Success("Login realizado com sucesso!")
                             onHomePageNavigate()
                         }else{

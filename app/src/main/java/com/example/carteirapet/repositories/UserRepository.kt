@@ -41,7 +41,25 @@ data class VeterinaryDoctor(
     val lastName: String,)
 
 @Serializable
+data class UserRegister(
+    val isRegistered: Boolean,
+)
+
+@Serializable
 data class Profile(
+    val isVet: Boolean,
+    val isRegistered: Boolean,
+    val firstName: String,
+    val lastName: String,
+    val email: String,
+    val phoneNumber: String,
+    val cpf: String,
+    val address: Address
+)
+
+@Serializable
+data class ProfileCreateResponse(
+    val id: Int,
     val isVet: Boolean,
     val isRegistered: Boolean,
     val firstName: String,
@@ -76,15 +94,27 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun registerPetGuardian(profile: Profile): PetGuardian? {
+    suspend fun checkUserRegister(): UserRegister {
+        val response: HttpResponse = client.get("http://35.239.21.191/users/checkRegister") {
+            contentType(ContentType.Application.Json)
+        }
+        return if (response.status == HttpStatusCode.OK) {
+            val userResponse = response.body<UserRegister>()
+            return userResponse
+        } else {
+            return UserRegister(isRegistered = false)
+        }
+    }
+
+    suspend fun registerPetGuardian(profile: Profile): Boolean {
         val response: HttpResponse = client.post("http://35.239.21.191/petguardian/register") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
         return if (response.status == HttpStatusCode.Created) {
-            response.body<PetGuardian>()
+            return true
         } else {
-            throw Exception("Erro ao realizar cadastro")
+            return false
         }
     }
 

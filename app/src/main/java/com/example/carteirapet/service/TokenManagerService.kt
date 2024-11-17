@@ -18,9 +18,9 @@ class TokenManagerService(context: Context) {
         sharedPreferences.edit().apply {
             putString("access_token", accessToken)
             putString("refresh_token", refreshToken)
-            apply()
-        }
+        }.commit()  // Alterado para commit() que é síncrono
     }
+
 
     // Função para obter o access token
     fun getAccessToken(): String? = sharedPreferences.getString("access_token", null)
@@ -30,6 +30,6 @@ class TokenManagerService(context: Context) {
 
     // Função para limpar os tokens (em caso de logout, por exemplo)
     fun clearTokens() {
-        sharedPreferences.edit().clear().apply()
+        sharedPreferences.edit().clear().commit()
     }
 }

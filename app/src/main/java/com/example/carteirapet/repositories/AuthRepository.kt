@@ -2,6 +2,9 @@ package com.example.carteirapet.repositories
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -68,8 +71,10 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun logout():Boolean {
-        val response: HttpResponse = client.delete("http://35.235.241.19/auth/logout")
-        return if (response.status == HttpStatusCode.NoContent) {
+        val response: HttpResponse = client.delete("http://35.239.21.191/auth/logout")
+        return if (response.status == HttpStatusCode.OK) {
+            client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>()
+                .firstOrNull()?.clearToken()
             return true
         } else {
             return false

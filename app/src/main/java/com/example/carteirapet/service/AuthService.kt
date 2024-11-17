@@ -1,6 +1,8 @@
 package com.example.carteirapet.service
 
 import com.example.carteirapet.repositories.AuthRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class AuthService(private val authRepository: AuthRepository, private val tokenManagerService: TokenManagerService) {
     suspend fun login(username: String, password: String): Boolean {
@@ -40,7 +42,8 @@ class AuthService(private val authRepository: AuthRepository, private val tokenM
         return tokenManagerService.getRefreshToken()
     }
 
-    fun logout() {
-        tokenManagerService.clearTokens()
+    suspend fun logout() {
+        val isSuccess = authRepository.logout()
+        if (isSuccess) { tokenManagerService.clearTokens() }
     }
 }

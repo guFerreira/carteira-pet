@@ -12,6 +12,8 @@ import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
+
+
 @Serializable
 data class Animal(
     val id: Int,
@@ -20,26 +22,10 @@ data class Animal(
     val species: String,
     val sex: String,
     val neutered: Boolean,
-    val birthDate: String,
+    var birthDate: String,
     val weight: Float,
     val conditions: String?, // Condições preexistentes
     val breeds: List<Breed>
-)
-
-@Serializable
-data class VaccineRequest(
-    val id: Int?,
-    val status: String,
-    val name: String,
-    val species: String,
-    val sex: String,
-    val neutered: Boolean,
-    val birthDate: String,
-    val weight: Float,
-    val conditions: String?, // Condições preexistentes
-    val breeds: List<Breed>
-//    val veterinaryDoctor: VeterinaryDoctor?, // Opcional
-//    val vaccineRequest: List<VaccineRequest>
 )
 
 @Serializable

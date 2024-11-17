@@ -28,9 +28,9 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
     LaunchedEffect(Unit) {
         isLoggedIn = authService.getAccessToken() != null && authService.getRefreshToken() != null
         if (isLoggedIn) {
-            var userProfile = userService.getUserInformations()
-            if (userProfile != null) {
-                if (!userProfile.isRegistered) {
+            var user = userService.checkUserRegister()
+            if (user != null) {
+                if (user.isRegistered == false) {
                     navController.navigate("registerUserProfileInfos")
                 }
             }
