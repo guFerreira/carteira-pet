@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -177,13 +178,30 @@ fun PetInformations(pet: Animal?) {
         if (pet == null){
             Text(text = "Carregando informações do pet...")
         } else {
-            Image(
-                painter = painterResource(id = R.drawable.bolinha),
-                contentDescription = "Imagem do pet",
-                Modifier
-                    .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
-                    .size(120.dp)
-            )
+//            Image(
+//                painter = painterResource(id = R.drawable.bolinha),
+//                contentDescription = "Imagem do pet",
+//                Modifier
+//                    .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
+//                    .size(120.dp)
+//            )
+            // TODO transformar isso em um componente
+            Box(
+                modifier = Modifier
+                    .background(color = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) // Adiciona a cor de fundo
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        CircleShape
+                    )
+                    .size(120.dp),
+                contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
+            ) {
+                Text(
+                    text = if (pet.species == "dog") "🐶" else "😺",
+                    fontSize = 80.sp // Ajuste o tamanho do emoji conforme necessário
+                )
+            }
             Column {
                 Text(
                     text = pet.name, style = TextStyle(

@@ -261,23 +261,28 @@ fun MyPetsScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                     ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.bolinha),
-                                            contentDescription = "Imagem do pet",
+                                        Box(
                                             modifier = Modifier
+                                                .background(color = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) // Adiciona a cor de fundo
                                                 .border(
                                                     1.dp,
                                                     MaterialTheme.colorScheme.onPrimaryContainer,
                                                     CircleShape
                                                 )
-                                                .size(60.dp)
-                                        )
+                                                .size(60.dp),
+                                            contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
+                                        ) {
+                                            Text(
+                                                text = if (viewModel.animals[i].species == "dog") "🐶" else "😺",
+                                                fontSize = 44.sp // Ajuste o tamanho do emoji conforme necessário
+                                            )
+                                        }
                                         Text(
                                             text = viewModel.animals[i].name,
                                             modifier = Modifier.padding(start = 4.dp)
                                         )
-
                                     }
+
 
                                     Row(
                                         horizontalArrangement = Arrangement.End,
@@ -293,7 +298,7 @@ fun MyPetsScreen(
                                                 )
                                         ) {
                                             Text(
-                                                text = "\uD83D\uDC36", // Emoji do texto
+                                                text = if (viewModel.animals[i].species == "dog") "🐶" else "😺", // Emoji do texto
                                                 style = TextStyle(
                                                     color = Color.White,
                                                     textAlign = TextAlign.Center,
