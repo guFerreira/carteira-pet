@@ -28,11 +28,7 @@ data class Animal(
     val breeds: List<Breed>
 )
 
-@Serializable
-data class Breed(
-    val id: Int?,
-    val name: String
-)
+
 
 class AnimalRepository(private val client: HttpClient) {
     suspend fun getAnimals(): List<Animal>{

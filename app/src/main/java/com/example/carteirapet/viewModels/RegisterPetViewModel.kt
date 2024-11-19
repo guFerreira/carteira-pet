@@ -10,10 +10,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.repositories.Animal
 import com.example.carteirapet.repositories.Breed
 import com.example.carteirapet.service.AnimalService
+import com.example.carteirapet.service.BreedService
 import kotlinx.coroutines.launch
 
 
-open class RegisterPetViewModel(private val animalService: AnimalService) : ViewModel() {
+open class RegisterPetViewModel(private val animalService: AnimalService, private val breedService: BreedService) : ViewModel() {
+
+    var breedOptions by mutableStateOf<List<Breed>>(emptyList())
+    var selectedBreed by mutableStateOf<Breed?>(null)
 
     var petImageUri by mutableStateOf<Uri?>(null)
 
@@ -23,8 +27,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService) : View
 
     var microchip by mutableStateOf("")
 
-    var breed by mutableStateOf("")
-
+    val sexes = listOf("Macho", "Fêmea")
     var sex by mutableStateOf("")
 
     var neutered by mutableStateOf(false)
@@ -33,33 +36,47 @@ open class RegisterPetViewModel(private val animalService: AnimalService) : View
 
     var weight by mutableStateOf("")
 
-    var species by mutableStateOf("Cachorro")
+    var species by mutableStateOf("dog")
 
-    val breeds = listOf("Labrador", "Bulldog", "Poodle", "Vira-lata", "Outra")
-    val sexes = listOf("Macho", "Fêmea")
+
+    fun loadBreeds() {
+        viewModelScope.launch {
+            breedOptions = breedService.getBreeds(species)
+        }
+    }
+
+    fun changeSpecies(newSpecies: String) {
+        viewModelScope.launch {
+            species = newSpecies
+            breedOptions = breedService.getBreeds(species)
+        }
+    }
 
     fun registerPet(onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val animal = Animal(
-                    name = name,
-                    birthDate = birthDate,
-                    microchip = microchip,
-                    breeds = listOf(
-                        Breed(id = null, breed)
-                    ),
-                    sex = sex,
-                    neutered = neutered,
-                    conditions = conditions,
-                    weight = weight?.toFloat() ?: 0f,
-                    id = 0,
-                    species = species
-                )
-                animalService.registerAnimal(animal)
-                onSuccess()
-            }catch (e: Exception){
-                onError("Erro ao criar conta. Tente novamente." + e.message)
+                if (selectedBreed != null) {
+                    val animal = Animal(
+                        name = name,
+                        birthDate = birthDate,
+                        microchip = microchip,
+                        breeds = listOf(selectedBreed!!),
+                        sex = sex,
+                        neutered = neutered,
+                        conditions = conditions,
+                        weight = weight?.toFloat() ?: 0f,
+                        id = 0,
+                        species = species
+                    )
+                    animalService.registerAnimal(animal)
+                    onSuccess()
+                } else {
+                    onError("Erro: Raça não selecionada.")
+                }
+            } catch (e: Exception) {
+                onError("Erro ao criar conta. Tente novamente. " + e.message)
             }
         }
     }
+
 }

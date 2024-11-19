@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +82,9 @@ fun RegisterPetScreen(
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) { viewModel.loadBreeds() }
+
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -119,117 +123,116 @@ fun RegisterPetScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ImagePicker(onImageSelected = { viewModel.petImageUri = it })
-            SpeciesSelection(viewModel.species, { viewModel.species = it })
 
-//            PetForm(viewModel, backToHomeScreen)
-
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Campo de Nome
-                OutlinedTextField(
-                    value = viewModel.name,
-                    onValueChange = { viewModel.name = it },
-                    label = { Text("Nome") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-//                // Campo de Data de Nascimento
-//                OutlinedTextField(
-//                    value = viewModel.birthDate,
-//                    onValueChange = { viewModel.birthDate = it },
-//                    label = { Text("Data de Nascimento") },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    placeholder = { Text("DD/MM/AAAA") }
-//                )
-
-                DateOfBirthField(viewModel.birthDate, { viewModel.birthDate = it })
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Campo de Microchip
-                OutlinedTextField(
-                    value = viewModel.microchip,
-                    onValueChange = { viewModel.microchip = it },
-                    label = { Text("Microchip") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Dropdown de Raça
-                DropdownMenuField(
-                    label = "Raça",
-                    options = viewModel.breeds,
-                    selectedOption = viewModel.breed,
-                    onOptionSelected = { viewModel.breed = it }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Dropdown de Sexo
-                DropdownMenuField(
-                    label = "Sexo",
-                    options = viewModel.sexes,
-                    selectedOption = viewModel.sex,
-                    onOptionSelected = { viewModel.sex = it }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Checkbox de Castrado
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = viewModel.neutered,
-                        onCheckedChange = { viewModel.neutered = it }
-                    )
-                    Text(text = "Castrado")
+            if (viewModel.breedOptions.isEmpty()) {
+                Text(text = "Carregando...")
+            } else {
+                ImagePicker(onImageSelected = { viewModel.petImageUri = it })
+                SpeciesSelection(viewModel.species) {
+                    viewModel.changeSpecies(it)
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Campo de Nome
+                    OutlinedTextField(
+                        value = viewModel.name,
+                        onValueChange = { viewModel.name = it },
+                        label = { Text("Nome") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                // Campo de Condições Pré-existentes
-                OutlinedTextField(
-                    value = viewModel.conditions,
-                    onValueChange = { viewModel.conditions = it },
-                    label = { Text("Condições Pré-existentes") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    DateOfBirthField(viewModel.birthDate, { viewModel.birthDate = it })
 
-                // Campo de Peso
-                OutlinedTextField(
-                    value = viewModel.weight,
-                    onValueChange = { viewModel.weight = it },
-                    label = { Text("Peso (kg)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    // Campo de Microchip
+                    OutlinedTextField(
+                        value = viewModel.microchip,
+                        onValueChange = { viewModel.microchip = it },
+                        label = { Text("Microchip") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                // Botão de Salvar
-                Button(
-                    onClick = {
-                        viewModel.registerPet(
-                            backToHomeScreen,
-                            { message ->
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            })
-                    },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .fillMaxWidth()
-                ) {
-                    Text(text = "Salvar")
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Dropdown de Raça
+                    DropdownMenuField(
+                        label = "Raça",
+                        options = viewModel.breedOptions,
+                        selectedOption = viewModel.selectedBreed,
+                        onOptionSelected = { viewModel.selectedBreed = it },
+                        displayText = { it.name }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Dropdown de Sexo
+                    DropdownMenuField(
+                        label = "Sexo",
+                        options = viewModel.sexes,
+                        selectedOption = viewModel.sex,
+                        onOptionSelected = { viewModel.sex = it },
+                        displayText = { it }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Checkbox de Castrado
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = viewModel.neutered,
+                            onCheckedChange = { viewModel.neutered = it }
+                        )
+                        Text(text = "Castrado")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Campo de Condições Pré-existentes
+                    OutlinedTextField(
+                        value = viewModel.conditions,
+                        onValueChange = { viewModel.conditions = it },
+                        label = { Text("Condições Pré-existentes") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Campo de Peso
+                    OutlinedTextField(
+                        value = viewModel.weight,
+                        onValueChange = { viewModel.weight = it },
+                        label = { Text("Peso (kg)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botão de Salvar
+                    Button(
+                        onClick = {
+                            viewModel.registerPet(
+                                backToHomeScreen,
+                                { message ->
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                })
+                        },
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = "Salvar")
+                    }
                 }
             }
         }
     }
+
 }
 
 
@@ -299,9 +302,9 @@ fun SpeciesSelection(
                 modifier = Modifier.padding(8.dp)
             ) {
                 RadioButton(
-                    selected = selectedSpecies == "Cachorro",
+                    selected = selectedSpecies == "dog",
                     onClick = {
-                        onSpeciesSelected("Cachorro")
+                        onSpeciesSelected("dog")
                     }
                 )
                 Text(text = "Cachorro")
@@ -312,9 +315,9 @@ fun SpeciesSelection(
                 modifier = Modifier.padding(8.dp)
             ) {
                 RadioButton(
-                    selected = selectedSpecies == "Gato",
+                    selected = selectedSpecies == "cat",
                     onClick = {
-                        onSpeciesSelected("Gato")
+                        onSpeciesSelected("cat")
                     }
                 )
                 Text(text = "Gato")
@@ -324,21 +327,22 @@ fun SpeciesSelection(
 }
 
 @Composable
-fun DropdownMenuField(
+fun <T> DropdownMenuField(
     label: String,
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    options: List<T>,
+    selectedOption: T?,
+    onOptionSelected: (T) -> Unit,
+    displayText: (T) -> String
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
         OutlinedTextField(
-            value = selectedOption,
+            value = selectedOption?.let { displayText(it) } ?: "",
             onValueChange = {},
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = true, // Desabilitado para evitar edição direta
+            enabled = true,
             trailingIcon = {
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
@@ -347,13 +351,13 @@ fun DropdownMenuField(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            options.forEachIndexed { index, option ->
+            options.forEach { option ->
                 DropdownMenuItem(
                     onClick = {
                         onOptionSelected(option)
                         expanded = false
                     },
-                    text = { Text(option) }
+                    text = { Text(displayText(option)) }
                 )
             }
         }
@@ -365,6 +369,7 @@ fun DropdownMenuField(
         )
     }
 }
+
 
 @Composable
 fun DateOfBirthField(
@@ -409,7 +414,10 @@ fun DateOfBirthField(
             IconButton(
                 onClick = { showDatePicker = true },
             ) {
-                Icon(imageVector = Icons.Filled.CalendarMonth, contentDescription = "Data de Nascimento")
+                Icon(
+                    imageVector = Icons.Filled.CalendarMonth,
+                    contentDescription = "Data de Nascimento"
+                )
             }
         }
     )
