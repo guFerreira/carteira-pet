@@ -1,16 +1,20 @@
 package com.example.carteirapet
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.carteirapet.exceptions.UnauthorizedException
 import com.example.carteirapet.screen.EditUserProfileScreen
 import com.example.carteirapet.screen.LoginScreen
 import com.example.carteirapet.screen.MyPetsScreen
@@ -21,25 +25,38 @@ import com.example.carteirapet.screen.RegisterVaccineScreen
 import com.example.carteirapet.screen.SignupScreen
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.UserService
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun MooApp(navController: NavHostController, authService: AuthService, userService: UserService) {
-    var isLoggedIn by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
-        isLoggedIn = authService.getAccessToken() != null && authService.getRefreshToken() != null
-        if (isLoggedIn) {
-            var user = userService.checkUserRegister()
-            if (user != null) {
-                if (user.isRegistered == false) {
-                    navController.navigate("registerUserProfileInfos")
+        coroutineScope.launch {
+            try {
+                val hasTokenSaved = authService.getAccessToken() != null && authService.getRefreshToken() != null
+                if (!hasTokenSaved) {
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                } else {
+                    val user = userService.checkUserRegister()
+
+                    if (user == null || user.isRegistered) {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate("registerUserProfileInfos")
+                    }
                 }
-            }
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
-            }
-        } else {
-            navController.navigate("login") {
-                popUpTo("home") { inclusive = true }
+
+            } catch (e: UnauthorizedException) {
+                // Captura a exceção e navega para a tela de login
+                Toast.makeText(context, "Token de refresh expirado. Faça login novamente.", Toast.LENGTH_LONG).show()
+                navController.navigate("login")
             }
         }
     }

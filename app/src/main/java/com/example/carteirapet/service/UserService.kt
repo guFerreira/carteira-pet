@@ -12,7 +12,7 @@ class UserService(private val userRepository: UserRepository) {
         return userRepository.getUserInformations()
     }
 
-    suspend fun checkUserRegister(): UserRegister? {
+    suspend fun checkUserRegister(): UserRegister {
         return userRepository.checkUserRegister()
     }
 

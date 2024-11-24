@@ -3,6 +3,7 @@ package com.example.carteirapet.repositories
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.carteirapet.exceptions.UnauthorizedException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

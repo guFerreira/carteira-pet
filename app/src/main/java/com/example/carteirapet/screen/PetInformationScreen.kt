@@ -241,7 +241,12 @@ fun PetInformations(pet: Animal?) {
 @Composable
 fun Vaccines(vaccines: List<Vaccine>) {
     if (vaccines.isEmpty()){
-        Text(text = "Nenhuma vacina registrada")
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
+        ) {
+            Text(text = "Nenhuma vacina registrada \uD83D\uDC89")
+        }
     } else{
         LazyColumn() {
             items(vaccines.size) { item ->
