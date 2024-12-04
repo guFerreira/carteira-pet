@@ -7,12 +7,15 @@ import com.example.carteirapet.repositories.AuthRepository
 import com.example.carteirapet.repositories.BreedRepository
 import com.example.carteirapet.repositories.UserRepository
 import com.example.carteirapet.repositories.VaccineRepository
+import com.example.carteirapet.repositories.VaccineRequestRepository
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.BreedService
 import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
+import com.example.carteirapet.service.VaccineRequestService
 import com.example.carteirapet.service.VaccineService
+import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
 import com.example.carteirapet.viewModels.EditUserProfileViewModel
 import com.example.carteirapet.viewModels.LoginViewModel
 import com.example.carteirapet.viewModels.MyPetsViewModel
@@ -42,12 +45,14 @@ val appModule = module {
     singleOf(::AnimalRepository)
     singleOf(::VaccineRepository)
     singleOf(::BreedRepository)
+    singleOf(::VaccineRequestRepository)
 
     singleOf(::AuthService)
     singleOf(::UserService)
     singleOf(::AnimalService)
     singleOf(::VaccineService)
     singleOf(::BreedService)
+    singleOf(::VaccineRequestService)
 
     viewModelOf(::LoginViewModel)
     viewModelOf(::SignupViewModel)
@@ -56,6 +61,7 @@ val appModule = module {
     viewModelOf(::RegisterPetViewModel)
     viewModelOf(::EditUserProfileViewModel)
     viewModelOf(::PetInformationViewModel)
+    viewModelOf(::CreateVaccineRequestViewModel)
 }
 
 val networkModule = module {

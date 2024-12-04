@@ -128,8 +128,8 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
                         navController.navigate("homeVeterinary") {
                             popUpTo("createVaccineRequest") { inclusive = true }
                         }
-                    }, {
-//                        navController.navigate("registerVaccine/$petId")
+                    }, goToVaccineRequestFormScreen = { vaccineRequestId ->
+                        navController.navigate("createVaccineRequestForm/$vaccineRequestId")
                     })
                 }
                 false -> {
@@ -155,9 +155,9 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
         }
 
         // rota para dar o update dos dados da solicitacao de vacina criada anteriormente pelo qrcode
-        composable("createVaccineRequestForm/{animalId}", arguments = listOf(navArgument("animalId") { type = NavType.IntType })) {
-            val petId = it.arguments?.getInt("animalId")
-            CreateVaccineRequestFormScreen(petId = petId, goToHomeScreen = { navController.navigate("homeVeterinary") })
+        composable("createVaccineRequestForm/{vaccineRequestId}", arguments = listOf(navArgument("vaccineRequestId") { type = NavType.IntType })) {
+            val vaccineRequestId = it.arguments?.getInt("vaccineRequestId")
+            CreateVaccineRequestFormScreen(vaccineRequestId = vaccineRequestId, goToHomeScreen = { navController.navigate("homeVeterinary") })
         }
 
         //telas do tutor

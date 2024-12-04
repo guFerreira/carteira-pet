@@ -32,11 +32,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
+import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateVaccineRequestFormScreen(petId: Int? = null, goToHomeScreen: () -> Unit){
+fun CreateVaccineRequestFormScreen(vaccineRequestId: Int? = null, goToHomeScreen: () -> Unit){
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -76,7 +78,10 @@ fun CreateVaccineRequestFormScreen(petId: Int? = null, goToHomeScreen: () -> Uni
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding).padding(16.dp).fillMaxWidth().fillMaxHeight(),
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -87,6 +92,10 @@ fun CreateVaccineRequestFormScreen(petId: Int? = null, goToHomeScreen: () -> Uni
 //                    label = { Text("Nome *") },
 //                    modifier = Modifier.fillMaxWidth()
 //                )
+                Text( text = "${vaccineRequestId}", style = androidx.compose.ui.text.TextStyle(
+                    fontSize = 24.sp
+                )
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = { /*TODO*/ }, modifier = Modifier.width(200.dp)) {
                     Text(text = "Criar")

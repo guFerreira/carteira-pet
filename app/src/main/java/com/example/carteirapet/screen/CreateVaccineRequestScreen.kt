@@ -1,5 +1,6 @@
 package com.example.carteirapet.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,16 +31,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.carteirapet.R
+import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
+import com.example.carteirapet.viewModels.EditUserProfileViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, goToVaccineRequestFormScreen: () -> Unit){
+fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, goToVaccineRequestFormScreen: (id: Int) -> Unit, viewModel: CreateVaccineRequestViewModel = koinViewModel()){
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -94,12 +100,20 @@ fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, g
             Text("Você escaneou o QR code ou clicou no link com sucesso.", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center,)
             Text("Agora, ao clicar em \"Criar\", você poderá iniciar uma nova solicitação de vacinação.", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(20.dp))
-            Button(onClick = {
-                goToVaccineRequestFormScreen()
-            }, modifier = Modifier.width(200.dp)) {
-                Text(text = "Criar")
-            }
 
+            Button(onClick = {
+                if (petId == null) return@Button
+                viewModel.createVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                } )
+
+            }, modifier = Modifier.width(200.dp)) {
+                if(viewModel.isLoading){
+                    CircularProgressIndicator()
+                } else {
+                    Text(text = "Criar")
+                }
+            }
         }
     }
 }
