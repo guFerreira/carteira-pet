@@ -7,4 +7,10 @@ class VaccineService(private val vaccineRepository: VaccineRepository) {
     suspend fun getVaccineRequestByAnimalId(animalId: Int): List<Vaccine> {
         return vaccineRepository.getVaccineRequestByAnimalId(animalId)
     }
+
+    suspend fun getVaccineRequestFromVecterinary(): List<Vaccine> {
+        return vaccineRepository.getVaccineRequestFromVecterinary()
+    }
+
+
 }

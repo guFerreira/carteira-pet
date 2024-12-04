@@ -63,7 +63,7 @@ import qrgenerator.qrkitpainter.solidBrush
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterVaccineScreen(goToVaccineCardScreen: () -> Unit) {
+fun RegisterVaccineScreen(petId: Int? = null, goToVaccineCardScreen: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
@@ -130,7 +130,7 @@ fun RegisterVaccineScreen(goToVaccineCardScreen: () -> Unit) {
                         fontWeight = FontWeight(800)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
-                    QRCodeVaccine(inputText = "google.com")
+                    QRCodeVaccine(inputText = "app://moo/createVaccineRequest/${petId}")
                 }
             }
 
@@ -143,7 +143,7 @@ fun RegisterVaccineScreen(goToVaccineCardScreen: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = "Peça para seu médico veterinário escanear o QR Code ou envie o link abaixo para o mesmo")
-                CopyTextButton()
+                CopyTextButton( "app://moo/createVaccineRequest/${petId}")
 
             }
             Column(
@@ -165,16 +165,13 @@ fun RegisterVaccineScreen(goToVaccineCardScreen: () -> Unit) {
 }
 
 @Composable
-fun CopyTextButton() {
+fun CopyTextButton(textToCopy: String) {
     // Obter o ClipboardManager
     val clipboardManager = LocalClipboardManager.current
     // Obter o contexto para exibir um Toast
     val context = LocalContext.current
 
     Box {
-        // Texto que será copiado
-        val textToCopy = "Este é o texto que será copiado"
-
         // Botão que, ao ser clicado, copia o texto
         Button(
             modifier = Modifier
@@ -238,5 +235,5 @@ fun QRCodeVaccine(inputText: String) {
 @Composable
 @Preview
 fun RegisterVaccineScreenPreview() {
-    RegisterVaccineScreen({})
+    RegisterVaccineScreen(0, {})
 }

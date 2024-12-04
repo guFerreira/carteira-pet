@@ -34,4 +34,16 @@ class VaccineRepository(private val client: HttpClient)  {
             emptyList()
         }
     }
+
+    suspend fun getVaccineRequestFromVecterinary(): List<Vaccine>{
+        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/vecterinary") {
+            contentType(ContentType.Application.Json)
+        }
+        return if (response.status == HttpStatusCode.OK) {
+            val vaccines = response.body<List<Vaccine>>()
+            return vaccines
+        } else {
+            emptyList()
+        }
+    }
 }

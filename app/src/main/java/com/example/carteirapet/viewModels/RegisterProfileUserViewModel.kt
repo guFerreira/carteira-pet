@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.repositories.Address
 import com.example.carteirapet.repositories.Profile
+import com.example.carteirapet.repositories.ProfileCreateResponse
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.UserService
 import kotlinx.coroutines.launch
@@ -18,7 +19,9 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
     var currentStep by mutableStateOf(1)
         private set
     // Personal information (Step 1)
-    var isVet by mutableStateOf(true)
+    var isVet by mutableStateOf(false)
+        private set
+    var crmv by mutableStateOf("")
         private set
     var isRegistered by mutableStateOf(false)
         private set
@@ -72,6 +75,10 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         isVet = value
     }
 
+    fun updateCrmv(value: String) {
+        crmv = value
+    }
+
     fun updateCep(value: String) {
         cep = value
     }
@@ -104,6 +111,10 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         if (currentStep > 1) currentStep--
     }
 
+    fun validateRequiredFieldsInFirstStep(): Boolean {
+        return firstName.isNotEmpty() && lastName.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty() && cpf.isNotEmpty() && (!isVet || crmv.isNotEmpty())
+    }
+
     fun logout(onLogout: () -> Unit, onError: (String) -> Unit){
         viewModelScope.launch {
             try {
@@ -117,7 +128,7 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
 
     fun registerProfileData(onRegister: () -> Unit, onError: (String) -> Unit){
         val address =  Address(cep.toInt(), street, number.toInt(), complement, city, state)
-        val profile = Profile(isVet, isRegistered, firstName, lastName, email, phoneNumber, cpf, address)
+        val profile = ProfileCreateResponse(isVet, crmv, isRegistered, firstName, lastName, email, phoneNumber, cpf, address)
 
         // Lança a operação de login
         viewModelScope.launch {

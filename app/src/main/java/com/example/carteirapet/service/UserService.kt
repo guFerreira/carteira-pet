@@ -1,6 +1,7 @@
 package com.example.carteirapet.service
 
 import com.example.carteirapet.repositories.Profile
+import com.example.carteirapet.repositories.ProfileCreateResponse
 import com.example.carteirapet.repositories.UserRegister
 import com.example.carteirapet.repositories.UserRepository
 import java.text.SimpleDateFormat
@@ -17,7 +18,7 @@ class UserService(private val userRepository: UserRepository) {
     }
 
 
-    suspend fun registerUserProfile(profile: Profile) {
+    suspend fun registerUserProfile(profile: ProfileCreateResponse) {
         if(profile.isVet == true){
             userRepository.registerVeterinaryDoctor(profile)
         } else {

@@ -46,6 +46,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.carteirapet.screen.components.CepVisualTransformation
+import com.example.carteirapet.screen.components.CpfVisualTransformation
+import com.example.carteirapet.screen.components.PhoneVisualTransformation
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
 import com.example.carteirapet.viewModels.SignupViewModel
@@ -168,10 +171,20 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     cpf = viewModel.cpf,
                     onCpfChange = viewModel::updateCpf
                 )
+                if (viewModel.isVet){
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = viewModel.crmv,
+                        onValueChange = viewModel::updateCrmv,
+                        label = { Text("CRMV") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Button to go to step 2
-                Button(onClick = { viewModel.goToNextStep() }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { viewModel.goToNextStep() }, enabled = viewModel.validateRequiredFieldsInFirstStep(), modifier = Modifier.fillMaxWidth()) {
                     Text("Próximo")
                 }
             }
@@ -239,40 +252,41 @@ fun PersonalInformationForm(
         OutlinedTextField(
             value = firstName,
             onValueChange = onFirstNameChange,
-            label = { Text("Nome") },
+            label = { Text("Nome *") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = lastName,
             onValueChange = onLastNameChange,
-            label = { Text("Sobrenome") },
+            label = { Text("Sobrenome *") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = onPhoneNumberChange,
-            label = { Text("Celular") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-        )
+        PhoneInput(phoneNumber, onPhoneNumberChange)
+
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
+            label = { Text("Email *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = cpf,
-            onValueChange = onCpfChange,
-            label = { Text("CPF") },
+            onValueChange = {
+                if (it.length <= 11) { // Limitar a entrada a 11 caracteres
+                    onCpfChange(it)
+                }
+            },
+            label = { Text("CPF *") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            visualTransformation = CpfVisualTransformation()
         )
+
     }
 }
 
@@ -294,10 +308,17 @@ fun AddressInformationForm(
     Column {
         OutlinedTextField(
             value = cep,
-            onValueChange = onCepChange,
+            onValueChange = {
+                if (it.length <= 8) { // Limitar a entrada a 8 caracteres (formato numérico do CEP)
+                    onCepChange(it)
+                }
+            },
             label = { Text("CEP") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            visualTransformation = CepVisualTransformation()
         )
+
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = street,
@@ -384,6 +405,27 @@ fun StepCircle(isActive: Boolean, step: Int) {
         Text(text = "$step", color = textColor)
     }
 }
+
+@Composable
+fun PhoneInput(
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = phoneNumber,
+        onValueChange = { newValue ->
+            // Limita o número de caracteres digitados
+            if (newValue.length <= 11) {
+                onPhoneNumberChange(newValue.filter { it.isDigit() }) // Aceita apenas números
+            }
+        },
+        label = { Text("Celular *") },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        visualTransformation = PhoneVisualTransformation()
+    )
+}
+
 
 @Composable
 @Preview(showBackground = true)

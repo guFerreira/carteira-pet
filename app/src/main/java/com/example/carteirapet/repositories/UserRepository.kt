@@ -60,8 +60,8 @@ data class Profile(
 
 @Serializable
 data class ProfileCreateResponse(
-    val id: Int,
     val isVet: Boolean,
+    val crmv: String?,
     val isRegistered: Boolean,
     val firstName: String,
     val lastName: String,
@@ -107,8 +107,8 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun registerPetGuardian(profile: Profile): Boolean {
-        val response: HttpResponse = client.post("http://35.239.21.191/petguardian/register") {
+    suspend fun registerPetGuardian(profile: ProfileCreateResponse): Boolean {
+        val response: HttpResponse = client.post("http://35.239.21.191/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -120,7 +120,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun updatePetGuardian(profile: Profile): Profile? {
-        val response: HttpResponse = client.put("http://35.239.21.191/petguardian/update") {
+        val response: HttpResponse = client.put("http://35.239.21.191/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -131,20 +131,20 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun registerVeterinaryDoctor(profile: Profile): VeterinaryDoctor? {
-        val response: HttpResponse = client.post("http://35.239.21.191/veterinary/register") {
+    suspend fun registerVeterinaryDoctor(profile: ProfileCreateResponse): Boolean {
+        val response: HttpResponse = client.post("http://35.239.21.191/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
         return if (response.status == HttpStatusCode.Created) {
-            response.body<VeterinaryDoctor>()
+            return true
         } else {
-            throw Exception("Erro ao realizar cadastro")
+            return false
         }
     }
 
     suspend fun updateVeterinaryDoctor(profile: Profile): VeterinaryDoctor? {
-        val response: HttpResponse = client.put("http://35.239.21.191/veterinary/update") {
+        val response: HttpResponse = client.put("http://35.239.21.191/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
