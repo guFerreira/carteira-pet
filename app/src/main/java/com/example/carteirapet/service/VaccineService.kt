@@ -4,13 +4,7 @@ import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRepository
 
 class VaccineService(private val vaccineRepository: VaccineRepository) {
-    suspend fun getVaccineRequestByAnimalId(animalId: Int): List<Vaccine> {
-        return vaccineRepository.getVaccineRequestByAnimalId(animalId)
+    suspend fun getAllVaccines(): List<Vaccine> {
+        return vaccineRepository.getAllVaccines()
     }
-
-    suspend fun getVaccineRequestFromVecterinary(): List<Vaccine> {
-        return vaccineRepository.getVaccineRequestFromVecterinary()
-    }
-
-
 }

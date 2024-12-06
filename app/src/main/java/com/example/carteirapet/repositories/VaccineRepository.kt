@@ -12,31 +12,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Vaccine(
     val id: Int,
-    val name: String,
-    val status: String,
-    val applicationDate: String,
-    val batchCode: String,
-    val manufacturer: String,
-    val veterinaryDoctorName: String,
-    val crmv: String,
-    val signedPdf: String
+    val name: String
 )
 
 class VaccineRepository(private val client: HttpClient)  {
-    suspend fun getVaccineRequestByAnimalId(animalId: Int): List<Vaccine>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/animal/${animalId}") {
-            contentType(ContentType.Application.Json)
-        }
-        return if (response.status == HttpStatusCode.OK) {
-            val vaccines = response.body<List<Vaccine>>()
-            return vaccines
-        } else {
-            emptyList()
-        }
-    }
-
-    suspend fun getVaccineRequestFromVecterinary(): List<Vaccine>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/vecterinary") {
+    suspend fun getAllVaccines(): List<Vaccine>{
+        val response: HttpResponse = client.get("http://35.239.21.191/vaccine") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {

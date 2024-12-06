@@ -1,10 +1,5 @@
 package com.example.carteirapet.screen
 
-import android.app.DownloadManager
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.os.Environment
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,18 +13,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,16 +30,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,47 +44,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.carteirapet.repositories.Vaccine
-import com.example.carteirapet.viewModels.VecterinaryHomeViewModel
+import com.example.carteirapet.repositories.VaccineRequestByVeterinary
+import com.example.carteirapet.screen.components.BatchInfoRow
+import com.example.carteirapet.screen.components.VaccineInfoRow
+import com.example.carteirapet.screen.components.VaccineStatus
+import com.example.carteirapet.viewModels.VeterinaryHomeViewModel
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VeterinaryHomeScreen(
-//    petId: Int? = null,
-//    goToHomeScreen: () -> Unit,
-//    goRegisterVaccineScreen: () -> Unit,
-//    viewModel: VecterinaryHomeViewModel = koinViewModel()
+    goToLoginScreen: () -> Unit,
+    goToEditVeterinaryScreen: () -> Unit,
+    viewModel: VeterinaryHomeViewModel = koinViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
-    val vaccineRequests = remember {
-        mutableStateListOf(
-            Vaccine( id = 1, name = "Vacina A", status = "Aplicada", applicationDate = "2023-01-01", batchCode = "Lote123", manufacturer = "Fabricante X", veterinaryDoctorName = "Dr. Silva", crmv = "12345-RS", signedPdf = "https://zapsign.s3.amazonaws.com/2022/1/pdf/63d19807-cbfa-4b51-8571-215ad0f4eb98/ca42e7be-c932-482c-b70b-92ad7aea04be.pdf" ),
-            Vaccine( id = 2, name = "Vacina B", status = "Pendente", applicationDate = "2023-02-01", batchCode = "Lote456", manufacturer = "Fabricante Y", veterinaryDoctorName = "Dra. Lima", crmv = "67890-RS", signedPdf = "https://zapsign.s3.amazonaws.com/2022/1/pdf/63d19807-cbfa-4b51-8571-215ad0f4eb98/ca42e7be-c932-482c-b70b-92ad7aea04be.pdf" )
-        )
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.isLoading = true
+
+        viewModel.loadVaccineRequestsFromVeterinary(onError = { message ->
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_SHORT
+            ).show()
+        })
+
+        viewModel.isLoading = false
     }
-//    LaunchedEffect(petId) {
-//        viewModel.isLoading = true
-//        if (petId != null) {
-//            viewModel.loadVaccineRequestsFromVecterinary(onError = { message ->
-//                Toast.makeText(
-//                    context,
-//                    message,
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            })
-//        }
-//        viewModel.isLoading = false
-//    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -175,31 +157,21 @@ fun VeterinaryHomeScreen(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                //if (viewModel.isLoading){
-//                    CircularProgressIndicator()
-                //} else {
+                if (viewModel.isLoading){
+                    CircularProgressIndicator()
+                } else {
                     VaccineRequests(vaccineRequests)
-               //}
+               }
             }
         }
     }
 }
 
-@Composable
-fun AbrirPdfNoNavegador(pdfUrl: String) {
-    val context = LocalContext.current
 
-    Button(onClick = {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(pdfUrl))
-        context.startActivity(intent)
-    }) {
-        Text("Abrir PDF")
-    }
-}
 
 
 @Composable
-fun VaccineRequests(vaccines: List<Vaccine>) {
+fun VaccineRequests(vaccines: List<VaccineRequestByVeterinary>) {
     if (vaccines.isEmpty()){
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -210,25 +182,41 @@ fun VaccineRequests(vaccines: List<Vaccine>) {
     } else{
         LazyColumn() {
             items(vaccines.size) { item ->
-                VaccineRequestItem(vaccines[item], modifier = Modifier.padding(4.dp))
+                VaccineVeterinaryItem(vaccines[item], modifier = Modifier.padding(4.dp))
             }
         }
     }
 
 }
 
+//data class VaccineRequestByVeterinary(
+//    val id: Int,
+//    val status: String,
+//    val vaccineName: String?,
+//    val applicationDate: String?,
+//    val batchCode: String?,
+//    val manufacturer: String?,
+//    val nextDoseDate: String?,
+//    val animalName: String?,
+//    val petGuardianName: String?,
+//    val storageUrl: String?,
+//    val signedUrl: String?
+//)
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VaccineRequestItem(vaccine: Vaccine, modifier: Modifier) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+fun VaccineVeterinaryItem(vaccine: VaccineRequestByVeterinary, modifier: Modifier) {
     var showBottomSheet by remember { mutableStateOf(false) }
+
     Card(
         onClick = { showBottomSheet = true },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,// Defina a cor desejada aqui
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer // Defina a cor do texto desejada aqui
         )
     ) {
         Column(
@@ -236,137 +224,159 @@ fun VaccineRequestItem(vaccine: Vaccine, modifier: Modifier) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            Text(
-                text = vaccine.applicationDate,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+
+            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate)
+            VaccineStatus(vaccine.status, vaccine.applicationDate)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = vaccine.name,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            PetInfoRow(vaccine.animalName, vaccine.petGuardianName)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Pet: ${"Mia"}",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 0.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Tutor: ${"João Teste"}",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 0.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Status da assinatura: ${vaccine.status}",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 0.dp)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            HorizontalDivider(modifier = Modifier.height(1.dp))
+            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer)
 
             if (showBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        showBottomSheet = false
-                    },
-                    sheetState = sheetState,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = vaccine.name,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = "Data da aplicação: ${vaccine.applicationDate}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Lote: ${vaccine.batchCode}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Fabricante: ${vaccine.manufacturer}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Médico veterinário: ${vaccine.veterinaryDoctorName}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "CRMV: ${vaccine.crmv}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Text(
-                            text = "Status do documento: ${vaccine.status}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Divider(
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                        Text(
-                            text = "Documento PDF",
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp)
-                        )
-                        Row {
-                            AbrirPdfNoNavegador(pdfUrl = vaccine.signedPdf)
-                            FazerDownloadPdf(pdfUrl = vaccine.signedPdf)
-                        }
-                    }
-
-                }
+                VaccinePetModalBottomSheet(
+                    vaccine = vaccine,
+                    onDismissRequest = { showBottomSheet = false }
+                )
             }
         }
     }
 }
 
-@Composable
-fun FazerDownloadPdf(pdfUrl: String) {
-    val context = LocalContext.current
+//
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun VaccineRequestItem(vaccine: Vaccine, modifier: Modifier) {
+//    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+//    var showBottomSheet by remember { mutableStateOf(false) }
+//    Card(
+//        onClick = { showBottomSheet = true },
+//        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+//        modifier = modifier,
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+//            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+//        )
+//    ) {
+//        Column(
+//            Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp)
+//        ) {
+//            Text(
+//                text = vaccine.applicationDate,
+//                fontSize = 12.sp,
+//                modifier = Modifier.padding(bottom = 4.dp)
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = vaccine.name,
+//                fontSize = 16.sp,
+//                lineHeight = 24.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier.padding(bottom = 4.dp)
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = "Pet: ${"Mia"}",
+//                fontSize = 14.sp,
+//                modifier = Modifier.padding(bottom = 0.dp)
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = "Tutor: ${"João Teste"}",
+//                fontSize = 14.sp,
+//                modifier = Modifier.padding(bottom = 0.dp)
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = "Status da assinatura: ${vaccine.status}",
+//                fontSize = 14.sp,
+//                modifier = Modifier.padding(bottom = 0.dp)
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            HorizontalDivider(modifier = Modifier.height(1.dp))
+//
+//            if (showBottomSheet) {
+//                ModalBottomSheet(
+//                    onDismissRequest = {
+//                        showBottomSheet = false
+//                    },
+//                    sheetState = sheetState,
+//                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+//                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+//                ) {
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(16.dp)
+//                    ) {
+//                        Text(
+//                            text = vaccine.name,
+//                            fontSize = 24.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(bottom = 8.dp)
+//                        )
+//                        Text(
+//                            text = "Data da aplicação: ${vaccine.applicationDate}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 4.dp)
+//                        )
+//                        Text(
+//                            text = "Lote: ${vaccine.batchCode}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 4.dp)
+//                        )
+//                        Text(
+//                            text = "Fabricante: ${vaccine.manufacturer}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 4.dp)
+//                        )
+//                        Text(
+//                            text = "Médico veterinário: ${vaccine.veterinaryDoctorName}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 4.dp)
+//                        )
+//                        Text(
+//                            text = "CRMV: ${vaccine.crmv}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 16.dp)
+//                        )
+//                        Text(
+//                            text = "Status do documento: ${vaccine.status}",
+//                            fontSize = 14.sp,
+//                            modifier = Modifier.padding(bottom = 16.dp)
+//                        )
+//                        Divider(
+//                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+//                            modifier = Modifier.padding(vertical = 8.dp)
+//                        )
+//                        Text(
+//                            text = "Documento PDF",
+//                            fontSize = 14.sp,
+//                            textAlign = TextAlign.Center,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(bottom = 4.dp)
+//                        )
+//                        Row {
+//                            AbrirPdfNoNavegador(pdfUrl = vaccine.signedPdf)
+//                            FazerDownloadPdf(pdfUrl = vaccine.signedPdf)
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
+//    }
+//}
 
-    Button(onClick = {
-        val request = DownloadManager.Request(Uri.parse(pdfUrl))
-            .setTitle("Baixando PDF")
-            .setDescription("Fazendo download do arquivo PDF")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "meu_arquivo.pdf")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        downloadManager.enqueue(request)
-    }) {
-        Text("Baixar PDF")
-    }
-}
 
 
 @Preview
 @Composable
 fun VaccineRequestItemPreview() {
-    VeterinaryHomeScreen()
+    VeterinaryHomeScreen(1)
 }

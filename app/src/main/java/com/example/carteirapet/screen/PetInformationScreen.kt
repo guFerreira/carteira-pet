@@ -2,7 +2,6 @@ package com.example.carteirapet.screen
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,7 +28,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,23 +42,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.carteirapet.R
 import com.example.carteirapet.repositories.Animal
-import com.example.carteirapet.repositories.Vaccine
+import com.example.carteirapet.repositories.VaccineRequestByAnimal
+import com.example.carteirapet.screen.components.BatchInfoRow
+import com.example.carteirapet.screen.components.ButtonDownloadPdf
+import com.example.carteirapet.screen.components.ButtonOpenPdfOnBrowser
+import com.example.carteirapet.screen.components.NextApplicationDate
+import com.example.carteirapet.screen.components.VaccineInfoRow
+import com.example.carteirapet.screen.components.VaccineStatus
+import com.example.carteirapet.screen.components.VeterinaryInfoRow
 import com.example.carteirapet.viewModels.PetInformationViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -148,11 +149,11 @@ fun PetInformation(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                if (viewModel.isLoading){
+                if (viewModel.isLoading) {
                     CircularProgressIndicator()
                 } else {
                     PetInformations(viewModel.pet)
-                    Vaccines(viewModel.vaccines)
+                    Vaccines(viewModel.vaccineRequests)
                 }
             }
         }
@@ -175,7 +176,7 @@ fun PetInformations(pet: Animal?) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (pet == null){
+        if (pet == null) {
             Text(text = "Carregando informações do pet...")
         } else {
 //            Image(
@@ -188,7 +189,10 @@ fun PetInformations(pet: Animal?) {
             // TODO transformar isso em um componente
             Box(
                 modifier = Modifier
-                    .background(color = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) // Adiciona a cor de fundo
+                    .background(
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        shape = CircleShape
+                    ) // Adiciona a cor de fundo
                     .border(
                         1.dp,
                         MaterialTheme.colorScheme.onPrimaryContainer,
@@ -230,7 +234,7 @@ fun PetInformations(pet: Animal?) {
                 Text(
                     text = "Castrado: ${if (pet.neutered == true) "Sim" else "Não"}",
                     style = TextStyle(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 14.sp,
                     )
                 )
             }
@@ -239,18 +243,18 @@ fun PetInformations(pet: Animal?) {
 }
 
 @Composable
-fun Vaccines(vaccines: List<Vaccine>) {
-    if (vaccines.isEmpty()){
+fun Vaccines(vaccines: List<VaccineRequestByAnimal>) {
+    if (vaccines.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
         ) {
             Text(text = "Nenhuma vacina registrada \uD83D\uDC89")
         }
-    } else{
+    } else {
         LazyColumn() {
             items(vaccines.size) { item ->
-                VaccineItem(vaccines[item], modifier = Modifier.padding(4.dp))
+                VaccinePetItem(vaccines[item], modifier = Modifier.padding(4.dp))
             }
         }
     }
@@ -259,10 +263,9 @@ fun Vaccines(vaccines: List<Vaccine>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VaccineItem(vaccine: Vaccine, modifier: Modifier) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val scope = rememberCoroutineScope()
+fun VaccinePetItem(vaccine: VaccineRequestByAnimal, modifier: Modifier) {
     var showBottomSheet by remember { mutableStateOf(false) }
+
     Card(
         onClick = { showBottomSheet = true },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -277,105 +280,150 @@ fun VaccineItem(vaccine: Vaccine, modifier: Modifier) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            Text(
-                text = vaccine.applicationDate,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = vaccine.name,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = "Status da assinatura: ${vaccine.status}",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 0.dp)
-            )
+
+            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate)
+            VaccineStatus(vaccine.status, vaccine.applicationDate)
             Spacer(modifier = Modifier.height(4.dp))
-            HorizontalDivider(modifier = Modifier.height(1.dp))
+            VeterinaryInfoRow(vaccine.veterinaryDoctorName, vaccine.crmv)
+            Spacer(modifier = Modifier.height(4.dp))
+            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer)
 
             if (showBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        showBottomSheet = false
-                    },
-                    sheetState = sheetState,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = vaccine.name,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = "Data da aplicação: ${vaccine.applicationDate}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Lote: ${vaccine.batchCode}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Fabricante: ${vaccine.manufacturer}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Médico veterinário: ${vaccine.veterinaryDoctorName}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "CRMV: ${vaccine.crmv}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Text(
-                            text = "Status do documento: ${vaccine.status}",
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        Divider(
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                        Text(
-                            text = "Documento assinado digitalmente",
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = vaccine.signedPdf,
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                }
+                VaccinePetModalBottomSheet(
+                    vaccine = vaccine,
+                    onDismissRequest = { showBottomSheet = false }
+                )
             }
         }
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VaccinePetModalBottomSheet(
+    vaccine: VaccineRequestByAnimal,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+
+            VaccineStatus(vaccine.status, vaccine.applicationDate, true)
+            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer, true)
+            VeterinaryInfoRow(vaccine.veterinaryDoctorName, vaccine.crmv, true)
+            NextApplicationDate(applicationDate = vaccine.applicationDate, true)
+            VaccineActions(vaccine.status, vaccine.signedUrl)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun VaccineModalBottomSheetPreview() {
+    var showBottomSheet by remember { mutableStateOf(true) }
+    if (showBottomSheet) {
+        VaccinePetModalBottomSheet(
+            VaccineRequestByAnimal(
+                id = 1,
+                status = "assinado",
+                vaccineName = "Antirabica",
+                applicationDate = "20/10/2024",
+                batchCode = "1234",
+                manufacturer = "Astrazenica",
+                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
+                crmv = "CRMV-RS 12345",
+                nextDoseDate = "20/11/2024",
+                storage = "",
+                signedUrl = ""
+            ),
+            onDismissRequest = { showBottomSheet = false }
+        )
+    }
+}
+
+
 @Composable
 @Preview
-fun PetInformationPreview() {
-    PetInformation(0, {}, {})
+fun PetInformationPreview1() {
+    Column {
+        VaccinePetItem(
+            vaccine = VaccineRequestByAnimal(
+                id = 1,
+                status = "pendente",
+                vaccineName = null,
+                applicationDate = null,
+                batchCode = null,
+                manufacturer = null,
+                veterinaryDoctorName = null,
+                crmv = null,
+                nextDoseDate = null,
+                storage = null,
+                signedUrl = null
+            ), modifier = Modifier.padding(10.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        VaccinePetItem(
+            vaccine = VaccineRequestByAnimal(
+                id = 1,
+                status = "pendente",
+                vaccineName = "Antirabica",
+                applicationDate = "20/10/2024",
+                batchCode = "1234",
+                manufacturer = "Astrazenica",
+                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
+                crmv = "CRMV-RS 12345",
+                nextDoseDate = null,
+                storage = null,
+                signedUrl = null
+            ), modifier = Modifier.padding(10.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        VaccinePetItem(
+            vaccine = VaccineRequestByAnimal(
+                id = 1,
+                status = "pendente",
+                vaccineName = "Antirabica",
+                applicationDate = "20/10/2024",
+                batchCode = "1234",
+                manufacturer = "Astrazenica",
+                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
+                crmv = "CRMV-RS 12345",
+                nextDoseDate = "20/11/2024",
+                storage = null,
+                signedUrl = null
+            ), modifier = Modifier.padding(10.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        VaccinePetItem(
+            vaccine = VaccineRequestByAnimal(
+                id = 1,
+                status = "assinado",
+                vaccineName = "Antirabica",
+                applicationDate = "20/10/2024",
+                batchCode = "1234",
+                manufacturer = "Astrazenica",
+                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
+                crmv = "CRMV-RS 12345",
+                nextDoseDate = "20/11/2024",
+                storage = null,
+                signedUrl = null
+            ), modifier = Modifier.padding(10.dp)
+        )
+
+    }
 }

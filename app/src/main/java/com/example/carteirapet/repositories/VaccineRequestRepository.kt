@@ -60,14 +60,14 @@ data class UpdateVaccineRequest(
 
 @Serializable
 data class UpdatedData(
-    val applicationDate: String?,
-    val applicationPlace: String?,
-    val manufacturer: String?,
-    val batchCode: String?,
-    val manufacturingDate: String?,
-    val expirationDate: String?,
-    val nextDoseDate: String?,
-    val vaccineId: Int?
+    val applicationDate: String,
+    val applicationPlace: String,
+    val manufacturer: String,
+    val batchCode: String,
+    val manufacturingDate: String,
+    val expirationDate: String,
+    val nextDoseDate: String,
+    val vaccineId: Int
 )
 
 @Serializable

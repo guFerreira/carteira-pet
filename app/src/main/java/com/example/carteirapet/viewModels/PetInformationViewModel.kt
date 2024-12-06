@@ -2,19 +2,18 @@ package com.example.carteirapet.viewModels
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.repositories.Animal
-import com.example.carteirapet.repositories.Vaccine
+import com.example.carteirapet.repositories.VaccineRequestByAnimal
 import com.example.carteirapet.service.AnimalService
-import com.example.carteirapet.service.VaccineService
+import com.example.carteirapet.service.VaccineRequestService
 import kotlinx.coroutines.launch
 
-open class PetInformationViewModel (private val animalService: AnimalService, private val vaccineService: VaccineService) : ViewModel() {
+open class PetInformationViewModel (private val animalService: AnimalService, private val vaccineRequestService: VaccineRequestService) : ViewModel() {
     var pet by mutableStateOf<Animal?>(null)
-    var vaccines by mutableStateOf<List<Vaccine>>(emptyList())
+    var vaccineRequests by mutableStateOf<List<VaccineRequestByAnimal>>(emptyList())
     var isLoading by mutableStateOf<Boolean>(false)
 
     fun loadPetInformation(petId: Int, onError: (String) -> Unit) {
@@ -32,7 +31,7 @@ open class PetInformationViewModel (private val animalService: AnimalService, pr
     fun loadVaccinesByPetId(petId: Int, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                vaccines = vaccineService.getVaccineRequestByAnimalId(petId)
+                vaccineRequests = vaccineRequestService.getAllVaccineRequestByAnimalId(petId)
             } catch (e: Exception) {
                 onError("Erro ao realizar cadastro")
             }
