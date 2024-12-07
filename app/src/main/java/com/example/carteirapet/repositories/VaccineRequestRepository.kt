@@ -16,30 +16,30 @@ import kotlinx.serialization.Serializable
 data class VaccineRequestByAnimal(
     val id: Int,
     val status: String,
-    val vaccineName: String?,
-    val applicationDate: String?,
-    val batchCode: String?,
-    val manufacturer: String?,
-    val veterinaryDoctorName: String?,
-    val crmv: String?,
-    val nextDoseDate: String?,
-    val storage: String?,
-    val signedUrl: String?
+    val vaccineName: String? = null,
+    val applicationDate: String? = null,
+    val batchCode: String? = null,
+    val manufacturer: String? = null,
+    val veterinaryDoctorName: String? = null,
+    val crmv: String? = null,
+    val nextDoseDate: String? = null,
+    val storage: String? = null,
+    val signedUrl: String? = null
 )
 
 @Serializable
 data class VaccineRequestByVeterinary(
     val id: Int,
     val status: String,
-    val vaccineName: String?,
-    val applicationDate: String?,
-    val batchCode: String?,
-    val manufacturer: String?,
-    val nextDoseDate: String?,
-    val animalName: String?,
-    val petGuardianName: String?,
-    val storageUrl: String?,
-    val signedUrl: String?
+    val vaccineName: String? = null,
+    val applicationDate: String? = null,
+    val batchCode: String? = null,
+    val manufacturer: String? = null,
+    val nextDoseDate: String? = null,
+    val animalName: String? = null,
+    val petGuardianName: String? = null,
+    val storageUrl: String? = null,
+    val signedUrl: String? = null
 )
 
 @Serializable
@@ -91,7 +91,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getAllVaccineRequestsFromVeterinary(): List<VaccineRequestByVeterinary>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/") {
+        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {

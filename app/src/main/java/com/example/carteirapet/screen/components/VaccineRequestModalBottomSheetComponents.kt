@@ -50,7 +50,19 @@ fun ButtonOpenPdfOnBrowser(pdfUrl: String) {
 }
 
 @Composable
-fun VaccineActions(status:String?, signedUrl: String?) {
+fun ButtonOpenLinkForDigitalSignatureOnBrowser(url: String) {
+    val context = LocalContext.current
+
+    Button(onClick = {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+    }) {
+        Text("Assinar digitalmente")
+    }
+}
+
+@Composable
+fun VaccineActions(status:String?, pdfDocumentUrl: String?, signatureUrl: String?, isVeterinary: Boolean = false, goToUpdateVaccineRequestScreen: () -> Unit = {}) {
     if (status == "assinado") {
         Divider(
             color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -61,8 +73,22 @@ fun VaccineActions(status:String?, signedUrl: String?) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            signedUrl?.let { ButtonDownloadPdf(pdfUrl = it) }
-            signedUrl?.let { ButtonOpenPdfOnBrowser(pdfUrl = it) }
+            pdfDocumentUrl?.let { ButtonDownloadPdf(pdfUrl = it) }
+            pdfDocumentUrl?.let { ButtonOpenPdfOnBrowser(pdfUrl = it) }
         }
+    } else {
+        if (isVeterinary) {
+            if (signatureUrl != null){
+                ButtonOpenLinkForDigitalSignatureOnBrowser(url = signatureUrl ?: "")
+            } else {
+                Button(onClick = { goToUpdateVaccineRequestScreen() }) {
+                    Text(text = "Concluir registro de vacina")
+                }
+                
+            }
+        } else {
+            Text(text = "A vacina ainda não foi assinada digitalmente.")
+        }
+
     }
 }

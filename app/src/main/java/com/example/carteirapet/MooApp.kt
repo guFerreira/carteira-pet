@@ -63,16 +63,19 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
                                 navController.navigate("homeVeterinary") {
                                     popUpTo("login") { inclusive = true }
                                 }
+                                return@launch
                             } else {
                                 navController.navigate("home") {
                                     popUpTo("login") { inclusive = true }
                                 }
+                                return@launch
                             }
                         }
                     } else {
                         navController.navigate("registerUserProfileInfos") {
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
+                        return@launch
                     }
                 }
 
@@ -88,7 +91,11 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
         //telas do veterinário
 
         composable("homeVeterinary") {
-            VeterinaryHomeScreen()
+            VeterinaryHomeScreen(
+                goToEditVeterinaryScreen = { navController.navigate("editUserProfileInfos") },
+                goToLoginScreen = { navController.navigate("login") },
+                goToUpdateVaccineRequestScreen = { vaccineRequestId: Int -> navController.navigate("createVaccineRequestForm/${vaccineRequestId}") }
+            )
         }
 
         // rota para a tela de criação de vacina escaneada pelo QR code
@@ -207,7 +214,7 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
         composable("login") {
             LoginScreen(
                 onSignUpClick = { navController.navigate("signup") },
-                onLoginSuccess = { navController.navigate("home") },
+                onLoginSuccess = { screenName: String -> navController.navigate(screenName) },
                 onRegisterProfileUserNavigate = { navController.navigate("registerUserProfileInfos") })
         }
 

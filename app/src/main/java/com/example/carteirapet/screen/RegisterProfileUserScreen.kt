@@ -246,7 +246,7 @@ fun PersonalInformationForm(
     email: String,
     onEmailChange: (String) -> Unit,
     cpf: String,
-    onCpfChange: (String) -> Unit
+    onCpfChange: (String) -> Unit,
 ) {
     Column {
         OutlinedTextField(

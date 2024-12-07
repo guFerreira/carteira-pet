@@ -17,23 +17,13 @@ open class PetInformationViewModel (private val animalService: AnimalService, pr
     var isLoading by mutableStateOf<Boolean>(false)
 
     fun loadPetInformation(petId: Int, onError: (String) -> Unit) {
-        // Lança a operação de login
+
         viewModelScope.launch {
             try {
                 pet = animalService.getAnimalById(petId)
-            } catch (e: Exception) {
-                onError("Erro ao realizar cadastro")
-            }
-        }
-
-    }
-
-    fun loadVaccinesByPetId(petId: Int, onError: (String) -> Unit) {
-        viewModelScope.launch {
-            try {
                 vaccineRequests = vaccineRequestService.getAllVaccineRequestByAnimalId(petId)
             } catch (e: Exception) {
-                onError("Erro ao realizar cadastro")
+                onError("Erro ao buscar informações do animal.")
             }
         }
 

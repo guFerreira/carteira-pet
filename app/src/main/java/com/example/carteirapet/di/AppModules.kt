@@ -8,6 +8,7 @@ import com.example.carteirapet.repositories.BreedRepository
 import com.example.carteirapet.repositories.UserRepository
 import com.example.carteirapet.repositories.VaccineRepository
 import com.example.carteirapet.repositories.VaccineRequestRepository
+import com.example.carteirapet.screen.VeterinaryHomeScreen
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.BreedService
@@ -15,6 +16,7 @@ import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
 import com.example.carteirapet.service.VaccineRequestService
 import com.example.carteirapet.service.VaccineService
+import com.example.carteirapet.viewModels.CreateVaccineRequestFormViewModel
 import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
 import com.example.carteirapet.viewModels.EditUserProfileViewModel
 import com.example.carteirapet.viewModels.LoginViewModel
@@ -23,6 +25,7 @@ import com.example.carteirapet.viewModels.PetInformationViewModel
 import com.example.carteirapet.viewModels.RegisterPetViewModel
 import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
 import com.example.carteirapet.viewModels.SignupViewModel
+import com.example.carteirapet.viewModels.VeterinaryHomeViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.auth.Auth
@@ -62,6 +65,8 @@ val appModule = module {
     viewModelOf(::EditUserProfileViewModel)
     viewModelOf(::PetInformationViewModel)
     viewModelOf(::CreateVaccineRequestViewModel)
+    viewModelOf(::VeterinaryHomeViewModel)
+    viewModelOf(::CreateVaccineRequestFormViewModel)
 }
 
 val networkModule = module {

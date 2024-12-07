@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
@@ -32,6 +33,8 @@ fun VaccineInfoRow(vaccineName: String?, applicationDate: String?, isShowOnModal
                 fontSize = if (isShowOnModal) 24.sp else 16.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterStart)
             )
         }
         if (applicationDate != null) {
@@ -45,7 +48,7 @@ fun VaccineInfoRow(vaccineName: String?, applicationDate: String?, isShowOnModal
 }
 
 @Composable
-fun VaccineStatus(status: String?, applicationDate: String?, isShowOnModal: Boolean = false) {
+fun VaccineStatus(status: String?, applicationDate: String?, isShowOnModal: Boolean = false, isVeterinary: Boolean = false) {
     if (status != null) {
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -74,8 +77,10 @@ fun VaccineStatus(status: String?, applicationDate: String?, isShowOnModal: Bool
             }
         }
         if (status == "pendente" && applicationDate == null) {
+            val veterinaryText = "Esta é uma solicitação aceita por você que ainda não foi concluída."
+            val petText = "Esta é uma solicitação aceita pelo seu médico veterinário que ainda não foi concluída. Peça para o veterinário concluir o registro da vacina!"
             Text(
-                text = "Esta é uma solicitação aceita pelo seu médico veterinário que ainda não foi concluída. Peça para o veterinário concluir o registro da vacina!",
+                text = if (isVeterinary) veterinaryText else petText,
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
@@ -92,16 +97,20 @@ fun PetInfoRow(animalName: String?, petGuardianName: String?, isShowOnModal: Boo
     ) {
         if (animalName != null) {
             Text(
-                text = "Médico Veterinário: $animalName",
+                text = "Nome do Pet: $animalName",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterStart)
             )
         }
         if (petGuardianName != null) {
             Text(
-                text = petGuardianName,
+                text = "Tutor: $petGuardianName",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterStart)
             )
         }
     }
@@ -119,13 +128,17 @@ fun VeterinaryInfoRow(veterinaryDoctorName: String?, crmv: String?, isShowOnModa
                 text = "Médico Veterinário: $veterinaryDoctorName",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterStart)
             )
         }
         if (crmv != null) {
             Text(
-                text = crmv,
+                text = "$crmv",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(0.5f)
+                    .wrapContentSize(Alignment.CenterEnd)
             )
         }
     }
@@ -160,6 +173,9 @@ fun BatchInfoRow(batchCode: String?, manufacturer: String?, isShowOnModal: Boole
                 text = "Lote: $batchCode",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterStart)
+
             )
         }
         if (manufacturer != null) {
@@ -167,6 +183,8 @@ fun BatchInfoRow(batchCode: String?, manufacturer: String?, isShowOnModal: Boole
                 text = "Fabricante: $manufacturer",
                 fontSize = if (isShowOnModal) 18.sp else 12.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
+                    .weight(1f)
+                    .wrapContentSize(Alignment.CenterEnd)
             )
         }
     }

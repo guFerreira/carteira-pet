@@ -26,7 +26,7 @@ class UserService(private val userRepository: UserRepository) {
         }
     }
 
-    suspend fun updaterUserProfile(profile: Profile) {
+    suspend fun updaterUserProfile(profile: ProfileCreateResponse) {
         if(profile.isVet == true){
             userRepository.updateVeterinaryDoctor(profile)
         } else {

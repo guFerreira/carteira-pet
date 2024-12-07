@@ -35,11 +35,19 @@ data class PetGuardian(
     val updatedAt: String,
     val addressId: Int
 )
+
 @Serializable
 data class VeterinaryDoctor(
-    val id: Int,
+    val isVet: Boolean,
+    val isRegistered: Boolean,
     val firstName: String,
-    val lastName: String,)
+    val lastName: String,
+    val email: String,
+    val phoneNumber: String,
+    val cpf: String,
+    val crmv: String,
+    val address: Address
+)
 
 @Serializable
 data class UserRegister(
@@ -55,7 +63,8 @@ data class Profile(
     val email: String,
     val phoneNumber: String,
     val cpf: String,
-    val address: Address
+    val address: Address,
+    val crmv: String? = null
 )
 
 @Serializable
@@ -119,7 +128,7 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun updatePetGuardian(profile: Profile): Profile? {
+    suspend fun updatePetGuardian(profile: ProfileCreateResponse): Profile? {
         val response: HttpResponse = client.put("http://35.239.21.191/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
@@ -143,7 +152,7 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun updateVeterinaryDoctor(profile: Profile): VeterinaryDoctor? {
+    suspend fun updateVeterinaryDoctor(profile: ProfileCreateResponse): VeterinaryDoctor? {
         val response: HttpResponse = client.put("http://35.239.21.191/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)

@@ -41,7 +41,7 @@ import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: () -> Unit, onRegisterProfileUserNavigate: () -> Unit, viewModel: LoginViewModel = koinViewModel()) {
+fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: (screen: String) -> Unit, onRegisterProfileUserNavigate: () -> Unit, viewModel: LoginViewModel = koinViewModel()) {
     val loginState = viewModel.loginState
 
     Column(

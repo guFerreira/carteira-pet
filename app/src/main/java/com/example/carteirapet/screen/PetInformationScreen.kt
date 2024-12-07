@@ -58,6 +58,7 @@ import com.example.carteirapet.screen.components.BatchInfoRow
 import com.example.carteirapet.screen.components.ButtonDownloadPdf
 import com.example.carteirapet.screen.components.ButtonOpenPdfOnBrowser
 import com.example.carteirapet.screen.components.NextApplicationDate
+import com.example.carteirapet.screen.components.VaccineActions
 import com.example.carteirapet.screen.components.VaccineInfoRow
 import com.example.carteirapet.screen.components.VaccineStatus
 import com.example.carteirapet.screen.components.VeterinaryInfoRow
@@ -320,11 +321,17 @@ fun VaccinePetModalBottomSheet(
                 .padding(16.dp)
         ) {
 
+            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate, true)
+            Spacer(modifier = Modifier.height(8.dp))
             VaccineStatus(vaccine.status, vaccine.applicationDate, true)
+            Spacer(modifier = Modifier.height(8.dp))
             BatchInfoRow(vaccine.batchCode, vaccine.manufacturer, true)
+            Spacer(modifier = Modifier.height(8.dp))
             VeterinaryInfoRow(vaccine.veterinaryDoctorName, vaccine.crmv, true)
+            Spacer(modifier = Modifier.height(8.dp))
             NextApplicationDate(applicationDate = vaccine.applicationDate, true)
-            VaccineActions(vaccine.status, vaccine.signedUrl)
+            Spacer(modifier = Modifier.height(8.dp))
+            VaccineActions(status = vaccine.status, pdfDocumentUrl = vaccine.storage, signatureUrl = null, isVeterinary = false)
         }
     }
 }

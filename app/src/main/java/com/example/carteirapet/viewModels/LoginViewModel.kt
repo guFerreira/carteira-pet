@@ -49,7 +49,7 @@ open class LoginViewModel(private val authService: AuthService, private val user
     val isLoginEnabled: Boolean
         get() = username.isNotEmpty() && password.isNotEmpty()
 
-    fun login(onHomePageNavigate: () -> Unit, onRegisterProfileUserNavigate: () -> Unit) {
+    fun login(onHomePageNavigate: (screenName: String) -> Unit, onRegisterProfileUserNavigate: () -> Unit) {
         // Define o estado como carregando
         loginState = LoginState.Loading
 
@@ -59,10 +59,12 @@ open class LoginViewModel(private val authService: AuthService, private val user
                 val isLoginSuccess = authService.login(username, password)
                 if (isLoginSuccess) {
                     val user = userService.checkUserRegister()
+
                     if (user != null) {
                         if (user.isRegistered){
+                            val profile = userService.getUserInformations()
                             loginState = LoginState.Success("Login realizado com sucesso!")
-                            onHomePageNavigate()
+                            onHomePageNavigate(if (profile!!.isVet) "homeVeterinary" else "home")
                         }else{
                           onRegisterProfileUserNavigate()
                         }
