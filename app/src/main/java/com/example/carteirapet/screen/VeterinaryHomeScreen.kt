@@ -70,7 +70,7 @@ fun VeterinaryHomeScreen(
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         viewModel.isLoading = true
 
         viewModel.loadVaccineRequestsFromVeterinary(onError = { message ->
@@ -217,7 +217,7 @@ fun VaccineVeterinaryItem(vaccine: VaccineRequestByVeterinary, goToUpdateVaccine
                 .padding(8.dp)
         ) {
 
-            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate)
+            VaccineInfoRow(vaccine.vaccine?.name, vaccine.applicationDate)
             VaccineStatus(vaccine.status, vaccine.applicationDate, false, true)
             Spacer(modifier = Modifier.height(4.dp))
             PetInfoRow(vaccine.animalName, vaccine.petGuardianName)
@@ -226,7 +226,7 @@ fun VaccineVeterinaryItem(vaccine: VaccineRequestByVeterinary, goToUpdateVaccine
 
             if (showBottomSheet) {
                 VaccineVeterinaryModalBottomSheet(
-                    vaccine = vaccine,
+                    vaccineRequest = vaccine,
                     onDismissRequest = { showBottomSheet = false },
                     goToUpdateVaccineRequestScreen = goToUpdateVaccineRequestScreen
                 )
@@ -238,7 +238,7 @@ fun VaccineVeterinaryItem(vaccine: VaccineRequestByVeterinary, goToUpdateVaccine
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccineVeterinaryModalBottomSheet(
-    vaccine: VaccineRequestByVeterinary,
+    vaccineRequest: VaccineRequestByVeterinary,
     onDismissRequest: () -> Unit,
     goToUpdateVaccineRequestScreen: (vaccineRequestId: Int) -> Unit,
     modifier: Modifier = Modifier
@@ -256,17 +256,17 @@ fun VaccineVeterinaryModalBottomSheet(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate, true)
+            VaccineInfoRow(vaccineRequest.vaccine?.name, vaccineRequest.applicationDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            VaccineStatus(vaccine.status, vaccine.applicationDate, true)
+            VaccineStatus(vaccineRequest.status, vaccineRequest.applicationDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer, true)
+            BatchInfoRow(vaccineRequest.batchCode, vaccineRequest.manufacturer, true)
             Spacer(modifier = Modifier.height(8.dp))
-            PetInfoRow(vaccine.animalName, vaccine.petGuardianName, true)
+            PetInfoRow(vaccineRequest.animalName, vaccineRequest.petGuardianName, true)
             Spacer(modifier = Modifier.height(8.dp))
-            NextApplicationDate(applicationDate = vaccine.applicationDate, true)
+            NextApplicationDate(applicationDate = vaccineRequest.applicationDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            VaccineActions(status = vaccine.status, pdfDocumentUrl = vaccine.signedUrl, signatureUrl = vaccine.storageUrl, true, { goToUpdateVaccineRequestScreen(vaccine.id) })
+            VaccineActions(status = vaccineRequest.status, pdfDocumentUrl = vaccineRequest.signedUrl, signatureUrl = vaccineRequest.storageUrl, true, { goToUpdateVaccineRequestScreen(vaccineRequest.id) })
         }
     }
 }

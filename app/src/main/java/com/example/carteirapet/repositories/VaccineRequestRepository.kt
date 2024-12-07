@@ -31,12 +31,16 @@ data class VaccineRequestByAnimal(
 data class VaccineRequestByVeterinary(
     val id: Int,
     val status: String,
-    val vaccineName: String? = null,
+    val vaccine: Vaccine? = null,
     val applicationDate: String? = null,
+    val applicationPlace: String? = null,
     val batchCode: String? = null,
     val manufacturer: String? = null,
+    val manufacturingDate: String? = null,
+    val expirationDate: String? = null,
     val nextDoseDate: String? = null,
     val animalName: String? = null,
+    val animalSpecies: String? = null,
     val petGuardianName: String? = null,
     val storageUrl: String? = null,
     val signedUrl: String? = null
@@ -99,6 +103,18 @@ class VaccineRequestRepository(private val client: HttpClient)  {
             return vaccines
         } else {
             emptyList()
+        }
+    }
+
+    suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestByVeterinary? {
+        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/${vaccineRequestId}") {
+            contentType(ContentType.Application.Json)
+        }
+        return if (response.status == HttpStatusCode.OK) {
+            val vaccines = response.body<VaccineRequestByVeterinary>()
+            return vaccines
+        } else {
+            null
         }
     }
 

@@ -3,7 +3,6 @@ package com.example.carteirapet.screen
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,21 +28,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.carteirapet.R
 import com.example.carteirapet.viewModels.CreateVaccineRequestFormViewModel
-import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
 import org.koin.androidx.compose.koinViewModel
-import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,10 +55,28 @@ fun CreateVaccineRequestFormScreen(
     val manufacturingDate by viewModel::manufacturingDate
     val expirationDate by viewModel::expirationDate
     val nextDoseDate by viewModel::nextDoseDate
-    val vaccineId by viewModel::vaccineId
+    val selectedVaccine by viewModel::selectedVaccine
     val isLoading by viewModel::isLoading
     val showRedirectToZapSignUrl by viewModel::showRedirectToZapSignUrl
     val zapSignUrl by viewModel::zapSignUrl
+
+    LaunchedEffect(Unit) {
+        if (vaccineRequestId == null) {
+            Toast.makeText(
+                context,
+                "Não foi possível carregar a solicitação de vacinação",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@LaunchedEffect
+        }
+        viewModel.loadData(vaccineRequestId, onError = { message ->
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_SHORT
+            ).show()
+        })
+    }
 
     Scaffold(
         topBar = {
@@ -115,6 +127,15 @@ fun CreateVaccineRequestFormScreen(
                 CircularProgressIndicator()
             } else {
                 Column {
+
+                    DropdownMenuField(
+                        label = "Vacina",
+                        options = viewModel.vaccineOptions,
+                        selectedOption = viewModel.selectedVaccine,
+                        onOptionSelected = { viewModel.selectedVaccine = it },
+                        displayText = { it.name }
+                    )
+
                     OutlinedTextField(
                         value = applicationDate,
                         onValueChange = { viewModel.applicationDate = it },
@@ -157,12 +178,6 @@ fun CreateVaccineRequestFormScreen(
                         label = { Text("Data da Próxima Dose *") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    OutlinedTextField(
-                        value = vaccineId.toString(),
-                        onValueChange = { viewModel.vaccineId = it.toIntOrNull() ?: 0 },
-                        label = { Text("ID da Vacina *") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
@@ -174,7 +189,7 @@ fun CreateVaccineRequestFormScreen(
                         },
                         modifier = Modifier.width(200.dp)
                     ) {
-                        Text(text = "Atualizar")
+                        Text(text = "Concluir solicitação de vacina")
                     }
                 }
             }

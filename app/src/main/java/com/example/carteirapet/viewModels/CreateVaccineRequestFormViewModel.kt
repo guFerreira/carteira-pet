@@ -5,11 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.carteirapet.repositories.Breed
 import com.example.carteirapet.repositories.UpdatedData
+import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.service.VaccineRequestService
+import com.example.carteirapet.service.VaccineService
 import kotlinx.coroutines.launch
 
-open class CreateVaccineRequestFormViewModel (private val vaccineRequestService: VaccineRequestService) : ViewModel() {
+open class CreateVaccineRequestFormViewModel (private val vaccineRequestService: VaccineRequestService, private val vaccineService: VaccineService) : ViewModel() {
     var isLoading by mutableStateOf<Boolean>(false)
         private set
 
@@ -22,7 +25,8 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
     var updatedData by mutableStateOf<UpdatedData?>(null)
         private set
 
-    // Variáveis para cada campo
+    var vaccineOptions by mutableStateOf<List<Vaccine>>(emptyList())
+
     var applicationDate by mutableStateOf("")
     var applicationPlace by mutableStateOf("")
     var manufacturer by mutableStateOf("")
@@ -30,7 +34,34 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
     var manufacturingDate by mutableStateOf("")
     var expirationDate by mutableStateOf("")
     var nextDoseDate by mutableStateOf("")
-    var vaccineId by mutableStateOf(0)
+    var selectedVaccine by mutableStateOf<Vaccine?>(null)
+
+    fun loadData(vaccineRequestId: Int, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val vaccineRequest = vaccineRequestService.getVaccineRequestsFromVeterinaryById(vaccineRequestId)
+                if (vaccineRequest == null) {
+                    onError("Erro ao buscar os dados da solicitação de vacina")
+                    return@launch
+                }
+
+                if (vaccineRequest.animalSpecies != null) {
+                    vaccineOptions = vaccineService.getAllVaccinesBySpecies(vaccineRequest.animalSpecies)
+                }
+
+                applicationDate =  vaccineRequest.applicationDate ?: ""
+                applicationPlace =  vaccineRequest.applicationPlace ?: ""
+                manufacturer = vaccineRequest.manufacturer ?: ""
+                manufacturingDate = vaccineRequest.manufacturingDate ?: ""
+                expirationDate = vaccineRequest.expirationDate ?: ""
+                batchCode = vaccineRequest.batchCode ?: ""
+                nextDoseDate = vaccineRequest.nextDoseDate ?: ""
+                selectedVaccine = vaccineRequest.vaccine
+            } catch (e: Exception) {
+                onError("Erro ao buscar perfil do usuário: ${e.message}")
+            }
+        }
+    }
 
     fun updateVaccineRequest(vaccineRequestId: Int, onError: (String) -> Unit) {
         viewModelScope.launch {
@@ -44,7 +75,7 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
                     manufacturingDate = manufacturingDate,
                     expirationDate = expirationDate,
                     nextDoseDate = nextDoseDate,
-                    vaccineId = vaccineId
+                    vaccineId = selectedVaccine!!.id
                 )
                 isLoading = true
                 val vaccineRequestResponse = vaccineRequestService.updateVaccineRequest(vaccineRequestId, data)
@@ -67,13 +98,13 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
         if (applicationPlace.isEmpty()) {
             throw IllegalArgumentException("Local de aplicação é obrigatório")
         }
-        if (manufacturer.isEmpty()) {
+        if (this.manufacturer.isEmpty()) {
             throw IllegalArgumentException("Fabricante é obrigatório")
         }
         if (batchCode.isEmpty()) {
             throw IllegalArgumentException("Código do lote é obrigatório")
         }
-        if (manufacturingDate.isEmpty()) {
+        if (this.manufacturer.isEmpty()) {
             throw IllegalArgumentException("Data de fabricação é obrigatória")
         }
         if (expirationDate.isEmpty()) {
@@ -82,7 +113,7 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
         if (nextDoseDate.isEmpty()) {
             throw IllegalArgumentException("Data da próxima dose é obrigatória")
         }
-        if (vaccineId == 0) {
+        if (selectedVaccine == null) {
             throw IllegalArgumentException("ID da vacina é obrigatório")
         }
     }

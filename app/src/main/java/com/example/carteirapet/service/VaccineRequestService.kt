@@ -8,6 +8,12 @@ import com.example.carteirapet.repositories.UpdatedData
 import com.example.carteirapet.repositories.VaccineRequestByAnimal
 import com.example.carteirapet.repositories.VaccineRequestByVeterinary
 import com.example.carteirapet.repositories.VaccineRequestRepository
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 
 
 class VaccineRequestService(private val vaccineRequestRepository: VaccineRequestRepository) {
@@ -18,6 +24,10 @@ class VaccineRequestService(private val vaccineRequestRepository: VaccineRequest
 
     suspend fun getAllVaccineRequestFromVeterinary(): List<VaccineRequestByVeterinary> {
         return vaccineRequestRepository.getAllVaccineRequestsFromVeterinary()
+    }
+
+    suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestByVeterinary? {
+        return vaccineRequestRepository.getVaccineRequestsFromVeterinaryById(vaccineRequestId)
     }
 
     suspend fun createVaccineRequest(animalId: Int): CreateVaccineRequestResponse? {

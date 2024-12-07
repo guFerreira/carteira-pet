@@ -4,7 +4,7 @@ import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRepository
 
 class VaccineService(private val vaccineRepository: VaccineRepository) {
-    suspend fun getAllVaccines(): List<Vaccine> {
-        return vaccineRepository.getAllVaccines()
+    suspend fun getAllVaccinesBySpecies(species: String): List<Vaccine> {
+        return vaccineRepository.getAllVaccinesBySpecies(species)
     }
 }
