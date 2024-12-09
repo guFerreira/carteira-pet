@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -54,7 +55,6 @@ import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
 import com.example.carteirapet.viewModels.SignupViewModel
 import org.koin.androidx.compose.koinViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterProfileUserScreen(
@@ -93,12 +93,11 @@ fun RegisterProfileUserScreen(
                         )
                     }
                 },
-
                 scrollBehavior = scrollBehavior,
             )
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -106,13 +105,16 @@ fun RegisterProfileUserScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-
-            Text(text = "Olá, para continuar, você deve preencher alguns dados referentes ao seu perfil.")
-
-            UserRegistrationForm(goToHomeScreen, viewModel)
+            item {
+                Text(text = "Olá, para continuar, você deve preencher alguns dados referentes ao seu perfil.")
+            }
+            item {
+                UserRegistrationForm(goToHomeScreen, viewModel)
+            }
         }
     }
 }
+
 
 @Composable
 fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileUserViewModel) {
@@ -224,6 +226,7 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Button(
+                        enabled = viewModel.validateRequiredFieldsInSecondStep(),
                         onClick = { viewModel.registerProfileData(goToHomeScreen, onError = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }) },
                         modifier = Modifier.weight(1f)
                     ) {

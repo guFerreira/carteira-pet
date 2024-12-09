@@ -60,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
+import com.example.carteirapet.screen.components.PetImage
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.MyPetsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -263,26 +264,20 @@ fun MyPetsScreen(
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .background(color = MaterialTheme.colorScheme.onSecondaryContainer, shape = CircleShape) // Adiciona a cor de fundo
-                                                .border(
-                                                    1.dp,
-                                                    MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    CircleShape
-                                                )
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    shape = CircleShape
+                                                ) // Adiciona a cor de fundo
                                                 .size(60.dp),
                                             contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
                                         ) {
-                                            Text(
-                                                text = if (viewModel.animals[i].species == "dog") "🐶" else "😺",
-                                                fontSize = 44.sp // Ajuste o tamanho do emoji conforme necessário
-                                            )
+                                            PetImage(pet = viewModel.animals[i])
                                         }
                                         Text(
                                             text = viewModel.animals[i].name,
                                             modifier = Modifier.padding(start = 4.dp)
                                         )
                                     }
-
 
                                     Row(
                                         horizontalArrangement = Arrangement.End,

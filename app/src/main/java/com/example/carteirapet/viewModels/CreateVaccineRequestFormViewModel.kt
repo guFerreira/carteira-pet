@@ -16,6 +16,8 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
     var isLoading by mutableStateOf<Boolean>(false)
         private set
 
+    var isEditing by mutableStateOf<Boolean>(true)
+
     var showRedirectToZapSignUrl by mutableStateOf<Boolean>(false)
         private set
 
@@ -47,6 +49,11 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
 
                 if (vaccineRequest.animalSpecies != null) {
                     vaccineOptions = vaccineService.getAllVaccinesBySpecies(vaccineRequest.animalSpecies)
+                }
+
+                if (vaccineRequest.signedUrl != null) {
+                    isEditing = false
+                    zapSignUrl = vaccineRequest.signedUrl
                 }
 
                 applicationDate =  vaccineRequest.applicationDate ?: ""
@@ -81,6 +88,7 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
                 val vaccineRequestResponse = vaccineRequestService.updateVaccineRequest(vaccineRequestId, data)
                 if (vaccineRequestResponse?.signUrl != null) {
                     zapSignUrl = vaccineRequestResponse.signUrl
+                    isEditing = false
                 }
             } catch (e: Exception) {
                 onError("Erro ao criar a solicitação de vacinação: ${e.message}")

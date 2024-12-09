@@ -2,14 +2,21 @@ package com.example.carteirapet.repositories
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.util.InternalAPI
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.time.LocalDateTime
 
 
@@ -18,6 +25,7 @@ import java.time.LocalDateTime
 data class Animal(
     val id: Int,
     val name: String,
+    val photo: String? = null,
     val microchip: String?, // Microchip é opcional
     val species: String,
     val sex: String,
@@ -59,18 +67,41 @@ class AnimalRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun registerAnimal(animal: Animal): Animal?{
-        val response: HttpResponse = client.post("http://35.239.21.191/animal/register") {
-            contentType(ContentType.Application.Json)
-            setBody(animal)
+    suspend fun registerAnimal(animal: Animal, imageBytes: ByteArray?): Animal? {
+        val multipartData = formData {
+            // Adiciona cada campo do objeto `animal` individualmente
+            append("name", animal.name)
+            append("microchip", animal.microchip ?: "")
+            append("species", animal.species)
+            append("sex", animal.sex)
+            append("neutered", animal.neutered.toString())
+            append("birthDate", animal.birthDate)
+            append("weight", animal.weight.toString())
+            append("conditions", animal.conditions ?: "")
+
+            // Serializa `breeds` para um formato aceitável pelo backend
+            append("breeds", Json.encodeToString(animal.breeds))
+
+            // Adiciona a imagem, se disponível
+            if (imageBytes != null) {
+                append("file", imageBytes, Headers.build {
+                    append(HttpHeaders.ContentType, "image/jpeg")
+                    append(HttpHeaders.ContentDisposition, "filename=\"photo.jpg\"")
+                })
+            }
         }
 
-        // Verifica se o login foi bem-sucedido e retorna o token JWT
+        val response: HttpResponse = client.submitFormWithBinaryData(
+            url = "http://35.239.21.191/animal",
+            formData = multipartData
+        )
+
         return if (response.status == HttpStatusCode.Created) {
-            val animalResponse = response.body<Animal>()
-            return animalResponse
+            response.body<Animal>()
         } else {
-            null
+            throw Exception("Erro ao criar animal: ${response.status}")
         }
     }
+
+
 }

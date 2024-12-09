@@ -115,6 +115,11 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         return firstName.isNotEmpty() && lastName.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty() && cpf.isNotEmpty() && (!isVet || crmv.isNotEmpty())
     }
 
+
+    fun validateRequiredFieldsInSecondStep(): Boolean {
+        return cep.isNotEmpty() && street.isNotEmpty() && number.isNotEmpty() && complement.isNotEmpty() && city.isNotEmpty() && state.isNotEmpty()
+    }
+
     fun logout(onLogout: () -> Unit, onError: (String) -> Unit){
         viewModelScope.launch {
             try {

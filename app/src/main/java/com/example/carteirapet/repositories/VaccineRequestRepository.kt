@@ -76,8 +76,8 @@ data class UpdatedData(
 
 @Serializable
 data class UpdateVaccineRequestResponse(
-    val signUrl: String?,
-    val message: String?
+    val signUrl: String? = null,
+    val message: String? = null
 )
 
 class VaccineRequestRepository(private val client: HttpClient)  {

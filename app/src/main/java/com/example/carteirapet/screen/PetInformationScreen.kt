@@ -14,18 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -55,9 +52,9 @@ import androidx.compose.ui.unit.sp
 import com.example.carteirapet.repositories.Animal
 import com.example.carteirapet.repositories.VaccineRequestByAnimal
 import com.example.carteirapet.screen.components.BatchInfoRow
-import com.example.carteirapet.screen.components.ButtonDownloadPdf
-import com.example.carteirapet.screen.components.ButtonOpenPdfOnBrowser
 import com.example.carteirapet.screen.components.NextApplicationDate
+import com.example.carteirapet.screen.components.PetImage
+import com.example.carteirapet.screen.components.PullToRefreshBox
 import com.example.carteirapet.screen.components.VaccineActions
 import com.example.carteirapet.screen.components.VaccineInfoRow
 import com.example.carteirapet.screen.components.VaccineStatus
@@ -77,7 +74,7 @@ fun PetInformation(
     val context = LocalContext.current
 
     LaunchedEffect(petId) {
-        viewModel.isLoading = true
+
         if (petId != null) {
             viewModel.loadPetInformation(petId, onError = { message ->
                 Toast.makeText(
@@ -87,7 +84,6 @@ fun PetInformation(
                 ).show()
             })
         }
-        viewModel.isLoading = false
     }
 
 
@@ -150,11 +146,26 @@ fun PetInformation(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                if (viewModel.isLoading) {
+                if (viewModel.isLoadingPetInformations) {
                     CircularProgressIndicator()
                 } else {
                     PetInformations(viewModel.pet)
-                    Vaccines(viewModel.vaccineRequests)
+
+                    PullToRefreshBox(
+                        isRefreshing = viewModel.isLoadingVaccineRequests,
+                        onRefresh = {
+                            if (petId != null) {
+                                viewModel.loadVaccineRequests(petId, onError = { message ->
+                                    Toast.makeText(
+                                        context,
+                                        message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                            }
+                        }) {
+                        Vaccines(viewModel.vaccineRequests, viewModel.isLoadingVaccineRequests)
+                    }
                 }
             }
         }
@@ -180,33 +191,8 @@ fun PetInformations(pet: Animal?) {
         if (pet == null) {
             Text(text = "Carregando informações do pet...")
         } else {
-//            Image(
-//                painter = painterResource(id = R.drawable.bolinha),
-//                contentDescription = "Imagem do pet",
-//                Modifier
-//                    .border(3.dp, MaterialTheme.colorScheme.onSecondaryContainer, CircleShape)
-//                    .size(120.dp)
-//            )
-            // TODO transformar isso em um componente
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        shape = CircleShape
-                    ) // Adiciona a cor de fundo
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        CircleShape
-                    )
-                    .size(120.dp),
-                contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
-            ) {
-                Text(
-                    text = if (pet.species == "dog") "🐶" else "😺",
-                    fontSize = 80.sp // Ajuste o tamanho do emoji conforme necessário
-                )
-            }
+            PetImage(pet = pet, true)
+
             Column {
                 Text(
                     text = pet.name, style = TextStyle(
@@ -244,25 +230,25 @@ fun PetInformations(pet: Animal?) {
 }
 
 @Composable
-fun Vaccines(vaccines: List<VaccineRequestByAnimal>) {
-    if (vaccines.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
-        ) {
-            Text(text = "Nenhuma vacina registrada \uD83D\uDC89")
-        }
-    } else {
-        LazyColumn() {
+fun Vaccines(vaccines: List<VaccineRequestByAnimal>, isLoading: Boolean = false) {
+    LazyColumn() {
+        if (vaccines.isEmpty() && !isLoading) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Nenhuma vacina registrada \uD83D\uDC89")
+                }
+            }
+        } else {
             items(vaccines.size) { item ->
                 VaccinePetItem(vaccines[item], modifier = Modifier.padding(4.dp))
             }
         }
     }
-
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccinePetItem(vaccine: VaccineRequestByAnimal, modifier: Modifier) {
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -331,7 +317,12 @@ fun VaccinePetModalBottomSheet(
             Spacer(modifier = Modifier.height(8.dp))
             NextApplicationDate(applicationDate = vaccine.applicationDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            VaccineActions(status = vaccine.status, pdfDocumentUrl = vaccine.storage, signatureUrl = null, isVeterinary = false)
+            VaccineActions(
+                status = vaccine.status,
+                pdfDocumentUrl = vaccine.storage,
+                signatureUrl = null,
+                isVeterinary = false
+            )
         }
     }
 }

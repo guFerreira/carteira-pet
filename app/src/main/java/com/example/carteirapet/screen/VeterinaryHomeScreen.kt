@@ -258,15 +258,15 @@ fun VaccineVeterinaryModalBottomSheet(
         ) {
             VaccineInfoRow(vaccineRequest.vaccine?.name, vaccineRequest.applicationDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            VaccineStatus(vaccineRequest.status, vaccineRequest.applicationDate, true)
+            VaccineStatus(vaccineRequest.status, vaccineRequest.applicationDate, true, true)
             Spacer(modifier = Modifier.height(8.dp))
             BatchInfoRow(vaccineRequest.batchCode, vaccineRequest.manufacturer, true)
             Spacer(modifier = Modifier.height(8.dp))
             PetInfoRow(vaccineRequest.animalName, vaccineRequest.petGuardianName, true)
             Spacer(modifier = Modifier.height(8.dp))
-            NextApplicationDate(applicationDate = vaccineRequest.applicationDate, true)
+            NextApplicationDate(applicationDate = vaccineRequest.nextDoseDate, true)
             Spacer(modifier = Modifier.height(8.dp))
-            VaccineActions(status = vaccineRequest.status, pdfDocumentUrl = vaccineRequest.signedUrl, signatureUrl = vaccineRequest.storageUrl, true, { goToUpdateVaccineRequestScreen(vaccineRequest.id) })
+            VaccineActions(status = vaccineRequest.status, pdfDocumentUrl = vaccineRequest.storageUrl, signatureUrl = vaccineRequest.signedUrl, true, { goToUpdateVaccineRequestScreen(vaccineRequest.id) })
         }
     }
 }

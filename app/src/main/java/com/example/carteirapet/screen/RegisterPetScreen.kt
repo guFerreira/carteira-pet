@@ -1,6 +1,7 @@
 package com.example.carteirapet.screen
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.net.Uri
 import android.widget.DatePicker
 import android.widget.Toast
@@ -30,8 +31,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -57,11 +56,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -127,7 +124,9 @@ fun RegisterPetScreen(
             if (viewModel.breedOptions.isEmpty()) {
                 Text(text = "Carregando...")
             } else {
-                ImagePicker(onImageSelected = { viewModel.petImageUri = it })
+                ImagePicker(onImageSelected = { viewModel.petImageByteArray =
+                    it?.let { it1 -> readImageAsByteArray(it1, context) }
+                })
                 SpeciesSelection(viewModel.species) {
                     viewModel.changeSpecies(it)
                 }
@@ -143,7 +142,7 @@ fun RegisterPetScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    DateOfBirthField(viewModel.birthDate, { viewModel.birthDate = it })
+                    DateFieldInput("Data de Nascimento", viewModel.birthDate, { viewModel.birthDate = it })
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -233,6 +232,10 @@ fun RegisterPetScreen(
         }
     }
 
+}
+
+fun readImageAsByteArray(uri: Uri, context: Context): ByteArray? {
+    return context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
 }
 
 
@@ -372,8 +375,9 @@ fun <T> DropdownMenuField(
 
 
 @Composable
-fun DateOfBirthField(
-    birthdate: String,
+fun DateFieldInput(
+    inputName: String,
+    value: String,
     onDateSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -400,9 +404,9 @@ fun DateOfBirthField(
     )
     //TODO Alterar a cor do datepicker para o tema do projeto
     OutlinedTextField(
-        value = birthdate,
+        value = value,
         onValueChange = {},
-        label = { Text("Data de Nascimento") },
+        label = { Text(inputName) },
         readOnly = true,
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
@@ -416,7 +420,7 @@ fun DateOfBirthField(
             ) {
                 Icon(
                     imageVector = Icons.Filled.CalendarMonth,
-                    contentDescription = "Data de Nascimento"
+                    contentDescription = inputName
                 )
             }
         }

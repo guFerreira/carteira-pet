@@ -19,7 +19,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
     var breedOptions by mutableStateOf<List<Breed>>(emptyList())
     var selectedBreed by mutableStateOf<Breed?>(null)
 
-    var petImageUri by mutableStateOf<Uri?>(null)
+    var petImageByteArray by mutableStateOf<ByteArray?>(null)
 
     var name by mutableStateOf<String>("")
 
@@ -68,7 +68,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
                         id = 0,
                         species = species
                     )
-                    animalService.registerAnimal(animal)
+                    animalService.registerAnimal(animal, image = petImageByteArray)
                     onSuccess()
                 } else {
                     onError("Erro: Raça não selecionada.")

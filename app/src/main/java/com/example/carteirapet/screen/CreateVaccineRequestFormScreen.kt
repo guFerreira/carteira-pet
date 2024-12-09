@@ -3,6 +3,7 @@ package com.example.carteirapet.screen
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -127,7 +130,7 @@ fun CreateVaccineRequestFormScreen(
                 CircularProgressIndicator()
             } else {
                 Column {
-
+                    Text(text = if (viewModel.isEditing) "editando true" else "editando falso")
                     DropdownMenuField(
                         label = "Vacina",
                         options = viewModel.vaccineOptions,
@@ -136,12 +139,11 @@ fun CreateVaccineRequestFormScreen(
                         displayText = { it.name }
                     )
 
-                    OutlinedTextField(
-                        value = applicationDate,
-                        onValueChange = { viewModel.applicationDate = it },
-                        label = { Text("Data de Aplicação *") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    DateFieldInput(
+                        "Data de Aplicação *",
+                        applicationDate,
+                        { viewModel.applicationDate = it })
+
                     OutlinedTextField(
                         value = applicationPlace,
                         onValueChange = { viewModel.applicationPlace = it },
@@ -160,49 +162,94 @@ fun CreateVaccineRequestFormScreen(
                         label = { Text("Código do Lote *") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    OutlinedTextField(
-                        value = manufacturingDate,
-                        onValueChange = { viewModel.manufacturingDate = it },
-                        label = { Text("Data de Fabricação *") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = expirationDate,
-                        onValueChange = { viewModel.expirationDate = it },
-                        label = { Text("Data de Validade *") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = nextDoseDate,
-                        onValueChange = { viewModel.nextDoseDate = it },
-                        label = { Text("Data da Próxima Dose *") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+
+                    DateFieldInput(
+                        "Data de Fabricação *",
+                        manufacturingDate,
+                        { viewModel.manufacturingDate = it })
+
+                    DateFieldInput(
+                        "Data de Validade *",
+                        expirationDate,
+                        { viewModel.expirationDate = it })
+
+                    DateFieldInput(
+                        "Data da Próxima Dose *",
+                        nextDoseDate,
+                        { viewModel.nextDoseDate = it })
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            vaccineRequestId?.let { id ->
-                                viewModel.updateVaccineRequest(id) { message ->
-                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        if (viewModel.zapSignUrl.isEmpty() && viewModel.isEditing) {
+                            Button(
+                                onClick = {
+                                    vaccineRequestId?.let { id ->
+                                        viewModel.updateVaccineRequest(id) { message ->
+                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(text = "Concluir solicitação de vacina")
+                            }
+                        }
+
+                        if (viewModel.zapSignUrl.isNotEmpty()) {
+                            if (viewModel.isEditing) {
+
+                                FilledTonalButton(onClick = {
+                                    viewModel.isEditing = false
+                                }) {
+                                    Text(text = "Cancelar")
+                                }
+
+                                Button(
+                                    onClick = {
+                                        vaccineRequestId?.let { id ->
+                                            viewModel.updateVaccineRequest(id) { message ->
+                                                Toast.makeText(context, message, Toast.LENGTH_SHORT)
+                                                    .show()
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.width(200.dp)
+                                ) {
+                                    Text(text = "Concluir solicitação de vacina")
                                 }
                             }
-                        },
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        Text(text = "Concluir solicitação de vacina")
+
+                            if (!viewModel.isEditing) {
+                                Button(
+                                    onClick = {
+                                        viewModel.isEditing = true
+                                    },
+                                    modifier = Modifier.width(200.dp)
+                                ) {
+                                    Text(text = "Editar solicitação de vacina")
+                                }
+
+                                Button(onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(zapSignUrl))
+                                    ContextCompat.startActivity(context, intent, null)
+                                }) {
+                                    Text("Ir para o link de assinatura")
+                                }
+                            }
+                        }
                     }
+
                 }
             }
-            if (showRedirectToZapSignUrl && zapSignUrl.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {
-                    // Abrir o link no navegador
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(zapSignUrl))
-                    ContextCompat.startActivity(context, intent, null)
-                }) {
-                    Text("Ir para o link de assinatura")
-                }
-            }
+
         }
     }
 }

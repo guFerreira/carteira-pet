@@ -62,7 +62,13 @@ fun ButtonOpenLinkForDigitalSignatureOnBrowser(url: String) {
 }
 
 @Composable
-fun VaccineActions(status:String?, pdfDocumentUrl: String?, signatureUrl: String?, isVeterinary: Boolean = false, goToUpdateVaccineRequestScreen: () -> Unit = {}) {
+fun VaccineActions(
+    status: String?,
+    pdfDocumentUrl: String?,
+    signatureUrl: String?,
+    isVeterinary: Boolean = false,
+    goToUpdateVaccineRequestScreen: () -> Unit = {}
+) {
     if (status == "assinado") {
         Divider(
             color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -78,13 +84,25 @@ fun VaccineActions(status:String?, pdfDocumentUrl: String?, signatureUrl: String
         }
     } else {
         if (isVeterinary) {
-            if (signatureUrl != null){
-                ButtonOpenLinkForDigitalSignatureOnBrowser(url = signatureUrl ?: "")
-            } else {
-                Button(onClick = { goToUpdateVaccineRequestScreen() }) {
-                    Text(text = "Concluir registro de vacina")
+            if (signatureUrl != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(onClick = { goToUpdateVaccineRequestScreen() }) {
+                        Text(text = "Editar registro de vacina")
+                    }
+                    ButtonOpenLinkForDigitalSignatureOnBrowser(url = signatureUrl ?: "")
                 }
-                
+            } else {
+                Row {
+                    Button(onClick = { goToUpdateVaccineRequestScreen() }) {
+                        Text(text = "Concluir registro de vacina")
+                    }
+                }
             }
         } else {
             Text(text = "A vacina ainda não foi assinada digitalmente.")
