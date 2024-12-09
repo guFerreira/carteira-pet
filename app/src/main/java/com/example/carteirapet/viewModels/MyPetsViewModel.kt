@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 
 
 open class MyPetsViewModel(private val authService: AuthService, private val userService: UserService, private val animalService: AnimalService) : ViewModel() {
-    var isLoading by mutableStateOf<Boolean>(true)
-        private set
+    var isLoadingUserData by mutableStateOf<Boolean>(true)
+    var isLoadingPets by mutableStateOf<Boolean>(true)
 
     var name by mutableStateOf<String>("")
         private set
@@ -27,28 +27,30 @@ open class MyPetsViewModel(private val authService: AuthService, private val use
     var animals by mutableStateOf<List<Animal>>(emptyList())
         private set
 
-    fun setIsLoading(value: Boolean){
-        isLoading = value
-    }
-
     fun loadUserProfile(onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
+                isLoadingUserData = true
                 userProfile = userService.getUserInformations()
                 if(userProfile != null){
                     name = userProfile!!.firstName
                 }
             } catch (e: Exception) {
                 onError("Erro ao buscar perfil do usuário: ${e.message}")
+            } finally {
+                isLoadingUserData = false
             }
         }
     }
     fun loadAnimals(onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
+                isLoadingPets = true
                 animals = animalService.getAnimals()
             } catch (e: Exception) {
                 onError("Erro ao buscar os pets: ${e.message}")
+            } finally {
+                isLoadingPets = false
             }
         }
     }

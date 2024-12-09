@@ -173,6 +173,7 @@ fun VeterinaryHomeScreen(
                 if (viewModel.isLoading){
                     CircularProgressIndicator()
                 } else {
+                    CardUser("Médico veterinário")
                     VaccineRequests(viewModel.vaccines, goToUpdateVaccineRequestScreen)
                }
             }

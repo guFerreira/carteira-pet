@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,7 +62,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.R
+import com.example.carteirapet.repositories.Animal
+import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.PetImage
+import com.example.carteirapet.screen.components.PullToRefreshBox
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.MyPetsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -81,234 +86,240 @@ fun MyPetsScreen(
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadUserProfile({ message ->
+        viewModel.loadUserProfile { message ->
             Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
+                context, message, Toast.LENGTH_SHORT
             ).show()
-        })
+        }
 
-        viewModel.loadAnimals({ message ->
+        viewModel.loadAnimals { message ->
             Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_SHORT
+                context, message, Toast.LENGTH_SHORT
             ).show()
-        })
-
-        viewModel.setIsLoading(false)
+        }
     }
 
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                title = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Pets,
-                            contentDescription = "Pets Icon",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Moo",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(
-                            Icons.Default.MoreVert,
-                            contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text("Perfil do Usuário") },
-                            onClick = goToEditUserProfileScreen,
-                            leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null) }
-                        )
-                        HorizontalDivider()
-                        DropdownMenuItem(
-                            text = { Text("Sair") },
-                            onClick = {
-                                viewModel.logout(
-                                    goToLoginScreen,
-                                    onError = { message ->
-                                        Toast.makeText(
-                                            context,
-                                            message,
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    })
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.Logout,
-                                    contentDescription = null
-                                )
-                            },
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
+    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
+        CenterAlignedTopAppBar(
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(100.dp),
-                onClick = goToRegisterPetScreen,
-                icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
-                text = { Text(text = "Registrar Novo Pet") },
-            )
-        }
-    ) { innerPadding ->
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            title = {
+                Logo()
+            },
+            actions = {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "Localized description",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(text = { Text("Perfil do Usuário") },
+                        onClick = goToEditUserProfileScreen,
+                        leadingIcon = { Icon(Icons.Outlined.Person, contentDescription = null) })
+                    HorizontalDivider()
+                    DropdownMenuItem(
+                        text = { Text("Sair") },
+                        onClick = {
+                            viewModel.logout(goToLoginScreen, onError = { message ->
+                                Toast.makeText(
+                                    context, message, Toast.LENGTH_SHORT
+                                ).show()
+                            })
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Outlined.Logout, contentDescription = null
+                            )
+                        },
+                    )
+                }
+            },
+            scrollBehavior = scrollBehavior,
+        )
+    }, floatingActionButton = {
+        ExtendedFloatingActionButton(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(100.dp),
+            onClick = goToRegisterPetScreen,
+            icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
+            text = { Text(text = "Registrar Novo Pet") },
+        )
+    }) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(8.dp),
+                .padding(8.dp)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    text = "Olá, ${viewModel.name}!",
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                if (viewModel.animals.isNotEmpty()) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        fontWeight = FontWeight.Light,
-                        text = "Selecione um de seus pets para visualizar as suas vacinas",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+            CardUser(viewModel.name, false)
+            PullToRefreshBox(isRefreshing = viewModel.isLoadingPets, onRefresh = {
+                viewModel.loadAnimals { message ->
+                    Toast.makeText(
+                        context, message, Toast.LENGTH_SHORT
+                    ).show()
                 }
+            }) {
+                ListPets(viewModel.animals, goToPetInformation)
             }
+        }
+    }
+}
 
-            if (viewModel.animals.isEmpty()) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Warning,
-                        contentDescription = "Pets Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "Nenhum pet encontrado.",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Light,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = "Cadastre um novo pet para começar!",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+
+@Composable
+fun ListPets(animals: List<Animal> = emptyList(), goToPetInformation: (id: Int) -> Unit) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+        content = {
+            if (animals.isEmpty()) {
+                item(span = { GridItemSpan(2) }) {
+                    NoPetFound()
                 }
-
             } else {
-                LazyVerticalGrid(columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    content = {
-
-                        items(viewModel.animals.size) { i ->
-                            ElevatedCard(
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 6.dp
-                                ),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                ),
-                                modifier = Modifier
-                                    .size(width = 80.dp, height = 92.dp),
-                                onClick = { goToPetInformation(viewModel.animals[i].id) }
-                            ) {
-                                Column(modifier = Modifier.padding(8.dp)) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Start,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    shape = CircleShape
-                                                ) // Adiciona a cor de fundo
-                                                .size(60.dp),
-                                            contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
-                                        ) {
-                                            PetImage(pet = viewModel.animals[i])
-                                        }
-                                        Text(
-                                            text = viewModel.animals[i].name,
-                                            modifier = Modifier.padding(start = 4.dp)
-                                        )
-                                    }
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.End,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .background(
-                                                    MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    shape = androidx.compose.foundation.shape.CircleShape
-                                                )
-                                        ) {
-                                            Text(
-                                                text = if (viewModel.animals[i].species == "dog") "🐶" else "😺", // Emoji do texto
-                                                style = TextStyle(
-                                                    color = Color.White,
-                                                    textAlign = TextAlign.Center,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-                    })
+                items(animals.size) { i ->
+                    PetCard(animals[i]) {
+                        goToPetInformation(animals[i].id)
+                    }
+                }
             }
+        }
+    )
+}
+@Composable
+fun PetCard(animal: Animal, goToPetInformation: () -> Unit) {
+    ElevatedCard(elevation = CardDefaults.cardElevation(
+        defaultElevation = 6.dp
+    ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        ),
+        modifier = Modifier.size(width = 80.dp, height = 92.dp),
+        onClick = { goToPetInformation() }) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            shape = CircleShape
+                        ) // Adiciona a cor de fundo
+                        .size(60.dp),
+                    contentAlignment = Alignment.Center // Centraliza o conteúdo dentro do Box
+                ) {
+                    PetImage(pet = animal)
+                }
+                Text(
+                    text = animal.name,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                PetSpecie(species = animal.species)
+            }
+        }
+    }
+}
+
+@Composable
+fun PetSpecie(species: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(24.dp)
+            .background(
+                MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = androidx.compose.foundation.shape.CircleShape
+            )
+    ) {
+        Text(
+            text = if (species == "dog") "🐶" else "😺", // Emoji do texto
+            style = TextStyle(
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
+}
+
+
+@Composable
+fun NoPetFound() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Warning,
+            contentDescription = "Pets Icon",
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = "Nenhum pet encontrado.",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Light,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text = "Cadastre um novo pet para começar!",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun CardUser(name: String, isVeterinary: Boolean? = false) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ), modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = "Olá, ${name}!",
+            fontWeight = FontWeight.Normal,
+            fontSize = 24.sp,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        if (isVeterinary == true) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                fontWeight = FontWeight.Light,
+                text = "Você pode visualizar as solicitações de vacinas relacionadas a você! ",
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        } else {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                fontWeight = FontWeight.Light,
+                text = "Selecione um de seus pets para visualizar as suas vacinas",
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }
@@ -317,7 +328,7 @@ fun MyPetsScreen(
 @Preview
 fun MyPetsScreenPreview() {
     CarteiraPetTheme {
-        MyPetsScreen({}, {}, {}, {})
+        ListPets(emptyList(), {})
     }
 }
 
