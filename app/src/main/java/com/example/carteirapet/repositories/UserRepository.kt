@@ -90,8 +90,9 @@ data class Address(
 )
 
 class UserRepository(private val client: HttpClient) {
+    private val url = "10.0.2.2:3000";
     suspend fun getUserInformations(): Profile? {
-        val response: HttpResponse = client.get("http://35.239.21.191/users") {
+        val response: HttpResponse = client.get("http://${url}/users") {
             contentType(ContentType.Application.Json)
         }
 
@@ -105,7 +106,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun checkUserRegister(): UserRegister {
-        val response: HttpResponse = client.get("http://35.239.21.191/users/checkRegister") {
+        val response: HttpResponse = client.get("http://${url}/users/checkRegister") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -117,7 +118,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun registerPetGuardian(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.post("http://35.239.21.191/petguardian") {
+        val response: HttpResponse = client.post("http://${url}/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -128,20 +129,20 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun updatePetGuardian(profile: ProfileCreateResponse): Profile? {
-        val response: HttpResponse = client.put("http://35.239.21.191/petguardian") {
+    suspend fun updatePetGuardian(profile: ProfileCreateResponse): Boolean {
+        val response: HttpResponse = client.put("http://${url}/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
         return if (response.status == HttpStatusCode.OK) {
-            response.body<Profile>()
+            true
         } else {
             throw Exception("Erro ao atualizar perfil do tutor")
         }
     }
 
     suspend fun registerVeterinaryDoctor(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.post("http://35.239.21.191/veterinary") {
+        val response: HttpResponse = client.post("http://${url}/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -152,13 +153,13 @@ class UserRepository(private val client: HttpClient) {
         }
     }
 
-    suspend fun updateVeterinaryDoctor(profile: ProfileCreateResponse): VeterinaryDoctor? {
-        val response: HttpResponse = client.put("http://35.239.21.191/veterinary") {
+    suspend fun updateVeterinaryDoctor(profile: ProfileCreateResponse): Boolean {
+        val response: HttpResponse = client.put("http://${url}/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
         return if (response.status == HttpStatusCode.OK) {
-            response.body<VeterinaryDoctor>()
+            true
         } else {
             throw Exception("Erro ao atualizar perfil do médico veterinário")
         }

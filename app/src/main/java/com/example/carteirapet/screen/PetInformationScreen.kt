@@ -92,8 +92,8 @@ fun PetInformation(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Row(
@@ -106,7 +106,7 @@ fun PetInformation(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            "Moo",
+                            "Carteirinha",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -118,7 +118,7 @@ fun PetInformation(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -127,11 +127,10 @@ fun PetInformation(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(120.dp),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 onClick = goRegisterVaccineScreen,
-                icon = { Icon(Icons.Filled.Add, "Extended floating action button.") },
+                icon = { Icon(Icons.Filled.Add, "Registrar vacina") },
                 text = { Text(text = "Registrar vacina") },
             )
         }

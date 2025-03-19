@@ -67,14 +67,15 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: (screen: String) -> U
                 .padding(bottom = 48.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
+                painter = painterResource(id = R.drawable.carteirinha),
                 contentDescription = "logo",
                 modifier = Modifier
                     .fillMaxWidth()
                     .size(180.dp)
 
             )
-            Text(text = "A sua carteira de vacinas digital", fontSize = 12.sp)
+            Text(text = "Carteirinha", fontSize = 36.sp)
+            Text(text = "O registro digital das vacinas do seu pet", fontSize = 12.sp)
         }
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(

@@ -17,8 +17,9 @@ data class Vaccine(
 )
 
 class VaccineRepository(private val client: HttpClient)  {
+    private val url = "10.0.2.2:3000";
     suspend fun getAllVaccinesBySpecies(species: String): List<Vaccine>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccine") {
+        val response: HttpResponse = client.get("http://${url}/vaccine") {
             contentType(ContentType.Application.Json)
             parameter("species", species)
         }

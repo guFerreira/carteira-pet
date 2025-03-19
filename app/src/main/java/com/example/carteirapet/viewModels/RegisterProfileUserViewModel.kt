@@ -9,11 +9,12 @@ import com.example.carteirapet.repositories.Address
 import com.example.carteirapet.repositories.Profile
 import com.example.carteirapet.repositories.ProfileCreateResponse
 import com.example.carteirapet.service.AuthService
+import com.example.carteirapet.service.CepService
 import com.example.carteirapet.service.UserService
 import kotlinx.coroutines.launch
 
 
-open class RegisterProfileUserViewModel (private val authService: AuthService, private val userService: UserService) : ViewModel() {
+open class RegisterProfileUserViewModel (private val authService: AuthService, private val userService: UserService, private val cepService: CepService) : ViewModel() {
 
     // Step management
     var currentStep by mutableStateOf(1)
@@ -37,6 +38,7 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
         private set
 
     // Address information (Step 2)
+    var isSearchingCep by mutableStateOf(false)
     var cep by mutableStateOf("")
         private set
     var street by mutableStateOf("")
@@ -81,6 +83,25 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
 
     fun updateCep(value: String) {
         cep = value
+        if(cep.length == 8) {
+            viewModelScope.launch {
+                try {
+                    isSearchingCep = true
+                    val address = cepService.getCep(cep)
+                    updateStreet(address.logradouro)
+                    updateCity(address.localidade)
+                    updateState(address.uf)
+                    isSearchingCep = false
+                } catch (e: Exception) {
+                    // Handle error
+                    println(e)
+                    isSearchingCep = false
+                    updateStreet("")
+                    updateCity("")
+                    updateState("")
+                }
+            }
+        }
     }
 
     fun updateStreet(value: String) {

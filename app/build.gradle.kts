@@ -58,6 +58,14 @@ dependencies {
     val koin_version = "4.0.0"
     val compose_version = "1.7.2" // Versão do Compose que você deseja usar
 
+
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
+
+    // Java language implementation
+    implementation("androidx.activity:activity:1.9.2")
+    // Kotlin
+    implementation("androidx.activity:activity-ktx:1.9.2")
+
     implementation("io.insert-koin:koin-android:$koin_version")
     implementation("io.insert-koin:koin-androidx-compose:$koin_version")
 

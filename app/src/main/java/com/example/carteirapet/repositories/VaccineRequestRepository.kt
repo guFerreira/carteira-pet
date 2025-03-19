@@ -81,9 +81,9 @@ data class UpdateVaccineRequestResponse(
 )
 
 class VaccineRequestRepository(private val client: HttpClient)  {
-
+    private val url = "10.0.2.2:3000";
     suspend fun getVaccineRequestsByAnimalId(animalId: Int): List<VaccineRequestByAnimal>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/animal/${animalId}") {
+        val response: HttpResponse = client.get("http://${url}/vaccinerequest/animal/${animalId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -95,7 +95,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getAllVaccineRequestsFromVeterinary(): List<VaccineRequestByVeterinary>{
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest") {
+        val response: HttpResponse = client.get("http://${url}/vaccinerequest") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -107,7 +107,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestByVeterinary? {
-        val response: HttpResponse = client.get("http://35.239.21.191/vaccinerequest/${vaccineRequestId}") {
+        val response: HttpResponse = client.get("http://${url}/vaccinerequest/${vaccineRequestId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -119,7 +119,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun createVaccineRequest(vaccineRequest: CreateVaccineRequest):CreateVaccineRequestResponse? {
-        val response: HttpResponse = client.post("http://35.239.21.191/vaccinerequest/create") {
+        val response: HttpResponse = client.post("http://${url}/vaccinerequest/create") {
             contentType(ContentType.Application.Json)
             setBody(vaccineRequest)
         }
@@ -131,7 +131,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun updateVaccineRequest(vaccineRequestId: Int, vaccineRequestInput: UpdateVaccineRequest):UpdateVaccineRequestResponse? {
-        val response: HttpResponse = client.put("http://35.239.21.191/vaccinerequest/${vaccineRequestId}") {
+        val response: HttpResponse = client.put("http://${url}/vaccinerequest/${vaccineRequestId}") {
             contentType(ContentType.Application.Json)
             setBody(vaccineRequestInput)
         }

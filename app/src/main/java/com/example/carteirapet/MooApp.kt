@@ -201,7 +201,13 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
 
         composable("editUserProfileInfos") {
             EditUserProfileScreen(
-                goToHomeScreen = { navController.navigate("home") }
+                goToHomeScreen = { userType ->
+                    if (userType == 1) {
+                        navController.navigate("homeVeterinary")
+                    } else{
+                        navController.navigate("home")
+                    }
+                }
             )
         }
 
@@ -221,7 +227,13 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
         composable("registerUserProfileInfos") {
             RegisterProfileUserScreen(
                 goToLoginScreen = { navController.navigate("login") },
-                goToHomeScreen = { navController.navigate("home") }
+                goToHomeScreen = { userType ->
+                    if (userType == 1){
+                        navController.navigate("homeVeterinary")
+                    }else {
+                        navController.navigate("home")
+                    }
+                }
             )
         }
 

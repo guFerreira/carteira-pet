@@ -88,12 +88,13 @@ fun RegisterPetScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Text(
                         "Registrar Pet",
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -104,7 +105,7 @@ fun RegisterPetScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -335,17 +336,18 @@ fun <T> DropdownMenuField(
     options: List<T>,
     selectedOption: T?,
     onOptionSelected: (T) -> Unit,
-    displayText: (T) -> String
+    displayText: (T) -> String,
+    enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
         OutlinedTextField(
+            enabled = enabled,
             value = selectedOption?.let { displayText(it) } ?: "",
             onValueChange = {},
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = true,
             trailingIcon = {
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
@@ -378,7 +380,8 @@ fun <T> DropdownMenuField(
 fun DateFieldInput(
     inputName: String,
     value: String,
-    onDateSelected: (String) -> Unit
+    onDateSelected: (String) -> Unit,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
 
@@ -405,6 +408,7 @@ fun DateFieldInput(
     //TODO Alterar a cor do datepicker para o tema do projeto
     OutlinedTextField(
         value = value,
+        enabled = enabled,
         onValueChange = {},
         label = { Text(inputName) },
         readOnly = true,

@@ -5,6 +5,7 @@ import com.example.carteirapet.exceptions.UnauthorizedException
 import com.example.carteirapet.repositories.AnimalRepository
 import com.example.carteirapet.repositories.AuthRepository
 import com.example.carteirapet.repositories.BreedRepository
+import com.example.carteirapet.repositories.CepRepository
 import com.example.carteirapet.repositories.UserRepository
 import com.example.carteirapet.repositories.VaccineRepository
 import com.example.carteirapet.repositories.VaccineRequestRepository
@@ -12,6 +13,7 @@ import com.example.carteirapet.screen.VeterinaryHomeScreen
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.BreedService
+import com.example.carteirapet.service.CepService
 import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
 import com.example.carteirapet.service.VaccineRequestService
@@ -42,16 +44,17 @@ import org.koin.dsl.module
 
 val appModule = module {
     singleOf(::TokenManagerService)
-
     singleOf(::AuthRepository)
     singleOf(::UserRepository)
     singleOf(::AnimalRepository)
     singleOf(::VaccineRepository)
     singleOf(::BreedRepository)
+    singleOf(::CepRepository)
     singleOf(::VaccineRequestRepository)
 
     singleOf(::AuthService)
     singleOf(::UserService)
+    singleOf(::CepService)
     singleOf(::AnimalService)
     singleOf(::VaccineService)
     singleOf(::BreedService)

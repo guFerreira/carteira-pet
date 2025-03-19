@@ -31,10 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,14 +48,13 @@ import com.example.carteirapet.screen.components.CpfVisualTransformation
 import com.example.carteirapet.screen.components.PhoneVisualTransformation
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.RegisterProfileUserViewModel
-import com.example.carteirapet.viewModels.SignupViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterProfileUserScreen(
     goToLoginScreen: () -> Unit,
-    goToHomeScreen: () -> Unit,
+    goToHomeScreen: (userType: Int) -> Unit,
     viewModel: RegisterProfileUserViewModel = koinViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -85,7 +80,13 @@ fun RegisterProfileUserScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { viewModel.logout(goToLoginScreen, { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }) }) {
+                    IconButton(onClick = {
+                        viewModel.logout(
+                            goToLoginScreen,
+                            { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            })
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
@@ -109,7 +110,7 @@ fun RegisterProfileUserScreen(
                 Text(text = "Olá, para continuar, você deve preencher alguns dados referentes ao seu perfil.")
             }
             item {
-                UserRegistrationForm(goToHomeScreen, viewModel)
+                UserRegistrationForm({ goToHomeScreen(if (viewModel.isVet) 1 else 0) }, viewModel)
             }
         }
     }
@@ -173,7 +174,7 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     cpf = viewModel.cpf,
                     onCpfChange = viewModel::updateCpf
                 )
-                if (viewModel.isVet){
+                if (viewModel.isVet) {
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = viewModel.crmv,
@@ -186,7 +187,11 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Button to go to step 2
-                Button(onClick = { viewModel.goToNextStep() }, enabled = viewModel.validateRequiredFieldsInFirstStep(), modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { viewModel.goToNextStep() },
+                    enabled = viewModel.validateRequiredFieldsInFirstStep(),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Próximo")
                 }
             }
@@ -201,6 +206,7 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 AddressInformationForm(
+                    isSearchingCep = viewModel.isSearchingCep,
                     cep = viewModel.cep,
                     onCepChange = viewModel::updateCep,
                     street = viewModel.street,
@@ -227,7 +233,17 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     Spacer(modifier = Modifier.width(16.dp))
                     Button(
                         enabled = viewModel.validateRequiredFieldsInSecondStep(),
-                        onClick = { viewModel.registerProfileData(goToHomeScreen, onError = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }) },
+                        onClick = {
+                            viewModel.registerProfileData(
+                                goToHomeScreen,
+                                onError = { message ->
+                                    Toast.makeText(
+                                        context,
+                                        message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Concluir")
@@ -248,8 +264,10 @@ fun PersonalInformationForm(
     onPhoneNumberChange: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
+    enableEmail: Boolean = true,
     cpf: String,
     onCpfChange: (String) -> Unit,
+    enableCpf: Boolean = true,
 ) {
     Column {
         OutlinedTextField(
@@ -272,12 +290,14 @@ fun PersonalInformationForm(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
+            enabled = enableEmail,
             label = { Text("Email *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
+            enabled = enableCpf,
             value = cpf,
             onValueChange = {
                 if (it.length <= 11) { // Limitar a entrada a 11 caracteres
@@ -295,6 +315,7 @@ fun PersonalInformationForm(
 
 @Composable
 fun AddressInformationForm(
+    isSearchingCep: Boolean = false,
     cep: String,
     onCepChange: (String) -> Unit,
     street: String,
@@ -316,17 +337,36 @@ fun AddressInformationForm(
                     onCepChange(it)
                 }
             },
-            label = { Text("CEP") },
+            label = { Text("CEP *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             visualTransformation = CepVisualTransformation()
         )
-
+        if (isSearchingCep){
+            Text(text = "Buscando cep...")
+        }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = street,
             onValueChange = onStreetChange,
-            label = { Text("Rua") },
+            label = { Text("Rua *") },
+            enabled = !isSearchingCep,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = city,
+            onValueChange = onCityChange,
+            label = { Text("Cidade *") },
+            enabled = !isSearchingCep,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = state,
+            onValueChange = onStateChange,
+            label = { Text("Estado *") },
+            enabled = !isSearchingCep,
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -338,7 +378,7 @@ fun AddressInformationForm(
                     onNumberChange(newValue)
                 }
             },
-            label = { Text("Número") },
+            label = { Text("Número *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -347,21 +387,7 @@ fun AddressInformationForm(
         OutlinedTextField(
             value = complement,
             onValueChange = onComplementChange,
-            label = { Text("Complemento") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = city,
-            onValueChange = onCityChange,
-            label = { Text("Cidade") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = state,
-            onValueChange = onStateChange,
-            label = { Text("Estado") },
+            label = { Text("Complemento *") },
             modifier = Modifier.fillMaxWidth()
         )
     }

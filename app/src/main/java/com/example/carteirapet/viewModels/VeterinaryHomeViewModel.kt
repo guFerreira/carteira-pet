@@ -21,9 +21,12 @@ open class VeterinaryHomeViewModel (private val authService: AuthService, privat
     fun loadVaccineRequestsFromVeterinary(onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
+                isLoading = true
                 vaccines = vaccineRequestService.getAllVaccineRequestFromVeterinary()
             } catch (e: Exception) {
                 onError("Erro ao buscar vacinas do veterinário: ${e.message}")
+            } finally {
+                isLoading = false
             }
         }
     }

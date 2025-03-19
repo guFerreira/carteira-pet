@@ -31,8 +31,9 @@ data class RefreshTokenRequest(val token: String)
 data class UserRequest(val username: String, val password: String)
 
 class AuthRepository(private val client: HttpClient) {
+    private val url = "10.0.2.2:3000";
     suspend fun login(username: String, password: String): AuthCredential? {
-        val response: HttpResponse = client.post("http://35.239.21.191/auth/login") {
+        val response: HttpResponse = client.post("http://${url}/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(LoginRequest(username, password))
         }
@@ -47,7 +48,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun refreshAccessToken(token: String): RefreshedToken? {
-        val response: HttpResponse = client.post("http://35.239.21.191/auth/refresh/token") {
+        val response: HttpResponse = client.post("http://${url}/auth/refresh/token") {
             contentType(ContentType.Application.Json)
             setBody(RefreshTokenRequest(token))
         }
@@ -59,7 +60,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun registerUser(username: String, password: String): Boolean {
-        val response: HttpResponse = client.post("http://35.239.21.191/auth/register") {
+        val response: HttpResponse = client.post("http://${url}/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(UserRequest(username, password))
         }
@@ -71,7 +72,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun logout():Boolean {
-        val response: HttpResponse = client.delete("http://35.239.21.191/auth/logout")
+        val response: HttpResponse = client.delete("http://${url}/auth/logout")
         return if (response.status == HttpStatusCode.OK) {
             client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>()
                 .firstOrNull()?.clearToken()

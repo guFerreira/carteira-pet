@@ -57,7 +57,7 @@ fun ButtonOpenLinkForDigitalSignatureOnBrowser(url: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         context.startActivity(intent)
     }) {
-        Text("Assinar digitalmente")
+        Text("Assinar")
     }
 }
 

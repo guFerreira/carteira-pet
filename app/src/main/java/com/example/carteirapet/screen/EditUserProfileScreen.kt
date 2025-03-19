@@ -1,7 +1,9 @@
 package com.example.carteirapet.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,9 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +43,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditUserProfileScreen(
-    goToHomeScreen: () -> Unit,
+    goToHomeScreen: (userType: Int) -> Unit,
     viewModel: EditUserProfileViewModel = koinViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -47,7 +51,6 @@ fun EditUserProfileScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.isLoading = true
         viewModel.loadUserProfile { message ->
             Toast.makeText(
                 context,
@@ -55,7 +58,6 @@ fun EditUserProfileScreen(
                 Toast.LENGTH_SHORT
             ).show()
         }
-        viewModel.isLoading = false
     }
 
     Scaffold(
@@ -63,23 +65,26 @@ fun EditUserProfileScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Text(
                         "Editar perfil",
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
                 },
                 navigationIcon = {
-                    IconButton(onClick = goToHomeScreen) {
+                    IconButton(onClick = {
+                        if (viewModel.isVet) goToHomeScreen(1) else goToHomeScreen(0)
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -96,9 +101,20 @@ fun EditUserProfileScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (viewModel.isLoading){
+            if (viewModel.isLoading) {
                 CircularProgressIndicator()
-            } else{
+            } else {
+                Text(text = "Aqui você pode visualizar e editar as informações do seu perfil ☺\uFE0F")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Informações pessoais",
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+                }
+
                 // Personal information fields
                 PersonalInformationForm(
                     firstName = viewModel.firstName,
@@ -108,11 +124,13 @@ fun EditUserProfileScreen(
                     phoneNumber = viewModel.phoneNumber,
                     onPhoneNumberChange = { viewModel.phoneNumber = it },
                     email = viewModel.email,
+                    enableEmail = false,
                     onEmailChange = { viewModel.email = it },
                     cpf = viewModel.cpf,
-                    onCpfChange = { viewModel.cpf = it }
+                    onCpfChange = { viewModel.cpf = it },
+                    enableCpf = false
                 )
-                if (viewModel.isVet){
+                if (viewModel.isVet) {
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = viewModel.crmv,
@@ -122,9 +140,18 @@ fun EditUserProfileScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Endereço",
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+                }
+
                 AddressInformationForm(
+                    isSearchingCep = viewModel.isSearchingCep,
                     cep = viewModel.cep,
-                    onCepChange = { viewModel.cep = it },
+                    onCepChange = { viewModel.updateCep(it) },
                     street = viewModel.street,
                     onStreetChange = { viewModel.street = it },
                     number = viewModel.number,
@@ -137,16 +164,24 @@ fun EditUserProfileScreen(
                     onStateChange = { viewModel.state = it }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
+                FilledTonalButton(
+                    enabled = viewModel.validateRequiredPersonInformations() && viewModel.validateRequiredAddressInformations(),
                     onClick = {
                         viewModel.updateProfileData(
-                            goToHomeScreen,
+                            { if (viewModel.isVet) goToHomeScreen(1) else goToHomeScreen(0) },
                             onError = { message ->
                                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                             })
                     },
+                    colors = ButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContentColor = MaterialTheme.colorScheme.surface
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Concluir")
+                    Text("Salvar")
                 }
             }
 

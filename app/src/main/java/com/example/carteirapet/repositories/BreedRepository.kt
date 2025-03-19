@@ -17,13 +17,13 @@ data class Breed(
 )
 
 class BreedRepository(private val client: HttpClient) {
+    private val url = "10.0.2.2:3000";
     suspend fun getBreeds(specie: String): List<Breed> {
-        val response: HttpResponse = client.get("http://35.239.21.191/breeds") {
+        val response: HttpResponse = client.get("http://${url}/breeds") {
             contentType(ContentType.Application.Json)
             parameter("specie", specie)
         }
 
-        // Verifica se o login foi bem-sucedido e retorna o token JWT
         return if (response.status == HttpStatusCode.OK) {
             val breeds = response.body<List<Breed>>()
             return breeds

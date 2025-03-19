@@ -36,11 +36,10 @@ data class Animal(
     val breeds: List<Breed>
 )
 
-
-
 class AnimalRepository(private val client: HttpClient) {
+    private val url = "10.0.2.2:3000";
     suspend fun getAnimals(): List<Animal>{
-        val response: HttpResponse = client.get("http://35.239.21.191/animal") {
+        val response: HttpResponse = client.get("http://${url}/animal") {
             contentType(ContentType.Application.Json)
         }
 
@@ -54,7 +53,7 @@ class AnimalRepository(private val client: HttpClient) {
     }
 
     suspend fun getAnimalById(animalId: Int): Animal? {
-        val response: HttpResponse = client.get("http://35.239.21.191/animal/$animalId") {
+        val response: HttpResponse = client.get("http://${url}/animal/$animalId") {
             contentType(ContentType.Application.Json)
         }
 
@@ -92,7 +91,7 @@ class AnimalRepository(private val client: HttpClient) {
         }
 
         val response: HttpResponse = client.submitFormWithBinaryData(
-            url = "http://35.239.21.191/animal",
+            url = "http://${url}/animal",
             formData = multipartData
         )
 
