@@ -216,22 +216,29 @@ fun VaccineVeterinaryItem(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                vaccine.vaccine?.name?.let {
+                if (vaccine.vaccine?.name != null) {
                     Text(
-                        text = it,
+                        text = vaccine.vaccine.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Text(
+                        text = "O registro de vacina não foi concluído",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
                 }
+
 
                 vaccine.status?.let { status ->
                     StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             vaccine.applicationDate?.let {
                 Text(
@@ -241,7 +248,7 @@ fun VaccineVeterinaryItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             if (vaccine.petGuardianName != null) {
                 Text(
                     text = "Tutor: ${vaccine.petGuardianName}",
@@ -276,6 +283,7 @@ fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
         "Pendente" -> MaterialTheme.colorScheme.tertiaryContainer
         "Assinado" -> MaterialTheme.colorScheme.primaryContainer
         "Rejeitado" -> MaterialTheme.colorScheme.errorContainer
+        "Registro Incompleto" -> MaterialTheme.colorScheme.secondaryContainer
         else -> MaterialTheme.colorScheme.inverseOnSurface
     }
 
@@ -284,6 +292,14 @@ fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
         "Assinado" -> Icons.Outlined.CheckCircle
         "Rejeitado" -> Icons.Outlined.Cancel
         else -> Icons.Outlined.Info
+    }
+
+    val textColor = when (status) {
+        "Pendente" -> MaterialTheme.colorScheme.onTertiaryContainer
+        "Assinado" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "Rejeitado" -> MaterialTheme.colorScheme.onErrorContainer
+        "Registro Incompleto" -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Row(
@@ -302,7 +318,7 @@ fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
         Text(
             text = status,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = textColor
         )
     }
 }
@@ -391,15 +407,12 @@ fun PreviewCardPendente(){
 fun PreviewCardRejeitado(){
     var vaccine = VaccineRequestByVeterinary(
         id = 1,
-        vaccine = Vaccine(
-            id = 2,
-            name = "Antirrábica"
-        ),
+        vaccine = null,
         petGuardianName = "Gustavo Ferreira",
-        batchCode = "ABC22222",
+        batchCode = null,
         animalName = "Calabreso",
         status = "Rejeitado",
-        applicationDate = "20/03/2025",
+        applicationDate = null,
         manufacturer = "Biontech"
     )
     CarteiraPetTheme {
@@ -423,6 +436,24 @@ fun PreviewCardOutro(){
         status = "Outro",
         applicationDate = "20/03/2025",
         manufacturer = "Biontech"
+    )
+    CarteiraPetTheme {
+        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+@Preview
+fun PreviewOutro(){
+    var vaccine = VaccineRequestByVeterinary(
+        id = 1,
+        vaccine = null,
+        petGuardianName = "Gustavo Ferreira",
+        batchCode = null,
+        animalName = "Calabreso",
+        status = "Registro Incompleto",
+        applicationDate = null,
+        manufacturer = null
     )
     CarteiraPetTheme {
         VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())

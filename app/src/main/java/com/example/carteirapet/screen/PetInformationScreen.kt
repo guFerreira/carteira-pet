@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -137,32 +139,37 @@ fun PetInformation(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(innerPadding)
+                .safeContentPadding(),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (viewModel.isLoadingPetInformations) {
-                    CircularProgressIndicator()
-                } else {
-                    PetInformations(viewModel.pet)
+            if (viewModel.isLoadingPetInformations) {
+                CircularProgressIndicator()
+            } else {
+                PetInformations(viewModel.pet)
 
-                    PullToRefreshBox(
-                        isRefreshing = viewModel.isLoadingVaccineRequests,
-                        onRefresh = {
-                            if (petId != null) {
-                                viewModel.loadVaccineRequests(petId, onError = { message ->
-                                    Toast.makeText(
-                                        context,
-                                        message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                })
-                            }
-                        }) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                PullToRefreshBox(
+                    isRefreshing = viewModel.isLoadingVaccineRequests,
+                    onRefresh = {
+                        if (petId != null) {
+                            viewModel.loadVaccineRequests(petId, onError = { message ->
+                                Toast.makeText(
+                                    context,
+                                    message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            })
+                        }
+                    }) {
+
+                    Column {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Vacinas",
+                                modifier = Modifier.align(Alignment.Start)
+                            )
+                        }
                         Vaccines(viewModel.vaccineRequests, viewModel.isLoadingVaccineRequests)
                     }
                 }
