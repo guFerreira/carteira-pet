@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +53,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRequestByVeterinary
 import com.example.carteirapet.screen.components.BatchInfoRow
@@ -150,6 +155,9 @@ fun VeterinaryHomeScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 CardUser("Médico veterinário", true)
+
+//                QRCodeScannerScreen()
+
                 if (viewModel.isLoading && viewModel.vaccines.isEmpty()){
                     Row (
                         horizontalArrangement = Arrangement.Center,
@@ -359,6 +367,86 @@ fun VaccineVeterinaryModalBottomSheet(
         }
     }
 }
+//
+//@Composable
+//fun QRCodeScannerScreen() {
+//    var scannedCode by remember { mutableStateOf<String?>(null) }
+//    var isScanning by remember { mutableStateOf(false) }
+//
+//    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+//        if (isScanning) {
+//            QRCodeScanner { code ->
+//                scannedCode = code
+//                isScanning = false
+//            }
+//        } else {
+//            Button(onClick = { isScanning = true }) {
+//                Text("Escanear QR Code")
+//            }
+//        }
+//
+//        scannedCode?.let {
+//            Text("QR Code: $it", modifier = Modifier.padding(16.dp))
+//        }
+//    }
+//}
+//
+//
+//
+//@Composable
+//fun QRCodeScanner(onQrCodeScanned: (String) -> Unit) {
+//    val context = LocalContext.current
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//    val previewView = remember { PreviewView(context) }
+//
+//    AndroidView(
+//        factory = { previewView },
+//        modifier = Modifier.fillMaxSize()
+//    ) { view ->
+//        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+//
+//        cameraProviderFuture.addListener({
+//            val cameraProvider = cameraProviderFuture.get()
+//
+//            val preview = androidx.camera.core.Preview.Builder().build().also {
+//                it.setSurfaceProvider(view.surfaceProvider)
+//            }
+//
+//            val barcodeScanner = BarcodeScanning.getClient()
+//
+//            val imageAnalysis = ImageAnalysis.Builder()
+//                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+//                .build()
+//
+//            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context)) { imageProxy ->
+//                @Suppress("UnsafeOptInUsageError")
+//                val mediaImage = imageProxy.image
+//                if (mediaImage != null) {
+//                    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+//                    barcodeScanner.process(image)
+//                        .addOnSuccessListener { barcodes ->
+//                            for (barcode in barcodes) {
+//                                barcode.rawValue?.let {
+//                                    onQrCodeScanned(it)
+//                                }
+//                            }
+//                        }
+//                        .addOnCompleteListener {
+//                            imageProxy.close()
+//                        }
+//                }
+//            }
+//
+//            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+//
+//            cameraProvider.unbindAll()
+//            cameraProvider.bindToLifecycle(
+//                lifecycleOwner, cameraSelector, preview, imageAnalysis
+//            )
+//        }, ContextCompat.getMainExecutor(context))
+//    }
+//}
+
 
 @Composable
 @Preview

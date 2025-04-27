@@ -102,6 +102,13 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
 
+//    implementation("androidx.camera:camera-core:1.3.0")
+//    implementation("androidx.camera:camera-camera2:1.3.0")
+//    implementation("androidx.camera:camera-lifecycle:1.3.0")
+//    implementation("androidx.camera:camera-view:1.3.0")
+//
+//    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+
     // Dependências de teste
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5") // Certifique-se de que essa versão é compatível
@@ -112,8 +119,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Removido aqui, pois já está incluído pelo BOM
-    // implementation("androidx.compose.ui:ui:1.7.2")
-    // implementation("androidx.compose.material:material:1.7.2")
-    // implementation("androidx.compose.ui:ui-tooling-preview:1.7.2")
+
 }

@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.net.Uri
 import android.widget.DatePicker
+import android.widget.Space
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,10 +33,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,11 +65,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.carteirapet.screen.components.DateFieldInput
+import com.example.carteirapet.screen.components.ImagePicker
+import com.example.carteirapet.screen.components.NumberFieldInput
+import com.example.carteirapet.screen.components.SpeciesSelection
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.RegisterPetViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -94,12 +106,11 @@ fun RegisterPetScreen(
                 ),
                 title = {
                     Text(
-                        "Registrar Pet",
+                        "Registrar Pet \uD83D\uDC3E",
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-
                 },
                 navigationIcon = {
                     IconButton(onClick = backToHomeScreen) {
@@ -125,96 +136,194 @@ fun RegisterPetScreen(
         ) {
 
             if (viewModel.breedOptions.isEmpty()) {
-                Text(text = "Carregando...")
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Carregando raças...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
                 ImagePicker(onImageSelected = { viewModel.petImageByteArray =
                     it?.let { it1 -> readImageAsByteArray(it1, context) }
                 })
-                SpeciesSelection(viewModel.species) {
-                    viewModel.changeSpecies(it)
-                }
 
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Campo de Nome
-                    OutlinedTextField(
-                        value = viewModel.name,
-                        onValueChange = { viewModel.name = it },
-                        label = { Text("Nome") },
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = "Campos marcados com * são obrigatórios",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    // Seção: Informações básicas
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
 
-                    DateFieldInput("Data de Nascimento", viewModel.birthDate, { viewModel.birthDate = it })
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Campo de Microchip
-                    OutlinedTextField(
-                        value = viewModel.microchip,
-                        onValueChange = { viewModel.microchip = it },
-                        label = { Text("Microchip") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Dropdown de Raça
-                    DropdownMenuField(
-                        label = "Raça",
-                        options = viewModel.breedOptions,
-                        selectedOption = viewModel.selectedBreed,
-                        onOptionSelected = { viewModel.selectedBreed = it },
-                        displayText = { it.name }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Dropdown de Sexo
-                    DropdownMenuField(
-                        label = "Sexo",
-                        options = viewModel.sexes,
-                        selectedOption = viewModel.sex,
-                        onOptionSelected = { viewModel.sex = it },
-                        displayText = { it }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Checkbox de Castrado
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = viewModel.neutered,
-                            onCheckedChange = { viewModel.neutered = it }
-                        )
-                        Text(text = "Castrado")
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Informações Básicas",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = viewModel.name,
+                                onValueChange = {
+                                    viewModel.name = it
+//                                    viewModel.clearNameError()
+                                },
+                                label = { Text("Nome *") },
+//                                isError = viewModel.nameError != null,
+                                supportingText = { Text("Nome do seu pet") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+//                                    .semantics { contentDescription = "Nome do pet, obrigatório" }
+                            )
+//                            viewModel.nameError?.let {
+//                                Text(
+//                                    text = it,
+//                                    color = MaterialTheme.colorScheme.error,
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    modifier = Modifier.padding(start = 4.dp)
+//                                )
+//                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            SpeciesSelection(
+                                selectedSpecies = viewModel.species,
+                                onSpeciesSelected = {
+                                    viewModel.changeSpecies(it)
+                                }
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Campo de Condições Pré-existentes
-                    OutlinedTextField(
-                        value = viewModel.conditions,
-                        onValueChange = { viewModel.conditions = it },
-                        label = { Text("Condições Pré-existentes") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Campo de Peso
-                    OutlinedTextField(
-                        value = viewModel.weight,
-                        onValueChange = { viewModel.weight = it },
-                        label = { Text("Peso (kg)") },
+                    // Seção: Características
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
-                    )
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Características",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            DateFieldInput(
+                                inputName = "Data de Nascimento *",
+                                value = viewModel.birthDate,
+                                onDateSelected = { viewModel.birthDate = it }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            DropdownMenuField(
+                                label = "Raça *",
+                                options = viewModel.breedOptions,
+                                selectedOption = viewModel.selectedBreed,
+                                onOptionSelected = { viewModel.selectedBreed = it },
+                                displayText = { it.name }
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            DropdownMenuField(
+                                label = "Sexo *",
+                                options = viewModel.sexes,
+                                selectedOption = viewModel.sex,
+                                onOptionSelected = { viewModel.sex = it },
+                                displayText = { it }
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = viewModel.neutered,
+                                    onCheckedChange = { viewModel.neutered = it }
+                                )
+                                Text(text = "Castrado *")
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            NumberFieldInput(
+                                inputName = "Peso (kg) *",
+                                value = viewModel.weight,
+                                onValueChange =  {
+                                    viewModel.weight = it
+//                                    viewModel.clearWeightError()
+                                },
+                                enabled = true,
+                                supportingText = "Peso em kg (ex.: 15.5)",
+                                modifier = Modifier
+                                    .semantics { contentDescription = "Peso do pet, obrigatório" }
+                            )
+//                            viewModel.weightError?.let {
+//                                Text(
+//                                    text = it,
+//                                    color = MaterialTheme.colorScheme.error,
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    modifier = Modifier.padding(start = 4.dp)
+//                                )
+//                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Seção: Detalhes adicionais
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Detalhes Adicionais",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = viewModel.microchip,
+                                onValueChange = { viewModel.microchip = it },
+                                label = { Text("Microchip") },
+                                supportingText = { Text("Número do microchip, se disponível") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = viewModel.conditions,
+                                onValueChange = { viewModel.conditions = it },
+                                label = { Text("Condições Pré-existentes") },
+                                supportingText = { Text("Ex.: alergias, doenças") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
-
                     // Botão de Salvar
                     Button(
                         onClick = {
@@ -242,95 +351,6 @@ fun readImageAsByteArray(uri: Uri, context: Context): ByteArray? {
 }
 
 
-@Composable
-fun ImagePicker(
-    onImageSelected: (Uri?) -> Unit
-) {
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        selectedImageUri = uri
-        onImageSelected(uri)
-    }
-
-    Card(
-        onClick = { launcher.launch("image/*") },
-        modifier = Modifier
-            .padding(12.dp) // Primeiro aplica padding
-            .clip(RoundedCornerShape(360.dp)) // Aplica o arredondamento
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
-            .width(120.dp)
-            .height(120.dp)
-    ) {
-        // Box para centralizar o conteúdo
-        Box(
-            contentAlignment = Alignment.Center, // Centraliza o conteúdo
-            modifier = Modifier.fillMaxSize() // Ocupa todo o espaço do Card
-        ) {
-            if (selectedImageUri == null) {
-                Icon(
-                    Icons.Filled.AddAPhoto,
-                    contentDescription = "Selecionar Imagem",
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer // Altera a cor do ícone
-                )
-            } else {
-                AsyncImage(
-                    model = selectedImageUri,
-                    contentDescription = "Imagem selecionada",
-                    contentScale = ContentScale.Crop, // Faz com que a imagem ocupe todo o espaço
-                    modifier = Modifier
-                        .fillMaxSize() // Garante que a imagem ocupe todo o Card
-                        .clip(CircleShape) // Aplica o formato circular
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onPrimaryContainer,
-                            CircleShape
-                        )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SpeciesSelection(
-    selectedSpecies: String,
-    onSpeciesSelected: (String) -> Unit
-) {
-    Column {
-        Text(text = "Espécie:")
-        Row {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                RadioButton(
-                    selected = selectedSpecies == "dog",
-                    onClick = {
-                        onSpeciesSelected("dog")
-                    }
-                )
-                Text(text = "Cachorro")
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                RadioButton(
-                    selected = selectedSpecies == "cat",
-                    onClick = {
-                        onSpeciesSelected("cat")
-                    }
-                )
-                Text(text = "Gato")
-            }
-        }
-    }
-}
 
 @Composable
 fun <T> DropdownMenuField(
@@ -374,69 +394,6 @@ fun <T> DropdownMenuField(
             .matchParentSize()
             .clickable { expanded = true }
         )
-    }
-}
-
-
-@Composable
-fun DateFieldInput(
-    inputName: String,
-    value: String,
-    onDateSelected: (String) -> Unit,
-    enabled: Boolean = true
-) {
-    val context = LocalContext.current
-
-    // Controla a exibição do DatePickerDialog
-    var showDatePicker by remember { mutableStateOf(false) }
-
-    // Configurações de calendário
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    // Função de callback para o DatePicker
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-            val formattedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-            onDateSelected(formattedDate)
-        },
-        year,
-        month,
-        day
-    )
-    //TODO Alterar a cor do datepicker para o tema do projeto
-    OutlinedTextField(
-        value = value,
-        enabled = enabled,
-        onValueChange = {},
-        label = { Text(inputName) },
-        readOnly = true,
-        modifier = Modifier.fillMaxWidth(),
-        placeholder = {
-            Text(
-                text = "dd/mm/yyyy"
-            )
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = { showDatePicker = true },
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CalendarMonth,
-                    contentDescription = inputName
-                )
-            }
-        }
-    )
-
-
-    // Exibir o DatePickerDialog ao clicar no campo
-    if (showDatePicker) {
-        datePickerDialog.show()
-        showDatePicker = false
     }
 }
 

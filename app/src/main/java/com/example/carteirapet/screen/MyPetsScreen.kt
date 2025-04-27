@@ -61,6 +61,7 @@ import com.example.carteirapet.screen.components.CardUser
 import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.PetImage
 import com.example.carteirapet.screen.components.PullToRefreshBox
+import com.example.carteirapet.screen.components.SexIcon
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.MyPetsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -229,21 +230,6 @@ fun PetCard(animal: Animal, goToPetInformation: () -> Unit) {
     }
 }
 
-@Composable
-fun SexIcon(sex: String, modifier: Modifier = Modifier) {
-    val (icon, color) = when (sex) {
-        "Macho" -> Icons.Filled.Male to MaterialTheme.colorScheme.primary
-        "Fêmea" -> Icons.Filled.Female to MaterialTheme.colorScheme.secondary
-        else -> Icons.Filled.HelpOutline to MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    Icon(
-        imageVector = icon,
-        contentDescription = sex,
-        tint = color,
-        modifier = modifier.size(20.dp)
-    )
-}
 
 
 

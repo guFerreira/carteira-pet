@@ -67,23 +67,31 @@ class AnimalRepository(private val client: HttpClient) {
     }
 
     suspend fun registerAnimal(animal: Animal, imageBytes: ByteArray?): Animal? {
+        // Validar breeds no cliente
+        if (animal.breeds.isEmpty()) {
+            throw IllegalArgumentException("Pelo menos uma raça deve ser fornecida.")
+        }
+
+        // Extrai apenas os IDs das raças
+        val breedIds = animal.breeds.map { it.id }
+
         val multipartData = formData {
-            // Adiciona cada campo do objeto `animal` individualmente
             append("name", animal.name)
-            append("microchip", animal.microchip ?: "")
             append("species", animal.species)
             append("sex", animal.sex)
             append("neutered", animal.neutered.toString())
-            append("birthDate", animal.birthDate)
             append("weight", animal.weight.toString())
-            append("conditions", animal.conditions ?: "")
+            animal.microchip?.let { append("microchip", it) }
+            animal.conditions?.let { append("conditions", it) }
+            append("birthDate", animal.birthDate)
 
-            // Serializa `breeds` para um formato aceitável pelo backend
-            append("breeds", Json.encodeToString(animal.breeds))
+            // Envia cada ID de breed como um valor separado
+            breedIds.forEach { breedId ->
+                append("breeds[]", breedId.toString())
+            }
 
-            // Adiciona a imagem, se disponível
-            if (imageBytes != null) {
-                append("file", imageBytes, Headers.build {
+            imageBytes?.let {
+                append("photo", it, Headers.build {
                     append(HttpHeaders.ContentType, "image/jpeg")
                     append(HttpHeaders.ContentDisposition, "filename=\"photo.jpg\"")
                 })

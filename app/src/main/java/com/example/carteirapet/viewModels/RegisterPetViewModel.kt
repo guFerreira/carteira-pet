@@ -47,8 +47,11 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
 
     fun changeSpecies(newSpecies: String) {
         viewModelScope.launch {
-            species = newSpecies
-            breedOptions = breedService.getBreeds(species)
+            if (newSpecies != species) {
+                species = newSpecies
+                breedOptions = breedService.getBreeds(species)
+                selectedBreed = null
+            }
         }
     }
 
@@ -61,12 +64,12 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
                         birthDate = birthDate,
                         microchip = microchip,
                         breeds = listOf(selectedBreed!!),
-                        sex = sex,
+                        sex = if (sex == "Macho") "MALE" else "FEMALE",
                         neutered = neutered,
                         conditions = conditions,
                         weight = weight?.toFloat() ?: 0f,
                         id = 0,
-                        species = species
+                        species = if (species == "dog") "DOG" else "CAT",
                     )
                     animalService.registerAnimal(animal, image = petImageByteArray)
                     onSuccess()
@@ -74,7 +77,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
                     onError("Erro: Raça não selecionada.")
                 }
             } catch (e: Exception) {
-                onError("Erro ao criar conta. Tente novamente. " + e.message)
+                onError("Erro ao registar pet. Tente novamente. " + e.message)
             }
         }
     }
