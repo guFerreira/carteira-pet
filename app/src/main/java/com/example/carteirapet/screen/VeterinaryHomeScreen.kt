@@ -1,28 +1,20 @@
 package com.example.carteirapet.screen
 
+import android.widget.Space
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.HourglassEmpty
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -50,24 +42,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRequestByVeterinary
+import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.screen.components.BatchInfoRow
+import com.example.carteirapet.screen.components.ButtonOpenLinkForDigitalSignatureOnBrowser
 import com.example.carteirapet.screen.components.CardUser
 import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.NextApplicationDate
 import com.example.carteirapet.screen.components.PetInfoRow
 import com.example.carteirapet.screen.components.PullToRefreshBox
+import com.example.carteirapet.screen.components.StatusIndicator
 import com.example.carteirapet.screen.components.VaccineActions
 import com.example.carteirapet.screen.components.VaccineInfoRow
 import com.example.carteirapet.screen.components.VaccineStatus
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.utils.DateUtils
 import com.example.carteirapet.viewModels.VeterinaryHomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -182,7 +179,7 @@ fun VeterinaryHomeScreen(
 }
 
 @Composable
-fun VaccineRequests(vaccines: List<VaccineRequestByVeterinary>, goToUpdateVaccineRequestScreen: (vaccineRequestId: Int) -> Unit) {
+fun VaccineRequests(vaccines: List<VaccineRequestResponse>, goToUpdateVaccineRequestScreen: (vaccineRequestId: Int) -> Unit) {
     if (vaccines.isEmpty()){
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -201,7 +198,7 @@ fun VaccineRequests(vaccines: List<VaccineRequestByVeterinary>, goToUpdateVaccin
 
 @Composable
 fun VaccineVeterinaryItem(
-    vaccine: VaccineRequestByVeterinary,
+    vaccineRequest: VaccineRequestResponse,
     goToUpdateVaccineRequestScreen: (vaccineRequestId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -212,7 +209,7 @@ fun VaccineVeterinaryItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -226,9 +223,9 @@ fun VaccineVeterinaryItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                if (vaccine.vaccine?.name != null) {
+                if (vaccineRequest.vaccineApplication?.vaccine?.name != null) {
                     Text(
-                        text = vaccine.vaccine.name,
+                        text = vaccineRequest.vaccineApplication?.vaccine?.name ?: "Nome da vacina",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -241,33 +238,35 @@ fun VaccineVeterinaryItem(
                 }
 
 
-                vaccine.status?.let { status ->
+                vaccineRequest.status?.let { status ->
                     StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            vaccine.applicationDate?.let {
                 Text(
-                    text = "Data de aplicação: $it",
+                    text = "Data de aplicação: ${vaccineRequest.vaccineApplication?.applicationDate?.let {
+                        DateUtils.formatDateStringToShow(
+                            it
+                        )
+                    }}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
 
-            Spacer(modifier = Modifier.height(4.dp))
-            if (vaccine.petGuardianName != null) {
-                Text(
-                    text = "Tutor: ${vaccine.petGuardianName}",
-                    fontSize = 12.sp
-                )
-            }
+
+//            Spacer(modifier = Modifier.height(4.dp))
+//            if (vaccineRequest.petGuardianName != null) {
+//                Text(
+//                    text = "Tutor: ${vaccineRequest.petGuardianName}",
+//                    fontSize = 12.sp
+//                )
+//            }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (vaccine.animalName != null) {
+            if (vaccineRequest.animalName != null) {
                 Text(
-                    text = "Nome do Pet: ${vaccine.animalName}",
+                    text = "Nome do Pet: ${vaccineRequest.animalName}",
                     fontSize = 12.sp
                 )
             }
@@ -276,7 +275,7 @@ fun VaccineVeterinaryItem(
 
             if (showBottomSheet) {
                 VaccineVeterinaryModalBottomSheet(
-                    vaccineRequest = vaccine,
+                    vaccineRequest = vaccineRequest,
                     onDismissRequest = { showBottomSheet = false },
                     goToUpdateVaccineRequestScreen = goToUpdateVaccineRequestScreen
                 )
@@ -285,57 +284,11 @@ fun VaccineVeterinaryItem(
     }
 }
 
-@Composable
-fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
-    val statusColor = when (status) {
-        "Pendente" -> MaterialTheme.colorScheme.tertiaryContainer
-        "Assinado" -> MaterialTheme.colorScheme.primaryContainer
-        "Rejeitado" -> MaterialTheme.colorScheme.errorContainer
-        "Registro Incompleto" -> MaterialTheme.colorScheme.secondaryContainer
-        else -> MaterialTheme.colorScheme.inverseOnSurface
-    }
-
-    val icon = when (status) {
-        "Pendente" -> Icons.Outlined.HourglassEmpty
-        "Assinado" -> Icons.Outlined.CheckCircle
-        "Rejeitado" -> Icons.Outlined.Cancel
-        else -> Icons.Outlined.Info
-    }
-
-    val textColor = when (status) {
-        "Pendente" -> MaterialTheme.colorScheme.onTertiaryContainer
-        "Assinado" -> MaterialTheme.colorScheme.onPrimaryContainer
-        "Rejeitado" -> MaterialTheme.colorScheme.onErrorContainer
-        "Registro Incompleto" -> MaterialTheme.colorScheme.onSecondaryContainer
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    Row(
-        modifier = modifier
-            .background(statusColor, shape = RoundedCornerShape(16.dp))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = status,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = status,
-            style = MaterialTheme.typography.bodySmall,
-            color = textColor
-        )
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccineVeterinaryModalBottomSheet(
-    vaccineRequest: VaccineRequestByVeterinary,
+    vaccineRequest: VaccineRequestResponse,
     onDismissRequest: () -> Unit,
     goToUpdateVaccineRequestScreen: (vaccineRequestId: Int) -> Unit,
     modifier: Modifier = Modifier
@@ -353,17 +306,88 @@ fun VaccineVeterinaryModalBottomSheet(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            VaccineInfoRow(vaccineRequest.vaccine?.name, vaccineRequest.applicationDate, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            VaccineStatus(vaccineRequest.status, vaccineRequest.applicationDate, true, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            BatchInfoRow(vaccineRequest.batchCode, vaccineRequest.manufacturer, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            PetInfoRow(vaccineRequest.animalName, vaccineRequest.petGuardianName, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            NextApplicationDate(applicationDate = vaccineRequest.nextDoseDate, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            VaccineActions(status = vaccineRequest.status, pdfDocumentUrl = vaccineRequest.storageUrl, signatureUrl = vaccineRequest.signedUrl, true, { goToUpdateVaccineRequestScreen(vaccineRequest.id) })
+
+            if(vaccineRequest.status == "Expirado" || vaccineRequest.status == "Recusado") {
+                Column {
+                    vaccineRequest.status?.let { status ->
+                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Pet: ${vaccineRequest.animalName}")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "A vacina está com o status ${vaccineRequest.status}. Caso queira realizar preencher uma nova solicitação de vacina para este pet, entre em contato com o tutor.")
+                }
+
+            } else if (vaccineRequest.status == "Aceito") {
+                Column {
+                    vaccineRequest.status?.let { status ->
+                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        buildAnnotatedString {
+                            append("Você aceitou a solicitação de vacina do pet ")
+
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(vaccineRequest.animalName)
+                            }
+
+                            append(". Preencha os dados específicos da aplicação da vacina para concluír o registro")
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        Button(onClick = { goToUpdateVaccineRequestScreen(vaccineRequest.id) }) {
+                            Text(text = "Concluir registro de vacina")
+                        }
+                    }
+
+                }
+            } else if (vaccineRequest.status == "Aguardando_Assinatura") {
+                Column {
+                    vaccineRequest.status?.let { status ->
+                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        buildAnnotatedString {
+                            append("Você preencheu os dados da solicitação de vacina do pet ")
+
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(vaccineRequest.animalName)
+                            }
+
+                            append(". Você pode editar algum dado da solicitação de vacina ou realizar a assinatura digital da vacina!")
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(onClick = { goToUpdateVaccineRequestScreen(vaccineRequest.id) }) {
+                            Text(text = "Editar registro de vacina")
+                        }
+                        ButtonOpenLinkForDigitalSignatureOnBrowser(url = vaccineRequest.signUrl ?: "")
+                    }
+                }
+            } else {
+                VaccineInfoRow(vaccineRequest.vaccineApplication?.vaccine?.name, vaccineRequest.vaccineApplication?.applicationDate, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                VaccineStatus(vaccineRequest.status, vaccineRequest.vaccineApplication?.applicationDate, true, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                BatchInfoRow(vaccineRequest.vaccineApplication?.batchCode, vaccineRequest.vaccineApplication?.manufacturer, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                PetInfoRow(vaccineRequest.animalName, "Nome do tutor", true)
+                Spacer(modifier = Modifier.height(8.dp))
+                NextApplicationDate(applicationDate = vaccineRequest.vaccineApplication?.nextDoseDate, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                VaccineActions(status = vaccineRequest.status, pdfDocumentUrl = vaccineRequest.storagedDocumentSignedUrl, signatureUrl = vaccineRequest.signUrl, true, { goToUpdateVaccineRequestScreen(vaccineRequest.id) })
+            }
+
         }
     }
 }
@@ -448,102 +472,102 @@ fun VaccineVeterinaryModalBottomSheet(
 //}
 
 
-@Composable
-@Preview
-fun PreviewCardAssinado(){
-    var vaccine = VaccineRequestByVeterinary(
-        id = 1,
-        vaccine = Vaccine(
-            id = 2,
-            name = "Antirrábica"
-        ),
-        petGuardianName = "Gustavo Ferreira",
-        batchCode = "ABC22222",
-        animalName = "Calabreso",
-        status = "Assinado",
-        applicationDate = "20/03/2025",
-        manufacturer = "Biontech"
-    )
-    CarteiraPetTheme {
-        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-@Preview
-fun PreviewCardPendente(){
-    var vaccine = VaccineRequestByVeterinary(
-        id = 1,
-        vaccine = Vaccine(
-            id = 2,
-            name = "Antirrábica"
-        ),
-        petGuardianName = "Gustavo Ferreira",
-        batchCode = "ABC22222",
-        animalName = "Calabreso",
-        status = "Pendente",
-        applicationDate = "20/03/2025",
-        manufacturer = "Biontech"
-    )
-    CarteiraPetTheme {
-        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-@Preview
-fun PreviewCardRejeitado(){
-    var vaccine = VaccineRequestByVeterinary(
-        id = 1,
-        vaccine = null,
-        petGuardianName = "Gustavo Ferreira",
-        batchCode = null,
-        animalName = "Calabreso",
-        status = "Rejeitado",
-        applicationDate = null,
-        manufacturer = "Biontech"
-    )
-    CarteiraPetTheme {
-        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-
-@Composable
-@Preview
-fun PreviewCardOutro(){
-    var vaccine = VaccineRequestByVeterinary(
-        id = 1,
-        vaccine = Vaccine(
-            id = 2,
-            name = "Antirrábica"
-        ),
-        petGuardianName = "Gustavo Ferreira",
-        batchCode = "ABC22222",
-        animalName = "Calabreso",
-        status = "Outro",
-        applicationDate = "20/03/2025",
-        manufacturer = "Biontech"
-    )
-    CarteiraPetTheme {
-        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-@Preview
-fun PreviewOutro(){
-    var vaccine = VaccineRequestByVeterinary(
-        id = 1,
-        vaccine = null,
-        petGuardianName = "Gustavo Ferreira",
-        batchCode = null,
-        animalName = "Calabreso",
-        status = "Registro Incompleto",
-        applicationDate = null,
-        manufacturer = null
-    )
-    CarteiraPetTheme {
-        VaccineVeterinaryItem(vaccine = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
+//@Composable
+//@Preview
+//fun PreviewCardAssinado(){
+//    var vaccine = VaccineRequestByVeterinary(
+//        id = 1,
+//        vaccine = Vaccine(
+//            id = 2,
+//            name = "Antirrábica"
+//        ),
+//        petGuardianName = "Gustavo Ferreira",
+//        batchCode = "ABC22222",
+//        animalName = "Calabreso",
+//        status = "Assinado",
+//        applicationDate = "20/03/2025",
+//        manufacturer = "Biontech"
+//    )
+//    CarteiraPetTheme {
+//        VaccineVeterinaryItem(vaccineRequest = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+//    }
+//}
+//
+//@Composable
+//@Preview
+//fun PreviewCardPendente(){
+//    var vaccine = VaccineRequestByVeterinary(
+//        id = 1,
+//        vaccine = Vaccine(
+//            id = 2,
+//            name = "Antirrábica"
+//        ),
+//        petGuardianName = "Gustavo Ferreira",
+//        batchCode = "ABC22222",
+//        animalName = "Calabreso",
+//        status = "Pendente",
+//        applicationDate = "20/03/2025",
+//        manufacturer = "Biontech"
+//    )
+//    CarteiraPetTheme {
+//        VaccineVeterinaryItem(vaccineRequest = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+//    }
+//}
+//
+//@Composable
+//@Preview
+//fun PreviewCardRejeitado(){
+//    var vaccine = VaccineRequestByVeterinary(
+//        id = 1,
+//        vaccine = null,
+//        petGuardianName = "Gustavo Ferreira",
+//        batchCode = null,
+//        animalName = "Calabreso",
+//        status = "Rejeitado",
+//        applicationDate = null,
+//        manufacturer = "Biontech"
+//    )
+//    CarteiraPetTheme {
+//        VaccineVeterinaryItem(vaccineRequest = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+//    }
+//}
+//
+//
+//@Composable
+//@Preview
+//fun PreviewCardOutro(){
+//    var vaccine = VaccineRequestByVeterinary(
+//        id = 1,
+//        vaccine = Vaccine(
+//            id = 2,
+//            name = "Antirrábica"
+//        ),
+//        petGuardianName = "Gustavo Ferreira",
+//        batchCode = "ABC22222",
+//        animalName = "Calabreso",
+//        status = "Outro",
+//        applicationDate = "20/03/2025",
+//        manufacturer = "Biontech"
+//    )
+//    CarteiraPetTheme {
+//        VaccineVeterinaryItem(vaccineRequest = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+//    }
+//}
+//
+//@Composable
+//@Preview
+//fun PreviewOutro(){
+//    var vaccine = VaccineRequestByVeterinary(
+//        id = 1,
+//        vaccine = null,
+//        petGuardianName = "Gustavo Ferreira",
+//        batchCode = null,
+//        animalName = "Calabreso",
+//        status = "Registro Incompleto",
+//        applicationDate = null,
+//        manufacturer = null
+//    )
+//    CarteiraPetTheme {
+//        VaccineVeterinaryItem(vaccineRequest = vaccine, goToUpdateVaccineRequestScreen = {}, modifier = Modifier.fillMaxWidth())
+//    }
+//}

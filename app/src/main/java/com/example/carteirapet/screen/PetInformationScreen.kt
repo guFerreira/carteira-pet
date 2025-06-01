@@ -1,5 +1,6 @@
 package com.example.carteirapet.screen
 
+import android.widget.Space
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -52,17 +52,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.repositories.Animal
+import com.example.carteirapet.repositories.Vaccine
+import com.example.carteirapet.repositories.VaccineApplication
 import com.example.carteirapet.repositories.VaccineRequestByAnimal
+import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.screen.components.BatchInfoRow
 import com.example.carteirapet.screen.components.NextApplicationDate
 import com.example.carteirapet.screen.components.PetImage
 import com.example.carteirapet.screen.components.PullToRefreshBox
+import com.example.carteirapet.screen.components.StatusIndicator
 import com.example.carteirapet.screen.components.VaccineActions
 import com.example.carteirapet.screen.components.VaccineInfoRow
 import com.example.carteirapet.screen.components.VaccineStatus
 import com.example.carteirapet.screen.components.VeterinaryInfoRow
 import com.example.carteirapet.viewModels.PetInformationViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.text.toUpperCase
+import com.example.carteirapet.screen.components.Logo
+import com.example.carteirapet.screen.components.SexIcon
+import com.example.carteirapet.screen.components.VaccineCreatedCard
+import com.example.carteirapet.ui.theme.CarteiraPetTheme
+import com.example.carteirapet.utils.DateUtils
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,22 +110,7 @@ fun PetInformation(
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Pets,
-                            contentDescription = "Pets Icon",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Carteirinha",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
+                    Logo()
                 },
                 navigationIcon = {
                     IconButton(onClick = goToHomeScreen) {
@@ -170,7 +167,7 @@ fun PetInformation(
                                 modifier = Modifier.align(Alignment.Start)
                             )
                         }
-                        Vaccines(viewModel.vaccineRequests, viewModel.isLoadingVaccineRequests)
+                        Vaccines(viewModel.vaccineRequests, viewModel.isLoadingVaccineRequests, goRegisterVaccineScreen)
                     }
                 }
             }
@@ -218,12 +215,16 @@ fun PetInformations(pet: Animal?) {
                         fontSize = 14.sp,
                     )
                 )
-                Text(
-                    text = "Sexo: ${pet.sex}", style = TextStyle(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontSize = 14.sp,
+
+                Row (verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Sexo:", style = TextStyle(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                        )
                     )
-                )
+                    SexIcon(pet.sex)
+                }
                 Text(
                     text = "Castrado: ${if (pet.neutered == true) "Sim" else "Não"}",
                     style = TextStyle(
@@ -236,9 +237,9 @@ fun PetInformations(pet: Animal?) {
 }
 
 @Composable
-fun Vaccines(vaccines: List<VaccineRequestByAnimal>, isLoading: Boolean = false) {
+fun Vaccines(vaccineRequests: List<VaccineRequestResponse>, isLoading: Boolean = false, goRegisterVaccineScreen: () -> Unit) {
     LazyColumn() {
-        if (vaccines.isEmpty() && !isLoading) {
+        if (vaccineRequests.isEmpty() && !isLoading) {
             item {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -248,54 +249,131 @@ fun Vaccines(vaccines: List<VaccineRequestByAnimal>, isLoading: Boolean = false)
                 }
             }
         } else {
-            items(vaccines.size) { item ->
-                VaccinePetItem(vaccines[item], modifier = Modifier.padding(4.dp))
+            items(vaccineRequests.size) { item ->
+                VaccinePetItem(vaccineRequests[item], goRegisterVaccineScreen,  modifier = Modifier.padding(4.dp))
             }
         }
     }
 }
 
 @Composable
-fun VaccinePetItem(vaccine: VaccineRequestByAnimal, modifier: Modifier) {
+fun VaccinePetItem(
+    vaccineRequest: VaccineRequestResponse,
+    goRegisterVaccineScreen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    Card(
-        onClick = { showBottomSheet = true },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,// Defina a cor desejada aqui
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer // Defina a cor do texto desejada aqui
-        )
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
+    when (vaccineRequest.status.toUpperCase()) {
+        "CRIADO" -> VaccineCreatedCard(vaccineRequest = vaccineRequest, goRegisterVaccineScreen)
+        else -> {
+            Card(
+                onClick = { showBottomSheet = true },
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    StatusIndicator(status = vaccineRequest.status)
 
-            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate)
-            VaccineStatus(vaccine.status, vaccine.applicationDate)
-            Spacer(modifier = Modifier.height(4.dp))
-            VeterinaryInfoRow(vaccine.veterinaryDoctorName, vaccine.crmv)
-            Spacer(modifier = Modifier.height(4.dp))
-            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer)
+                    var requestStatus = vaccineRequest.status.toUpperCase()
+                    when (requestStatus) {
+                        "RECUSADO" -> {
+                            Text(
+                                text = "A solicitação de vacina foi recusada pelo médico veterinário  ${vaccineRequest.veterinaryDoctorName}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
+                        "EXPIRADO" -> {
+                            Text(
+                                text = "A solicitação de vacina foi expirada",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(
+                                text = "Expirado em: ${vaccineRequest.expirationDate?.let {
+                                    DateUtils.formatDateStringToShow(
+                                        it
+                                    )
+                                }}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        "ACEITO" -> {
+                            Text(
+                                text = "Solicitação aceita por ${vaccineRequest.veterinaryDoctorName}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(
+                                text = "Aguardando preenchimento dos dados da aplicação da vacina",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(
+                                text = "Aceito em: ${vaccineRequest.acceptanceDate?.let {
+                                    DateUtils.formatDateStringToShow(
+                                        it
+                                    )
+                                }}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        "AGUARDANDO_ASSINATURA", "ASSINADO" -> {
+                            VaccineInfoRow(
+                                vaccineName = vaccineRequest.vaccineApplication?.vaccine?.name,
+                                applicationDate = vaccineRequest.vaccineApplication?.applicationDate?.let {
+                                    DateUtils.formatDateStringToShow(
+                                        it
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            VeterinaryInfoRow(
+                                vaccineRequest.veterinaryDoctorName,
+                                crmv = "CRMV-0000"
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            BatchInfoRow(
+                                batchCode = vaccineRequest.vaccineApplication?.batchCode,
+                                manufacturer = vaccineRequest.vaccineApplication?.manufacturer
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = "O status da solicitação de vacina é indefinido",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
             if (showBottomSheet) {
                 VaccinePetModalBottomSheet(
-                    vaccine = vaccine,
+                    vaccineRequest = vaccineRequest,
                     onDismissRequest = { showBottomSheet = false }
                 )
             }
         }
     }
+    Spacer(modifier = Modifier.height(4.dp))
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaccinePetModalBottomSheet(
-    vaccine: VaccineRequestByAnimal,
+    vaccineRequest: VaccineRequestResponse,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -304,8 +382,8 @@ fun VaccinePetModalBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Column(
             modifier = modifier
@@ -313,121 +391,113 @@ fun VaccinePetModalBottomSheet(
                 .padding(16.dp)
         ) {
 
-            VaccineInfoRow(vaccine.vaccineName, vaccine.applicationDate, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            VaccineStatus(vaccine.status, vaccine.applicationDate, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            BatchInfoRow(vaccine.batchCode, vaccine.manufacturer, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            VeterinaryInfoRow(vaccine.veterinaryDoctorName, vaccine.crmv, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            NextApplicationDate(applicationDate = vaccine.applicationDate, true)
-            Spacer(modifier = Modifier.height(8.dp))
-            VaccineActions(
-                status = vaccine.status,
-                pdfDocumentUrl = vaccine.storage,
-                signatureUrl = null,
-                isVeterinary = false
-            )
+            if(vaccineRequest.status == "Aguardando_Assinatura"){
+                StatusIndicator(status = vaccineRequest.status)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Vacina: ${vaccineRequest.vaccineApplication?.vaccine?.name}")
+                Text(text = "Aplicada em: ${vaccineRequest.vaccineApplication?.applicationDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+                Text(text = "Local de Aplicação: ${vaccineRequest.vaccineApplication?.applicationPlace}")
+                vaccineRequest.vaccineApplication?.nextDoseDate.let {
+                    Text(text = "Próxima dose: ${it?.let { it1 ->
+                        DateUtils.formatDateStringToShow(
+                            it1
+                        )
+                    }}")
+                }
+                Text(text = "Lote: ${vaccineRequest.vaccineApplication?.batchCode}")
+                Text(text = "Fabricante: ${vaccineRequest.vaccineApplication?.manufacturer}")
+                Text(text = "Data de Fabricação:${vaccineRequest.vaccineApplication?.manufacturingDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+                Text(text = "Data de Expiração: ${vaccineRequest.vaccineApplication?.expirationDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+            } else{
+                VaccineInfoRow(vaccineRequest.vaccineApplication?.vaccine?.name,
+                    vaccineRequest.vaccineApplication?.applicationDate, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                VaccineStatus(vaccineRequest.status, vaccineRequest.vaccineApplication?.applicationDate, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                BatchInfoRow(vaccineRequest.vaccineApplication?.batchCode, vaccineRequest.vaccineApplication?.manufacturer, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                VeterinaryInfoRow(vaccineRequest.veterinaryDoctorName, "vaccineRequest.crmv", true)
+                Spacer(modifier = Modifier.height(8.dp))
+                NextApplicationDate(applicationDate = vaccineRequest.vaccineApplication?.nextDoseDate, true)
+                Spacer(modifier = Modifier.height(8.dp))
+                VaccineActions(
+                    status = vaccineRequest.status,
+                    pdfDocumentUrl = vaccineRequest.storagedDocumentSignedUrl,
+                    signatureUrl = null,
+                    isVeterinary = false
+                )
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun VaccineModalBottomSheetPreview() {
-    var showBottomSheet by remember { mutableStateOf(true) }
-    if (showBottomSheet) {
-        VaccinePetModalBottomSheet(
-            VaccineRequestByAnimal(
+fun VaccinePetItemPreview() {
+    CarteiraPetTheme {
+        val mockVaccineRequest = { status: String ->
+            VaccineRequestResponse(
                 id = 1,
-                status = "assinado",
-                vaccineName = "Antirabica",
-                applicationDate = "20/10/2024",
-                batchCode = "1234",
-                manufacturer = "Astrazenica",
-                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
-                crmv = "CRMV-RS 12345",
-                nextDoseDate = "20/11/2024",
-                storage = "",
-                signedUrl = ""
-            ),
-            onDismissRequest = { showBottomSheet = false }
-        )
-    }
-}
+                status = status,
+                vaccineApplication = when (status) {
+                    "AGUARDANDO_ASSINATURA", "ASSINADO", "ACEITO" -> VaccineApplication(
+                        id = 101,
+                        vaccine = Vaccine(name = "Raiva", id = 1),
+                        applicationDate = "2025-05-01",
+                        applicationPlace = "Clínica PetVida",
+                        batchCode = "ABC123",
+                        manufacturer = "PetVax",
+                        manufacturingDate = "2024-12-01",
+                        expirationDate = "2026-12-01",
+                        nextDoseDate = "2026-05-01"
+                    )
+                    else -> null
+                },
+                animalName = "Rex",
+                animalSpecies = "Cão",
+                veterinaryDoctorName = if (status == "AGUARDANDO_ASSINATURA" || status == "ASSINADO" || status == "ACEITO" || status == "RECUSADO") "Dr. João Silva" else null,
+                requestDate = "2025-04-20",
+                expirationDate = "2025-06-01",
+                acceptanceDate = if (status == "ACEITO" || status == "ASSINADO" || status == "AGUARDANDO_ASSINATURA") "2025-04-25" else null,
+                storagedDocumentSignedUrl = if (status == "ASSINADO") "https://storage.example.com/vaccine/1/signed.pdf" else null,
+                signUrl = if (status == "AGUARDANDO_ASSINATURA") "https://sign.example.com/vaccine/1" else null
+            )
+        }
 
-
-@Composable
-@Preview
-fun PetInformationPreview1() {
-    Column {
-        VaccinePetItem(
-            vaccine = VaccineRequestByAnimal(
-                id = 1,
-                status = "pendente",
-                vaccineName = null,
-                applicationDate = null,
-                batchCode = null,
-                manufacturer = null,
-                veterinaryDoctorName = null,
-                crmv = null,
-                nextDoseDate = null,
-                storage = null,
-                signedUrl = null
-            ), modifier = Modifier.padding(10.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        VaccinePetItem(
-            vaccine = VaccineRequestByAnimal(
-                id = 1,
-                status = "pendente",
-                vaccineName = "Antirabica",
-                applicationDate = "20/10/2024",
-                batchCode = "1234",
-                manufacturer = "Astrazenica",
-                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
-                crmv = "CRMV-RS 12345",
-                nextDoseDate = null,
-                storage = null,
-                signedUrl = null
-            ), modifier = Modifier.padding(10.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        VaccinePetItem(
-            vaccine = VaccineRequestByAnimal(
-                id = 1,
-                status = "pendente",
-                vaccineName = "Antirabica",
-                applicationDate = "20/10/2024",
-                batchCode = "1234",
-                manufacturer = "Astrazenica",
-                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
-                crmv = "CRMV-RS 12345",
-                nextDoseDate = "20/11/2024",
-                storage = null,
-                signedUrl = null
-            ), modifier = Modifier.padding(10.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        VaccinePetItem(
-            vaccine = VaccineRequestByAnimal(
-                id = 1,
-                status = "assinado",
-                vaccineName = "Antirabica",
-                applicationDate = "20/10/2024",
-                batchCode = "1234",
-                manufacturer = "Astrazenica",
-                veterinaryDoctorName = "Cristiano Ronaldo Siiiiiuuu",
-                crmv = "CRMV-RS 12345",
-                nextDoseDate = "20/11/2024",
-                storage = null,
-                signedUrl = null
-            ), modifier = Modifier.padding(10.dp)
-        )
-
+        LazyColumn(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(items = listOf(
+                "CRIADO",
+                "RECUSADO",
+                "EXPIRADO",
+                "ACEITO",
+                "AGUARDANDO_ASSINATURA",
+                "ASSINADO",
+                "INDEFINIDO"
+            )) { status ->
+                VaccinePetItem(
+                    vaccineRequest = mockVaccineRequest(status),
+                    {},
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
     }
 }

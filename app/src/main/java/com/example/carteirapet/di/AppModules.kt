@@ -9,6 +9,7 @@ import com.example.carteirapet.repositories.CepRepository
 import com.example.carteirapet.repositories.UserRepository
 import com.example.carteirapet.repositories.VaccineRepository
 import com.example.carteirapet.repositories.VaccineRequestRepository
+import com.example.carteirapet.screen.AcceptOrRejectVaccineRequestScreen
 import com.example.carteirapet.screen.VeterinaryHomeScreen
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
@@ -18,6 +19,7 @@ import com.example.carteirapet.service.TokenManagerService
 import com.example.carteirapet.service.UserService
 import com.example.carteirapet.service.VaccineRequestService
 import com.example.carteirapet.service.VaccineService
+import com.example.carteirapet.viewModels.AcceptOrRejectVaccineRequestViewModel
 import com.example.carteirapet.viewModels.CreateVaccineRequestFormViewModel
 import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
 import com.example.carteirapet.viewModels.EditUserProfileViewModel
@@ -70,6 +72,8 @@ val appModule = module {
     viewModelOf(::CreateVaccineRequestViewModel)
     viewModelOf(::VeterinaryHomeViewModel)
     viewModelOf(::CreateVaccineRequestFormViewModel)
+    viewModelOf(::AcceptOrRejectVaccineRequestViewModel)
+
 }
 
 val networkModule = module {

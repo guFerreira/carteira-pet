@@ -186,8 +186,8 @@ fun PetCard(animal: Animal, goToPetInformation: () -> Unit) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -245,7 +245,7 @@ fun PetSpecie(species: String) {
             )
     ) {
         Text(
-            text = if (species == "dog") "🐶" else "😺", // Emoji do texto
+            text = if (species == "DOG") "🐶" else "😺", // Emoji do texto
             style = TextStyle(
                 color = Color.White,
                 textAlign = TextAlign.Center,

@@ -81,7 +81,7 @@ data class ProfileCreateResponse(
 )
 @Serializable
 data class Address(
-    val cep: Int,
+    val cep: String,
     val street: String,
     val number: Int,
     val complement: String,

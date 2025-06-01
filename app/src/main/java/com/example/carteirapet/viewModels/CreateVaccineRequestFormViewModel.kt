@@ -51,19 +51,19 @@ open class CreateVaccineRequestFormViewModel (private val vaccineRequestService:
                     vaccineOptions = vaccineService.getAllVaccinesBySpecies(vaccineRequest.animalSpecies)
                 }
 
-                if (vaccineRequest.signedUrl != null) {
+                if (vaccineRequest.signUrl != null) {
                     isEditing = false
-                    zapSignUrl = vaccineRequest.signedUrl
+                    zapSignUrl = vaccineRequest.signUrl
                 }
 
-                applicationDate =  vaccineRequest.applicationDate ?: ""
-                applicationPlace =  vaccineRequest.applicationPlace ?: ""
-                manufacturer = vaccineRequest.manufacturer ?: ""
-                manufacturingDate = vaccineRequest.manufacturingDate ?: ""
+                applicationDate =  vaccineRequest.vaccineApplication?.applicationDate ?: ""
+                applicationPlace =  vaccineRequest.vaccineApplication?.applicationPlace ?: ""
+                manufacturer = vaccineRequest.vaccineApplication?.manufacturer ?: ""
+                manufacturingDate = vaccineRequest.vaccineApplication?.manufacturingDate ?: ""
                 expirationDate = vaccineRequest.expirationDate ?: ""
-                batchCode = vaccineRequest.batchCode ?: ""
-                nextDoseDate = vaccineRequest.nextDoseDate ?: ""
-                selectedVaccine = vaccineRequest.vaccine
+                batchCode = vaccineRequest.vaccineApplication?.batchCode ?: ""
+                nextDoseDate = vaccineRequest.vaccineApplication?.nextDoseDate ?: ""
+                selectedVaccine = vaccineRequest.vaccineApplication?.vaccine
             } catch (e: Exception) {
                 onError("Erro ao buscar perfil do usuário: ${e.message}")
             }

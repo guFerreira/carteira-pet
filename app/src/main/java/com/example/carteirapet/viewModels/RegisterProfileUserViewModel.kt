@@ -153,7 +153,7 @@ open class RegisterProfileUserViewModel (private val authService: AuthService, p
     }
 
     fun registerProfileData(onRegister: () -> Unit, onError: (String) -> Unit){
-        val address =  Address(cep.toInt(), street, number.toInt(), complement, city, state)
+        val address =  Address(cep, street, number.toInt(), complement, city, state)
         val profile = ProfileCreateResponse(isVet, crmv, isRegistered, firstName, lastName, email, phoneNumber, cpf, address)
 
         // Lança a operação de login

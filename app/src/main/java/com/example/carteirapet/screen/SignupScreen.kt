@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,8 +51,8 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Row(
@@ -69,7 +70,9 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
                     IconButton(onClick = { goToLoginScreen() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.onSurface
+
                         )
                     }
                 },
@@ -81,12 +84,12 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .safeContentPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
 
-            Text(text = "Preencha os dados para começar a utilizar a carteira digital Moo.")
+            Text(text = "Preencha os dados para começar a utilizar a carteirinha digital do seu pet")
 
             OutlinedTextField(
                 value = viewModel.username,

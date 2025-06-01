@@ -1,5 +1,6 @@
 package com.example.carteirapet.repositories
 
+import com.example.carteirapet.exceptions.VaccineRequestNotFoundException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -11,6 +12,34 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
+
+@Serializable
+data class VaccineRequestResponse(
+    val id: Int,
+    val status: String,
+    val vaccineApplication: VaccineApplication? = null,
+    val animalName: String,
+    val animalSpecies: String,
+    val veterinaryDoctorName: String? = null,
+    val requestDate: String? = null,
+    val expirationDate: String? = null,
+    val acceptanceDate: String? = null,
+    val storagedDocumentSignedUrl: String? = null,
+    val signUrl: String? = null
+)
+
+@Serializable
+data class VaccineApplication(
+    val id: Int,
+    val vaccine: Vaccine,
+    val applicationDate: String,
+    val applicationPlace: String,
+    val batchCode: String,
+    val manufacturer: String,
+    val manufacturingDate: String,
+    val expirationDate: String,
+    val nextDoseDate: String?
+)
 
 @Serializable
 data class VaccineRequestByAnimal(
@@ -45,6 +74,17 @@ data class VaccineRequestByVeterinary(
     val storageUrl: String? = null,
     val signedUrl: String? = null
 )
+
+@Serializable
+data class AcceptVaccineRequest(
+    val vaccineRequestId: Int
+)
+
+@Serializable
+data class RejectVaccineRequest(
+    val vaccineRequestId: Int
+)
+
 
 @Serializable
 data class CreateVaccineRequest(
@@ -82,51 +122,90 @@ data class UpdateVaccineRequestResponse(
 
 class VaccineRequestRepository(private val client: HttpClient)  {
     private val url = "10.0.2.2:3000";
-    suspend fun getVaccineRequestsByAnimalId(animalId: Int): List<VaccineRequestByAnimal>{
+
+    suspend fun getActiveVaccineRequestByAnimalId(animalId: Int): VaccineRequestResponse{
+        val response: HttpResponse = client.get("http://${url}/vaccinerequest/animal/${animalId}/active") {
+            contentType(ContentType.Application.Json)
+        }
+        return if (response.status == HttpStatusCode.OK) {
+            val vaccineRequest = response.body<VaccineRequestResponse>()
+            return vaccineRequest
+        } else if (response.status == HttpStatusCode.NotFound) {
+            throw VaccineRequestNotFoundException()
+        } else {
+            throw RuntimeException("Erro ao buscar a última solicitação de vacina ${animalId}")
+        }
+    }
+
+    suspend fun getVaccineRequestsByAnimalId(animalId: Int): List<VaccineRequestResponse>{
         val response: HttpResponse = client.get("http://${url}/vaccinerequest/animal/${animalId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
-            val vaccines = response.body<List<VaccineRequestByAnimal>>()
+            val vaccines = response.body<List<VaccineRequestResponse>>()
             return vaccines
         } else {
             emptyList()
         }
     }
 
-    suspend fun getAllVaccineRequestsFromVeterinary(): List<VaccineRequestByVeterinary>{
+    suspend fun getAllVaccineRequestsFromVeterinary(): List<VaccineRequestResponse>{
         val response: HttpResponse = client.get("http://${url}/vaccinerequest") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
-            val vaccines = response.body<List<VaccineRequestByVeterinary>>()
+            val vaccines = response.body<List<VaccineRequestResponse>>()
             return vaccines
         } else {
             emptyList()
         }
     }
 
-    suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestByVeterinary? {
+    suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestResponse? {
         val response: HttpResponse = client.get("http://${url}/vaccinerequest/${vaccineRequestId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
-            val vaccines = response.body<VaccineRequestByVeterinary>()
+            val vaccines = response.body<VaccineRequestResponse>()
             return vaccines
         } else {
             null
         }
     }
 
-    suspend fun createVaccineRequest(vaccineRequest: CreateVaccineRequest):CreateVaccineRequestResponse? {
-        val response: HttpResponse = client.post("http://${url}/vaccinerequest/create") {
+    suspend fun createVaccineRequest(vaccineRequest: CreateVaccineRequest):VaccineRequestResponse {
+        val response: HttpResponse = client.post("http://${url}/vaccinerequest/") {
             contentType(ContentType.Application.Json)
             setBody(vaccineRequest)
         }
         return if (response.status == HttpStatusCode.Created) {
-            return response.body<CreateVaccineRequestResponse>()
+            return response.body<VaccineRequestResponse>()
         } else {
-            null
+            throw RuntimeException("Erro ao criar solicitação de vacina ${vaccineRequest.animalId}")
+        }
+    }
+
+    suspend fun rejectVaccineRequest(rejectVaccineRequest: RejectVaccineRequest) {
+        val response: HttpResponse = client.post("http://${url}/vaccinerequest/reject") {
+            contentType(ContentType.Application.Json)
+            setBody(rejectVaccineRequest)
+        }
+        return if (response.status == HttpStatusCode.OK) {
+            return
+        } else {
+            throw RuntimeException("Erro ao aceitar solicitação de vacina de ID = ${rejectVaccineRequest.vaccineRequestId}")
+        }
+    }
+
+    suspend fun acceptVaccineRequest(acceptVaccineRequest: AcceptVaccineRequest) {
+        val response: HttpResponse = client.post("http://${url}/vaccinerequest/accept") {
+            contentType(ContentType.Application.Json)
+            setBody(acceptVaccineRequest)
+        }
+        return if (response.status == HttpStatusCode.Created) {
+            return
+        } else {
+            throw RuntimeException("Erro ao aceitar solicitação de vacina de ID = ${acceptVaccineRequest.vaccineRequestId}")
         }
     }
 

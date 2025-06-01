@@ -59,7 +59,7 @@ fun SpeciesSelection(
 
     val speciesOptions = listOf(
         SpeciesOption(
-            "dog",
+            "DOG",
             "Cachorro",
             Icons.Filled.Pets,
             MaterialTheme.colorScheme.primaryContainer,
@@ -67,7 +67,7 @@ fun SpeciesSelection(
             MaterialTheme.colorScheme.onPrimaryContainer
         ), // Verde para cachorro
         SpeciesOption(
-            "cat",
+            "CAT",
             "Gato",
             Icons.Filled.Pets,
             MaterialTheme.colorScheme.primaryContainer,
@@ -158,8 +158,8 @@ private fun SpeciesOptionCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = when (option.name) {
-                    "dog" -> "🐶"
-                    "cat" -> "🐱"
+                    "DOG" -> "🐶"
+                    "CAT" -> "🐱"
                     else -> option.label
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -169,8 +169,8 @@ private fun SpeciesOptionCard(
             )
             Text(
                 text = when (option.name) {
-                    "dog" -> "Cachorro"
-                    "cat" -> "Gato"
+                    "DOG" -> "Cachorro"
+                    "CAT" -> "Gato"
                     else -> option.label
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -191,7 +191,7 @@ private fun SpeciesOptionCard(
 fun SpeciesSelectionPreviewDog() {
     CarteiraPetTheme {
         SpeciesSelection(
-            selectedSpecies = "dog",
+            selectedSpecies = "DOG",
             onSpeciesSelected = {},
             modifier = Modifier.padding(16.dp)
         )
@@ -223,7 +223,7 @@ fun SpeciesSelectionPreviewCat() {
 fun SpeciesSelectionPreviewDark() {
     CarteiraPetTheme {
         SpeciesSelection(
-            selectedSpecies = "dog",
+            selectedSpecies = "DOG",
             onSpeciesSelected = {},
             modifier = Modifier.padding(16.dp)
         )

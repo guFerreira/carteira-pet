@@ -29,7 +29,7 @@ class TokenManagerService(context: Context) {
     fun getRefreshToken(): String? = sharedPreferences.getString("refresh_token", null)
 
     // Função para limpar os tokens (em caso de logout, por exemplo)
-    fun clearTokens() {
-        sharedPreferences.edit().clear().commit()
+    fun clearTokens(): Boolean {
+        return sharedPreferences.edit().clear().commit()
     }
 }

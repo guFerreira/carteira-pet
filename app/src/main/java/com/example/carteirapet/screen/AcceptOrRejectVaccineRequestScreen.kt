@@ -12,16 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,20 +35,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.carteirapet.R
+import com.example.carteirapet.viewModels.AcceptOrRejectVaccineRequestViewModel
 import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
-import com.example.carteirapet.viewModels.EditUserProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, goToVaccineRequestFormScreen: (id: Int) -> Unit, viewModel: CreateVaccineRequestViewModel = koinViewModel()){
+fun AcceptOrRejectVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, goToVaccineRequestFormScreen: (id: Int) -> Unit, viewModel: AcceptOrRejectVaccineRequestViewModel = koinViewModel()){
     val context = LocalContext.current
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Row(
@@ -64,7 +61,7 @@ fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, g
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            "Moo",
+                            "Registro de vacina",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -75,8 +72,8 @@ fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, g
                     IconButton(onClick = goToHomeScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -85,35 +82,50 @@ fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, g
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding).padding(16.dp).fillMaxWidth().fillMaxHeight(),
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(50.dp))
-            Image(
-                painter = painterResource(id = R.drawable.gatinho_carteira),
-                contentDescription = "Pet segurando carteira",
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(8.dp)
-            )
+
             Text("Você escaneou o QR code ou clicou no link com sucesso.", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center,)
-            Text("Agora, ao clicar em \"Criar\", você poderá iniciar uma nova solicitação de vacinação.", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
+            Text("Você pode aceitar ou rejeitar o pedido de vacina", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(onClick = {
-                if (petId == null) return@Button
-                viewModel.createVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                } )
+            Row {
+                Button(onClick = {
+                    if (petId == null) return@Button
+                    //esse petId na verdade é o id da vaccineRequest
+                    viewModel.rejectVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    } )
 
-            }, modifier = Modifier.width(200.dp)) {
-                if(viewModel.isLoading){
-                    CircularProgressIndicator()
-                } else {
-                    Text(text = "Criar")
+                }, modifier = Modifier.width(200.dp)) {
+                    if(viewModel.isLoading){
+                        CircularProgressIndicator()
+                    } else {
+                        Text(text = "Rejeitar Solicitação")
+                    }
+                }
+
+                Button(onClick = {
+                    if (petId == null) return@Button
+                    viewModel.acceptVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    } )
+
+                }, modifier = Modifier.width(200.dp)) {
+                    if(viewModel.isLoading){
+                        CircularProgressIndicator()
+                    } else {
+                        Text(text = "Aceitar solicitação")
+                    }
                 }
             }
+
         }
     }
 }
@@ -122,5 +134,5 @@ fun CreateVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () -> Unit, g
 @Preview
 @Composable
 fun CreateVaccineRequestScreenPreview() {
-    CreateVaccineRequestScreen(1, {}, {})
+    AcceptOrRejectVaccineRequestScreen(1, {}, {})
 }

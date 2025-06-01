@@ -7,13 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.repositories.Animal
 import com.example.carteirapet.repositories.VaccineRequestByAnimal
+import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.VaccineRequestService
 import kotlinx.coroutines.launch
 
 open class PetInformationViewModel (private val animalService: AnimalService, private val vaccineRequestService: VaccineRequestService) : ViewModel() {
     var pet by mutableStateOf<Animal?>(null)
-    var vaccineRequests by mutableStateOf<List<VaccineRequestByAnimal>>(emptyList())
+    var vaccineRequests by mutableStateOf<List<VaccineRequestResponse>>(emptyList())
     var isLoadingPetInformations by mutableStateOf<Boolean>(false)
     var isLoadingVaccineRequests by mutableStateOf<Boolean>(false)
 

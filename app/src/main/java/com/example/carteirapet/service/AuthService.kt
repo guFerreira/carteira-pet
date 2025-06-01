@@ -44,6 +44,12 @@ class AuthService(private val authRepository: AuthRepository, private val tokenM
 
     suspend fun logout() {
         val isSuccess = authRepository.logout()
-        if (isSuccess) { tokenManagerService.clearTokens() }
+        if (isSuccess) {
+            if (tokenManagerService.clearTokens()) {
+                println("Tokens limpos com sucesso")
+            } else {
+                println("Falha ao limpar tokens")
+            }
+        }
     }
 }

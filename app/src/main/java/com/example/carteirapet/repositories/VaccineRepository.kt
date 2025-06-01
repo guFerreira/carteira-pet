@@ -13,7 +13,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Vaccine(
     val id: Int,
-    val name: String
+    val name: String,
+    val species: String? = null
 )
 
 class VaccineRepository(private val client: HttpClient)  {

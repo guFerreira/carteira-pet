@@ -73,11 +73,12 @@ class AuthRepository(private val client: HttpClient) {
 
     suspend fun logout():Boolean {
         val response: HttpResponse = client.delete("http://${url}/auth/logout")
-        return if (response.status == HttpStatusCode.OK) {
+        return if (response.status == HttpStatusCode.Created) {
             client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>()
                 .firstOrNull()?.clearToken()
             return true
         } else {
+            response
             return false
         }
     }

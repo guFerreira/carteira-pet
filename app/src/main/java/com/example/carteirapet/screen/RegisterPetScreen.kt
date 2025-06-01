@@ -116,7 +116,7 @@ fun RegisterPetScreen(
                     IconButton(onClick = backToHomeScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description",
+                            contentDescription = "Voltar",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }

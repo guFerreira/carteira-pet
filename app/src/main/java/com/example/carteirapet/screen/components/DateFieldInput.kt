@@ -22,8 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import java.time.Instant
 import java.util.Calendar
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateFieldInput(
@@ -34,11 +34,30 @@ fun DateFieldInput(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // Estado para o DatePicker
-    val datePickerState = rememberDatePickerState()
+    // Converter valor ISO para millis
+    val initialMillis = remember(value) {
+        try {
+            Instant.parse(value).toEpochMilli()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // Estado do DatePicker
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+
+    // Formatar para exibição
+    fun formatDate(millis: Long?): String {
+        if (millis == null) return ""
+        val calendar = Calendar.getInstance().apply { timeInMillis = millis }
+        val day = calendar.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
+        val month = (calendar.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
+        val year = calendar.get(Calendar.YEAR)
+        return "$day/$month/$year"
+    }
 
     OutlinedTextField(
-        value = value,
+        value = formatDate(initialMillis),
         enabled = enabled,
         onValueChange = {},
         label = { Text(inputName) },
@@ -59,7 +78,6 @@ fun DateFieldInput(
         }
     )
 
-    // Exibir o DatePicker em um diálogo
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -67,11 +85,7 @@ fun DateFieldInput(
                 TextButton(
                     onClick = {
                         val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
-                            val calendar = Calendar.getInstance().apply { timeInMillis = millis }
-                            val day = calendar.get(Calendar.DAY_OF_MONTH)
-                            val month = calendar.get(Calendar.MONTH) + 1
-                            val year = calendar.get(Calendar.YEAR)
-                            "$day/$month/$year"
+                            Instant.ofEpochMilli(millis).toString()
                         } ?: ""
                         onDateSelected(selectedDate)
                         showDatePicker = false

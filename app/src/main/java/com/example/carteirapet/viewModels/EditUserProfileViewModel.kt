@@ -73,7 +73,7 @@ class EditUserProfileViewModel(private val userService: UserService, private val
 
     fun updateProfileData(onRegister: () -> Unit, onError: (String) -> Unit) {
         val address =
-            Address(cep.toInt(), street, number.toInt(), complement, city, state)
+            Address(cep, street, number.toInt(), complement, city, state)
         val profile = ProfileCreateResponse(isVet, crmv, isRegistered, firstName, lastName, email, phoneNumber, cpf, address)
 
         // Lança a operação de login

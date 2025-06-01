@@ -36,7 +36,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
 
     var weight by mutableStateOf("")
 
-    var species by mutableStateOf("dog")
+    var species by mutableStateOf("DOG")
 
 
     fun loadBreeds() {
@@ -69,7 +69,7 @@ open class RegisterPetViewModel(private val animalService: AnimalService, privat
                         conditions = conditions,
                         weight = weight?.toFloat() ?: 0f,
                         id = 0,
-                        species = if (species == "dog") "DOG" else "CAT",
+                        species = if (species == "DOG") "DOG" else "CAT",
                     )
                     animalService.registerAnimal(animal, image = petImageByteArray)
                     onSuccess()

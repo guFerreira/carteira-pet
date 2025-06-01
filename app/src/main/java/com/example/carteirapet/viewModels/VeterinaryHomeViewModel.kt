@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRequestByVeterinary
+import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.service.AnimalService
 import com.example.carteirapet.service.AuthService
 import com.example.carteirapet.service.VaccineRequestService
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 
 open class VeterinaryHomeViewModel (private val authService: AuthService, private val vaccineRequestService: VaccineRequestService) : ViewModel() {
-    var vaccines by mutableStateOf<List<VaccineRequestByVeterinary>>(emptyList())
+    var vaccines by mutableStateOf<List<VaccineRequestResponse>>(emptyList())
     var isLoading by mutableStateOf<Boolean>(false)
 
     fun loadVaccineRequestsFromVeterinary(onError: (String) -> Unit) {

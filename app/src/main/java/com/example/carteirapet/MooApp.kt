@@ -1,6 +1,8 @@
 package com.example.carteirapet
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,7 +20,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.carteirapet.exceptions.UnauthorizedException
 import com.example.carteirapet.screen.CreateVaccineRequestFormScreen
-import com.example.carteirapet.screen.CreateVaccineRequestScreen
+import com.example.carteirapet.screen.AcceptOrRejectVaccineRequestScreen
 import com.example.carteirapet.screen.EditUserProfileScreen
 import com.example.carteirapet.screen.LoginScreen
 import com.example.carteirapet.screen.MyPetsScreen
@@ -33,6 +35,7 @@ import com.example.carteirapet.service.UserService
 import kotlinx.coroutines.launch
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MooApp(navController: NavHostController, authService: AuthService, userService: UserService) {
     val context = LocalContext.current
@@ -131,7 +134,7 @@ fun MooApp(navController: NavHostController, authService: AuthService, userServi
             when (canAccess) {
                 true -> {
                     // Renderiza a tela normalmente
-                    CreateVaccineRequestScreen(petId = petId, {
+                    AcceptOrRejectVaccineRequestScreen(petId = petId, {
                         navController.navigate("homeVeterinary") {
                             popUpTo("createVaccineRequest") { inclusive = true }
                         }

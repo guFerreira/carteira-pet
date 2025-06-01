@@ -62,7 +62,7 @@ fun PetImage(pet: Animal, isFromPetInformation: Boolean = false) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (pet.species == "dog") "🐶" else "😺",
+                text = if (pet.species == "DOG") "🐶" else "😺",
                 fontSize = if (isFromPetInformation) 80.sp else 44.sp
             )
         }
