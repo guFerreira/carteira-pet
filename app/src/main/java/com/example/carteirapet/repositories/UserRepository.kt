@@ -3,6 +3,7 @@ package com.example.carteirapet.repositories
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.carteirapet.BuildConfig
 import com.example.carteirapet.exceptions.UnauthorizedException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -90,9 +91,9 @@ data class Address(
 )
 
 class UserRepository(private val client: HttpClient) {
-    private val url = "10.0.2.2:3000";
+    private val url = BuildConfig.BASE_URL;
     suspend fun getUserInformations(): Profile? {
-        val response: HttpResponse = client.get("http://${url}/users") {
+        val response: HttpResponse = client.get("${url}/users") {
             contentType(ContentType.Application.Json)
         }
 
@@ -106,7 +107,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun checkUserRegister(): UserRegister {
-        val response: HttpResponse = client.get("http://${url}/users/checkRegister") {
+        val response: HttpResponse = client.get("${url}/users/checkRegister") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -118,7 +119,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun registerPetGuardian(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.post("http://${url}/petguardian") {
+        val response: HttpResponse = client.post("${url}/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -130,7 +131,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun updatePetGuardian(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.put("http://${url}/petguardian") {
+        val response: HttpResponse = client.put("${url}/petguardian") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -142,7 +143,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun registerVeterinaryDoctor(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.post("http://${url}/veterinary") {
+        val response: HttpResponse = client.post("${url}/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }
@@ -154,7 +155,7 @@ class UserRepository(private val client: HttpClient) {
     }
 
     suspend fun updateVeterinaryDoctor(profile: ProfileCreateResponse): Boolean {
-        val response: HttpResponse = client.put("http://${url}/veterinary") {
+        val response: HttpResponse = client.put("${url}/veterinary") {
             contentType(ContentType.Application.Json)
             setBody(profile)
         }

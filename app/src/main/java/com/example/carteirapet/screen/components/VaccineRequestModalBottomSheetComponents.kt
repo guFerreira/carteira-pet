@@ -76,7 +76,7 @@ fun VaccineActions(
     isVeterinary: Boolean = false,
     goToUpdateVaccineRequestScreen: () -> Unit = {}
 ) {
-    if (status == "assinado") {
+    if (status == "Assinado") {
         Divider(
             color = MaterialTheme.colorScheme.onTertiaryContainer,
             modifier = Modifier.padding(vertical = 8.dp)

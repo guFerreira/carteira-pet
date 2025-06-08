@@ -1,5 +1,6 @@
 package com.example.carteirapet.repositories
 
+import com.example.carteirapet.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.auth.Auth
@@ -31,9 +32,9 @@ data class RefreshTokenRequest(val token: String)
 data class UserRequest(val username: String, val password: String)
 
 class AuthRepository(private val client: HttpClient) {
-    private val url = "10.0.2.2:3000";
+    private val url = BuildConfig.BASE_URL;
     suspend fun login(username: String, password: String): AuthCredential? {
-        val response: HttpResponse = client.post("http://${url}/auth/login") {
+        val response: HttpResponse = client.post("${url}/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(LoginRequest(username, password))
         }
@@ -48,7 +49,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun refreshAccessToken(token: String): RefreshedToken? {
-        val response: HttpResponse = client.post("http://${url}/auth/refresh/token") {
+        val response: HttpResponse = client.post("${url}/auth/refresh/token") {
             contentType(ContentType.Application.Json)
             setBody(RefreshTokenRequest(token))
         }
@@ -60,7 +61,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun registerUser(username: String, password: String): Boolean {
-        val response: HttpResponse = client.post("http://${url}/auth/register") {
+        val response: HttpResponse = client.post("${url}/auth/register") {
             contentType(ContentType.Application.Json)
             setBody(UserRequest(username, password))
         }
@@ -72,7 +73,7 @@ class AuthRepository(private val client: HttpClient) {
     }
 
     suspend fun logout():Boolean {
-        val response: HttpResponse = client.delete("http://${url}/auth/logout")
+        val response: HttpResponse = client.delete("${url}/auth/logout")
         return if (response.status == HttpStatusCode.Created) {
             client.plugin(Auth).providers.filterIsInstance<BearerAuthProvider>()
                 .firstOrNull()?.clearToken()

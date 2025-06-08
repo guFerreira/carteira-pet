@@ -1,5 +1,6 @@
 package com.example.carteirapet.repositories
 
+import com.example.carteirapet.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -17,9 +18,9 @@ data class Breed(
 )
 
 class BreedRepository(private val client: HttpClient) {
-    private val url = "10.0.2.2:3000";
+    private val url = BuildConfig.BASE_URL;
     suspend fun getBreeds(specie: String): List<Breed> {
-        val response: HttpResponse = client.get("http://${url}/breeds") {
+        val response: HttpResponse = client.get("${url}/breeds") {
             contentType(ContentType.Application.Json)
             parameter("specie", specie)
         }

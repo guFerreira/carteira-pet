@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.carteirapet"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -23,13 +23,29 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"http://34.56.110.215\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
         }
     }
     compileOptions {
@@ -58,6 +74,7 @@ dependencies {
     val koin_version = "4.0.0"
     val compose_version = "1.7.2" // Versão do Compose que você deseja usar
 
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
 

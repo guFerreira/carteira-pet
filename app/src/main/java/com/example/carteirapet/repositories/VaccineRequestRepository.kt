@@ -1,5 +1,6 @@
 package com.example.carteirapet.repositories
 
+import com.example.carteirapet.BuildConfig
 import com.example.carteirapet.exceptions.VaccineRequestNotFoundException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -121,10 +122,10 @@ data class UpdateVaccineRequestResponse(
 )
 
 class VaccineRequestRepository(private val client: HttpClient)  {
-    private val url = "10.0.2.2:3000";
+    private val url = BuildConfig.BASE_URL;
 
     suspend fun getActiveVaccineRequestByAnimalId(animalId: Int): VaccineRequestResponse{
-        val response: HttpResponse = client.get("http://${url}/vaccinerequest/animal/${animalId}/active") {
+        val response: HttpResponse = client.get("${url}/vaccinerequest/animal/${animalId}/active") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -138,7 +139,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getVaccineRequestsByAnimalId(animalId: Int): List<VaccineRequestResponse>{
-        val response: HttpResponse = client.get("http://${url}/vaccinerequest/animal/${animalId}") {
+        val response: HttpResponse = client.get("${url}/vaccinerequest/animal/${animalId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -150,7 +151,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getAllVaccineRequestsFromVeterinary(): List<VaccineRequestResponse>{
-        val response: HttpResponse = client.get("http://${url}/vaccinerequest") {
+        val response: HttpResponse = client.get("${url}/vaccinerequest") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -162,7 +163,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun getVaccineRequestsFromVeterinaryById(vaccineRequestId: Int): VaccineRequestResponse? {
-        val response: HttpResponse = client.get("http://${url}/vaccinerequest/${vaccineRequestId}") {
+        val response: HttpResponse = client.get("${url}/vaccinerequest/${vaccineRequestId}") {
             contentType(ContentType.Application.Json)
         }
         return if (response.status == HttpStatusCode.OK) {
@@ -174,7 +175,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun createVaccineRequest(vaccineRequest: CreateVaccineRequest):VaccineRequestResponse {
-        val response: HttpResponse = client.post("http://${url}/vaccinerequest/") {
+        val response: HttpResponse = client.post("${url}/vaccinerequest/") {
             contentType(ContentType.Application.Json)
             setBody(vaccineRequest)
         }
@@ -186,7 +187,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun rejectVaccineRequest(rejectVaccineRequest: RejectVaccineRequest) {
-        val response: HttpResponse = client.post("http://${url}/vaccinerequest/reject") {
+        val response: HttpResponse = client.post("${url}/vaccinerequest/reject") {
             contentType(ContentType.Application.Json)
             setBody(rejectVaccineRequest)
         }
@@ -198,7 +199,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun acceptVaccineRequest(acceptVaccineRequest: AcceptVaccineRequest) {
-        val response: HttpResponse = client.post("http://${url}/vaccinerequest/accept") {
+        val response: HttpResponse = client.post("${url}/vaccinerequest/accept") {
             contentType(ContentType.Application.Json)
             setBody(acceptVaccineRequest)
         }
@@ -210,7 +211,7 @@ class VaccineRequestRepository(private val client: HttpClient)  {
     }
 
     suspend fun updateVaccineRequest(vaccineRequestId: Int, vaccineRequestInput: UpdateVaccineRequest):UpdateVaccineRequestResponse? {
-        val response: HttpResponse = client.put("http://${url}/vaccinerequest/${vaccineRequestId}") {
+        val response: HttpResponse = client.put("${url}/vaccinerequest/${vaccineRequestId}") {
             contentType(ContentType.Application.Json)
             setBody(vaccineRequestInput)
         }

@@ -1,5 +1,6 @@
 package com.example.carteirapet.repositories
 
+import com.example.carteirapet.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
@@ -37,9 +38,9 @@ data class Animal(
 )
 
 class AnimalRepository(private val client: HttpClient) {
-    private val url = "10.0.2.2:3000";
+    private val url = BuildConfig.BASE_URL;
     suspend fun getAnimals(): List<Animal>{
-        val response: HttpResponse = client.get("http://${url}/animal") {
+        val response: HttpResponse = client.get("${url}/animal") {
             contentType(ContentType.Application.Json)
         }
 
@@ -53,7 +54,7 @@ class AnimalRepository(private val client: HttpClient) {
     }
 
     suspend fun getAnimalById(animalId: Int): Animal? {
-        val response: HttpResponse = client.get("http://${url}/animal/$animalId") {
+        val response: HttpResponse = client.get("${url}/animal/$animalId") {
             contentType(ContentType.Application.Json)
         }
 
@@ -99,7 +100,7 @@ class AnimalRepository(private val client: HttpClient) {
         }
 
         val response: HttpResponse = client.submitFormWithBinaryData(
-            url = "http://${url}/animal",
+            url = "${url}/animal",
             formData = multipartData
         )
 

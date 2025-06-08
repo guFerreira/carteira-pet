@@ -20,7 +20,7 @@ class AnimalService(private val animalRepository: AnimalRepository) {
     }
 
     suspend fun registerAnimal(animal: Animal, image: ByteArray?) {
-        animal.birthDate = DateUtils.formatDateStringToRegister(animal.birthDate)
+//        animal.birthDate = DateUtils.formatDateStringToRegister(animal.birthDate)
         animalRepository.registerAnimal(animal, image)
     }
 
