@@ -1,6 +1,5 @@
 package com.example.carteirapet.screen
 
-import android.widget.Space
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -14,17 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -47,33 +46,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.repositories.Animal
 import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineApplication
-import com.example.carteirapet.repositories.VaccineRequestByAnimal
 import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.screen.components.BatchInfoRow
+import com.example.carteirapet.screen.components.ButtonDownloadPdf
+import com.example.carteirapet.screen.components.ButtonOpenPdfOnBrowser
+import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.NextApplicationDate
 import com.example.carteirapet.screen.components.PetImage
 import com.example.carteirapet.screen.components.PullToRefreshBox
+import com.example.carteirapet.screen.components.SexIcon
 import com.example.carteirapet.screen.components.StatusIndicator
+import com.example.carteirapet.screen.components.petguardian.VaccineAcceptedCard
 import com.example.carteirapet.screen.components.VaccineActions
+import com.example.carteirapet.screen.components.petguardian.VaccineCreatedCard
+import com.example.carteirapet.screen.components.petguardian.VaccineExpiredCard
 import com.example.carteirapet.screen.components.VaccineInfoRow
+import com.example.carteirapet.screen.components.petguardian.VaccineRejectedCard
 import com.example.carteirapet.screen.components.VaccineStatus
 import com.example.carteirapet.screen.components.VeterinaryInfoRow
-import com.example.carteirapet.viewModels.PetInformationViewModel
-import org.koin.androidx.compose.koinViewModel
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.text.toUpperCase
-import com.example.carteirapet.screen.components.Logo
-import com.example.carteirapet.screen.components.SexIcon
-import com.example.carteirapet.screen.components.VaccineCreatedCard
+import com.example.carteirapet.screen.components.petguardian.VaccineAwaitingSignatureCard
 import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.utils.DateUtils
+import com.example.carteirapet.viewModels.PetInformationViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,7 +138,9 @@ fun PetInformation(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .safeContentPadding(),
+                .safeContentPadding()
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
         ) {
             if (viewModel.isLoadingPetInformations) {
                 CircularProgressIndicator()
@@ -266,13 +269,18 @@ fun VaccinePetItem(
 
     when (vaccineRequest.status.toUpperCase()) {
         "CRIADO" -> VaccineCreatedCard(vaccineRequest = vaccineRequest, goRegisterVaccineScreen)
+        "RECUSADO" -> VaccineRejectedCard(vaccineRequest = vaccineRequest)
+        "EXPIRADO" -> VaccineExpiredCard(vaccineRequest = vaccineRequest)
+        "ACEITO" -> VaccineAcceptedCard(vaccineRequest = vaccineRequest)
+        "AGUARDANDO_ASSINATURA" -> VaccineAwaitingSignatureCard(vaccineRequest = vaccineRequest)
+        "ASSINADO" -> VaccineAcceptedCard(vaccineRequest = vaccineRequest)
         else -> {
             Card(
                 onClick = { showBottomSheet = true },
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
@@ -281,54 +289,14 @@ fun VaccinePetItem(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    StatusIndicator(status = vaccineRequest.status)
+                    Row(modifier= Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        StatusIndicator(status = vaccineRequest.status)
 
+                    }
+                    Spacer(modifier = Modifier.padding(4.dp))
                     var requestStatus = vaccineRequest.status.toUpperCase()
                     when (requestStatus) {
-                        "RECUSADO" -> {
-                            Text(
-                                text = "A solicitação de vacina foi recusada pelo médico veterinário  ${vaccineRequest.veterinaryDoctorName}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-
-                        "EXPIRADO" -> {
-                            Text(
-                                text = "A solicitação de vacina foi expirada",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.padding(4.dp))
-                            Text(
-                                text = "Expirado em: ${vaccineRequest.expirationDate?.let {
-                                    DateUtils.formatDateStringToShow(
-                                        it
-                                    )
-                                }}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        "ACEITO" -> {
-                            Text(
-                                text = "Solicitação aceita por ${vaccineRequest.veterinaryDoctorName}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.padding(4.dp))
-                            Text(
-                                text = "Aguardando preenchimento dos dados da aplicação da vacina",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Spacer(modifier = Modifier.padding(4.dp))
-                            Text(
-                                text = "Aceito em: ${vaccineRequest.acceptanceDate?.let {
-                                    DateUtils.formatDateStringToShow(
-                                        it
-                                    )
-                                }}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        "AGUARDANDO_ASSINATURA", "ASSINADO" -> {
+                        "ASSINADO" -> {
                             VaccineInfoRow(
                                 vaccineName = vaccineRequest.vaccineApplication?.vaccine?.name,
                                 applicationDate = vaccineRequest.vaccineApplication?.applicationDate?.let {
@@ -340,7 +308,7 @@ fun VaccinePetItem(
                             Spacer(modifier = Modifier.height(4.dp))
                             VeterinaryInfoRow(
                                 vaccineRequest.veterinaryDoctorName,
-                                crmv = "CRMV-0000"
+                                crmv = ""
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             BatchInfoRow(
@@ -392,7 +360,10 @@ fun VaccinePetModalBottomSheet(
         ) {
 
             if(vaccineRequest.status == "Aguardando_Assinatura"){
-                StatusIndicator(status = vaccineRequest.status)
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    StatusIndicator(status = vaccineRequest.status)
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(text = "Vacina: ${vaccineRequest.vaccineApplication?.vaccine?.name}")
@@ -421,7 +392,54 @@ fun VaccinePetModalBottomSheet(
                         it
                     )
                 }}")
-            } else{
+            } else if(vaccineRequest.status == "Assinado"){
+                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    StatusIndicator(status = vaccineRequest.status)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(text = "Vacina: ${vaccineRequest.vaccineApplication?.vaccine?.name}")
+                Text(text = "Aplicada em: ${vaccineRequest.vaccineApplication?.applicationDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+                Text(text = "Local de Aplicação: ${vaccineRequest.vaccineApplication?.applicationPlace}")
+                vaccineRequest.vaccineApplication?.nextDoseDate.let {
+                    Text(text = "Próxima dose: ${it?.let { it1 ->
+                        DateUtils.formatDateStringToShow(
+                            it1
+                        )
+                    }}")
+                }
+                Text(text = "Lote: ${vaccineRequest.vaccineApplication?.batchCode}")
+                Text(text = "Fabricante: ${vaccineRequest.vaccineApplication?.manufacturer}")
+                Text(text = "Data de Fabricação:${vaccineRequest.vaccineApplication?.manufacturingDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+                Text(text = "Data de Expiração: ${vaccineRequest.vaccineApplication?.expirationDate?.let {
+                    DateUtils.formatDateStringToShow(
+                        it
+                    )
+                }}")
+
+
+                Divider(
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    vaccineRequest.storagedDocumentSignedUrl?.let { ButtonDownloadPdf(pdfUrl = it) }
+                    vaccineRequest.storagedDocumentSignedUrl?.let { ButtonOpenPdfOnBrowser(pdfUrl = it) }
+                }
+            }else{
                 VaccineInfoRow(vaccineRequest.vaccineApplication?.vaccine?.name,
                     vaccineRequest.vaccineApplication?.applicationDate, true)
                 Spacer(modifier = Modifier.height(8.dp))

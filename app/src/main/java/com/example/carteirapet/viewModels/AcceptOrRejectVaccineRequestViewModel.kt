@@ -12,12 +12,12 @@ class AcceptOrRejectVaccineRequestViewModel (private val vaccineRequestService: 
     var isLoading by mutableStateOf<Boolean>(false)
         private set
 
-    fun rejectVaccineRequest(vaccineRequestId: Int, onSuccessful: (id: Int) -> Unit, onError: (String) -> Unit) {
+    fun rejectVaccineRequest(vaccineRequestId: Int, onSuccessful: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
                 isLoading = true
                 vaccineRequestService.rejectVaccineRequest(vaccineRequestId)
-                onSuccessful(vaccineRequestId)
+                onSuccessful()
             } catch (e: Exception) {
                 onError("Erro ao criar a solicitação de vacinação ${e.message}")
             } finally {

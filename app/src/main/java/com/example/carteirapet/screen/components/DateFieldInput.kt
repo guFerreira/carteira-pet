@@ -23,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,12 +51,13 @@ fun DateFieldInput(
     // Formatar para exibição
     fun formatDate(millis: Long?): String {
         if (millis == null) return ""
-        val calendar = Calendar.getInstance().apply { timeInMillis = millis }
-        val day = calendar.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
-        val month = (calendar.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
-        val year = calendar.get(Calendar.YEAR)
+        val localDate = LocalDate.ofEpochDay(millis / (1000 * 60 * 60 * 24))
+        val day = localDate.dayOfMonth.toString().padStart(2, '0')
+        val month = localDate.monthValue.toString().padStart(2, '0')
+        val year = localDate.year
         return "$day/$month/$year"
     }
+
 
     OutlinedTextField(
         value = formatDate(initialMillis),
@@ -87,6 +90,8 @@ fun DateFieldInput(
                         val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
                             Instant.ofEpochMilli(millis).toString()
                         } ?: ""
+
+                        //2025-06-11T00:00:00Z o valor do selectedDate ao seleciona o dia 11 mas a exibição ta aparecendo dia 10
                         onDateSelected(selectedDate)
                         showDatePicker = false
                     }

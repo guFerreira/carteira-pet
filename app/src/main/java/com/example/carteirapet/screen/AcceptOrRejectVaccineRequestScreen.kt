@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -83,6 +86,7 @@ fun AcceptOrRejectVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
+                .safeContentPadding()
                 .padding(16.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(),
@@ -95,36 +99,71 @@ fun AcceptOrRejectVaccineRequestScreen(petId: Int? = null, goToHomeScreen: () ->
             Text("Você pode aceitar ou rejeitar o pedido de vacina", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row {
-                Button(onClick = {
-                    if (petId == null) return@Button
-                    //esse petId na verdade é o id da vaccineRequest
-                    viewModel.rejectVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    } )
-
-                }, modifier = Modifier.width(200.dp)) {
-                    if(viewModel.isLoading){
-                        CircularProgressIndicator()
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Button(
+                    onClick = {
+                        if (petId == null) return@Button
+                        viewModel.rejectVaccineRequest(
+                            petId,
+                            onSuccessful = goToHomeScreen,
+                            onError = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    if (viewModel.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
                     } else {
-                        Text(text = "Rejeitar Solicitação")
+                        Icon(
+                            imageVector = Icons.Outlined.Cancel,
+                            contentDescription = "Rejeitar",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Rejeitar")
                     }
                 }
 
-                Button(onClick = {
-                    if (petId == null) return@Button
-                    viewModel.acceptVaccineRequest(petId, onSuccessful = goToVaccineRequestFormScreen , onError = { message ->
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    } )
-
-                }, modifier = Modifier.width(200.dp)) {
-                    if(viewModel.isLoading){
-                        CircularProgressIndicator()
+                Button(
+                    onClick = {
+                        if (petId == null) return@Button
+                        viewModel.acceptVaccineRequest(
+                            petId,
+                            onSuccessful = goToVaccineRequestFormScreen,
+                            onError = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    if (viewModel.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
                     } else {
-                        Text(text = "Aceitar solicitação")
+                        Icon(
+                            imageVector = Icons.Outlined.CheckCircle,
+                            contentDescription = "Aceitar",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Aceitar")
                     }
                 }
             }
+
 
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -53,7 +54,9 @@ import com.example.carteirapet.repositories.Vaccine
 import com.example.carteirapet.repositories.VaccineRequestByVeterinary
 import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.screen.components.BatchInfoRow
+import com.example.carteirapet.screen.components.ButtonDownloadPdf
 import com.example.carteirapet.screen.components.ButtonOpenLinkForDigitalSignatureOnBrowser
+import com.example.carteirapet.screen.components.ButtonOpenPdfOnBrowser
 import com.example.carteirapet.screen.components.CardUser
 import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.NextApplicationDate
@@ -143,14 +146,11 @@ fun VeterinaryHomeScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .safeContentPadding(),
+                .safeContentPadding()
+                .padding(16.dp, 0.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+            Column {
                 CardUser("Médico veterinário", true)
 
 //                QRCodeScannerScreen()
@@ -218,32 +218,22 @@ fun VaccineVeterinaryItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                if (vaccineRequest.vaccineApplication?.vaccine?.name != null) {
-                    Text(
-                        text = vaccineRequest.vaccineApplication?.vaccine?.name ?: "Nome da vacina",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    Text(
-                        text = "O registro de vacina não foi concluído",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
 
-
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 vaccineRequest.status?.let { status ->
                     StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
+            vaccineRequest.vaccineApplication?.vaccine?.let {
+                Text(
+                    text = it.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            vaccineRequest.vaccineApplication?.applicationDate?.let {
                 Text(
                     text = "Data de aplicação: ${vaccineRequest.vaccineApplication?.applicationDate?.let {
                         DateUtils.formatDateStringToShow(
@@ -253,15 +243,9 @@ fun VaccineVeterinaryItem(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
 
 
-//            Spacer(modifier = Modifier.height(4.dp))
-//            if (vaccineRequest.petGuardianName != null) {
-//                Text(
-//                    text = "Tutor: ${vaccineRequest.petGuardianName}",
-//                    fontSize = 12.sp
-//                )
-//            }
             Spacer(modifier = Modifier.height(4.dp))
 
             if (vaccineRequest.animalName != null) {
@@ -309,8 +293,10 @@ fun VaccineVeterinaryModalBottomSheet(
 
             if(vaccineRequest.status == "Expirado" || vaccineRequest.status == "Recusado") {
                 Column {
-                    vaccineRequest.status?.let { status ->
-                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        vaccineRequest.status?.let { status ->
+                            StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = "Pet: ${vaccineRequest.animalName}")
@@ -320,8 +306,10 @@ fun VaccineVeterinaryModalBottomSheet(
 
             } else if (vaccineRequest.status == "Aceito") {
                 Column {
-                    vaccineRequest.status?.let { status ->
-                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        vaccineRequest.status?.let { status ->
+                            StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -345,8 +333,10 @@ fun VaccineVeterinaryModalBottomSheet(
                 }
             } else if (vaccineRequest.status == "Aguardando_Assinatura") {
                 Column {
-                    vaccineRequest.status?.let { status ->
-                        StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        vaccineRequest.status?.let { status ->
+                            StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -369,12 +359,73 @@ fun VaccineVeterinaryModalBottomSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(onClick = { goToUpdateVaccineRequestScreen(vaccineRequest.id) }) {
-                            Text(text = "Editar registro de vacina")
+                            Text(text = "Editar")
                         }
                         ButtonOpenLinkForDigitalSignatureOnBrowser(url = vaccineRequest.signUrl ?: "")
                     }
                 }
-            } else {
+            } else if (vaccineRequest.status == "Assinado") {
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        vaccineRequest.status?.let { status ->
+                            StatusIndicator(status = status.replaceFirstChar { it.uppercase() }, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        buildAnnotatedString {
+                            append("A solicitação de vacina do pet ")
+
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(vaccineRequest.animalName)
+                            }
+
+                            append(" foi assinada com sucesso!")
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    vaccineRequest.vaccineApplication?.vaccine?.name?.let {
+                        Text(
+                            text = "Vacina: " + it
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    vaccineRequest.vaccineApplication?.manufacturer?.let {
+                        Text(
+                            text = "Fabricante: " + it
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    vaccineRequest.vaccineApplication?.batchCode?.let {
+                        Text(
+                            text = "Lote: " + it
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    vaccineRequest.vaccineApplication?.manufacturingDate?.let {
+                        Text(
+                            text = "Data de Fabricação: " + DateUtils.formatDateStringToShow(it)
+                        )
+                    }
+
+                    Divider(
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        vaccineRequest.storagedDocumentSignedUrl?.let { ButtonDownloadPdf(pdfUrl = it) }
+                        vaccineRequest.storagedDocumentSignedUrl?.let { ButtonOpenPdfOnBrowser(pdfUrl = it) }
+                    }
+                }
+            }else {
                 VaccineInfoRow(vaccineRequest.vaccineApplication?.vaccine?.name, vaccineRequest.vaccineApplication?.applicationDate, true)
                 Spacer(modifier = Modifier.height(8.dp))
                 VaccineStatus(vaccineRequest.status, vaccineRequest.vaccineApplication?.applicationDate, true, true)

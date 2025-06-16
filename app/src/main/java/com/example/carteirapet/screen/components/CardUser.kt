@@ -21,7 +21,6 @@ fun CardUser(name: String, isVeterinary: Boolean? = false) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-//            .padding(horizontal = 16.dp, vertical = 24.dp) // Padding externo para alinhamento correto
     ) {
         Text(
             text = "Olá, ${name}!",

@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Add
@@ -140,8 +142,9 @@ fun MyPetsScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .safeContentPadding(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .safeContentPadding()
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
         ) {
             CardUser(viewModel.name, false)
             PullToRefreshBox(isRefreshing = viewModel.isLoadingPets, onRefresh = {

@@ -118,7 +118,8 @@ fun CreateVaccineRequestFormScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .safeContentPadding(),
+//                .safeContentPadding()
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

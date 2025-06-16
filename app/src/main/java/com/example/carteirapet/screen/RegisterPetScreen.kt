@@ -129,6 +129,7 @@ fun RegisterPetScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .safeContentPadding()
+                .padding(16.dp)
                 .fillMaxWidth()
                 .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.Center,

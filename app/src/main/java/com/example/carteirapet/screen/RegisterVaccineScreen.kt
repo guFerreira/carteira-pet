@@ -129,6 +129,7 @@ fun RegisterVaccineScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .safeContentPadding()
+                .padding(16.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,

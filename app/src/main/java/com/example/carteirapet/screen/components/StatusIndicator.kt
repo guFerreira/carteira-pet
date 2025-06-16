@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.HourglassEmpty
@@ -22,40 +23,63 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
     var statusName = status.toUpperCase()
+
     val statusColor = when (statusName) {
-        "CRIADO" -> MaterialTheme.colorScheme.tertiaryContainer
-        "RECUSADO" -> MaterialTheme.colorScheme.errorContainer
-        "EXPIRADO" -> MaterialTheme.colorScheme.errorContainer
-        "ACEITO" -> MaterialTheme.colorScheme.primaryContainer
-        "AGUARDANDO_ASSINATURA" -> MaterialTheme.colorScheme.tertiaryContainer
-        "ASSINADO" -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.inverseOnSurface
+        "CRIADO" -> Color(0xFFD0E8FF) // Azul claro
+        "AGUARDANDO_ASSINATURA" -> Color(0xFFFFF3CD) // Amarelo claro
+        "ACEITO" -> Color(0xFFD1E7DD) // Verde claro
+        "ASSINADO" -> Color(0xFF2E8B57) // Verde escuro
+        "RECUSADO" -> Color(0xFFF8D7DA) // Vermelho claro
+        "EXPIRADO" -> Color(0xFFE0E0E0) // Cinza claro
+        else -> Color(0xFFE5E5E5) // Cinza neutro
     }
 
+    val textColor = when (statusName) {
+        "CRIADO" -> Color(0xFF084298)
+        "AGUARDANDO_ASSINATURA" -> Color(0xFF856404)
+        "ACEITO" -> Color(0xFF0F5132)
+        "ASSINADO" -> Color.White
+        "RECUSADO" -> Color(0xFF842029)
+        "EXPIRADO" -> Color(0xFF6C757D)
+        else -> Color(0xFF6C757D)
+    }
+
+//
+//    val statusColor = when (statusName) {
+//        "CRIADO" -> MaterialTheme.colorScheme.tertiaryContainer
+//        "RECUSADO" -> MaterialTheme.colorScheme.errorContainer
+//        "EXPIRADO" -> MaterialTheme.colorScheme.errorContainer
+//        "ACEITO" -> MaterialTheme.colorScheme.primaryContainer
+//        "AGUARDANDO_ASSINATURA" -> MaterialTheme.colorScheme.tertiaryContainer
+//        "ASSINADO" -> Color(0xFF2E8B57)
+//        else -> MaterialTheme.colorScheme.inverseOnSurface
+//    }
+
+//    val textColor = when (statusName) {
+//        "CRIADO" -> MaterialTheme.colorScheme.onTertiaryContainer
+//        "RECUSADO" -> MaterialTheme.colorScheme.onErrorContainer
+//        "EXPIRADO" -> MaterialTheme.colorScheme.onErrorContainer
+//        "ACEITO" -> MaterialTheme.colorScheme.onPrimaryContainer
+//        "AGUARDANDO_ASSINATURA" -> MaterialTheme.colorScheme.onTertiaryContainer
+//        "ASSINADO" -> Color.White
+//        else -> MaterialTheme.colorScheme.onSurfaceVariant
+//    }
+
     val icon = when (statusName) {
-        "CRIADO" -> Icons.Outlined.HourglassEmpty
+        "CRIADO" -> Icons.Outlined.Add
         "RECUSADO" -> Icons.Outlined.Cancel
         "EXPIRADO" -> Icons.Outlined.TimerOff
         "ACEITO" -> Icons.Outlined.CheckCircle
         "AGUARDANDO_ASSINATURA" -> Icons.Outlined.HourglassEmpty
         "ASSINADO" -> Icons.Outlined.CheckCircle
         else -> Icons.Outlined.Info
-    }
-
-    val textColor = when (statusName) {
-        "CRIADO" -> MaterialTheme.colorScheme.onTertiaryContainer
-        "RECUSADO" -> MaterialTheme.colorScheme.onErrorContainer
-        "EXPIRADO" -> MaterialTheme.colorScheme.onErrorContainer
-        "ACEITO" -> MaterialTheme.colorScheme.onPrimaryContainer
-        "AGUARDANDO_ASSINATURA" -> MaterialTheme.colorScheme.onTertiaryContainer
-        "ASSINADO" -> MaterialTheme.colorScheme.onPrimaryContainer
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val text = when (statusName) {
@@ -77,7 +101,7 @@ fun StatusIndicator(status: String, modifier: Modifier = Modifier) {
         Icon(
             imageVector = icon,
             contentDescription = text,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = textColor,
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))

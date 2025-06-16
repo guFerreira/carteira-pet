@@ -84,6 +84,7 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(16.dp)
                 .safeContentPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top

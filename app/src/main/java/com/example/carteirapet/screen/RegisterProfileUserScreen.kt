@@ -103,7 +103,8 @@ fun RegisterProfileUserScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .safeContentPadding(),
+                .safeContentPadding()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
