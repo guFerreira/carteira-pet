@@ -21,7 +21,7 @@ import com.example.carteirapet.repositories.Animal
 
 
 @Composable
-fun PetImage(pet: Animal, isFromPetInformation: Boolean = false) {
+fun PetImage(pet: Animal, modifier: Modifier = Modifier) { // Modificador externo para controle de tamanho e borda
     // Carregar a imagem da URL
     val painter = rememberImagePainter(
         pet.photo, // A URL da imagem
@@ -35,35 +35,31 @@ fun PetImage(pet: Animal, isFromPetInformation: Boolean = false) {
         // Exibir a imagem com a borda
         Image(
             painter = painter,
-            contentDescription = "Imagem do pet",
-            modifier = Modifier
-                .size(120.dp)
+            contentDescription = "Foto do pet ${pet.name}", // Descrição mais específica
+            modifier = modifier // Aplica o modificador passado, que incluirá o size e border
                 .clip(CircleShape)
-                .border(
-                    if (isFromPetInformation) 3.dp else 1.dp,
-                    MaterialTheme.colorScheme.onSecondaryContainer,
-                    CircleShape
-                ),
+                .background(MaterialTheme.colorScheme.secondaryContainer), // Cor de fundo para caso a imagem demore a carregar
             contentScale = ContentScale.Crop // Faz a imagem se ajustar ao formato circular
         )
     } else {
+        // Fallback com Box e emoji
         Box(
-            modifier = Modifier
+            modifier = modifier // Aplica o modificador passado para size e border
+                .clip(CircleShape) // Garante o clipe circular
                 .background(
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    shape = CircleShape
-                ) // Adiciona a cor de fundo
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    CircleShape
+                    color = MaterialTheme.colorScheme.secondaryContainer, // Cor de fundo consistente com o tema
                 )
-                .size(120.dp),
+                .border(
+                    1.dp, // Borda padrão para o fallback
+                    MaterialTheme.colorScheme.outlineVariant, // Cor da borda
+                    CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (pet.species == "DOG") "🐶" else "😺",
-                fontSize = if (isFromPetInformation) 80.sp else 44.sp
+                fontSize = 48.sp, // Tamanho fixo para o emoji, ajustado para caber bem no círculo
+                color = MaterialTheme.colorScheme.onSecondaryContainer // Cor do texto/emoji consistente
             )
         }
     }

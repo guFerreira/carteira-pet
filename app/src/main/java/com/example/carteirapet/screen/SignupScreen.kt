@@ -4,11 +4,16 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -40,6 +45,120 @@ import com.example.carteirapet.ui.theme.CarteiraPetTheme
 import com.example.carteirapet.viewModels.SignupViewModel
 import org.koin.androidx.compose.koinViewModel
 
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinViewModel()) {
+//    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+//    val context = LocalContext.current
+//
+//    Scaffold(
+//        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+//        topBar = {
+//            CenterAlignedTopAppBar(
+//                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.surface,
+//                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+//                ),
+//                title = {
+//                    Row(
+//                        horizontalArrangement = Arrangement.Center,
+//                        verticalAlignment = Alignment.CenterVertically,
+//                    ) {
+//                        Text(
+//                            "Cadastro de usuário",
+//                            maxLines = 1,
+//                            overflow = TextOverflow.Ellipsis
+//                        )
+//                    }
+//                },
+//                navigationIcon = {
+//                    IconButton(onClick = { goToLoginScreen() }) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = "Voltar",
+//                            tint = MaterialTheme.colorScheme.onSurface
+//
+//                        )
+//                    }
+//                },
+//                scrollBehavior = scrollBehavior,
+//            )
+//        }
+//    ) { innerPadding ->
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(innerPadding)
+//                .padding(16.dp)
+//                .safeContentPadding(),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Top
+//        ) {
+//
+//            Text(text = "Preencha os dados para começar a utilizar a carteirinha digital do seu pet")
+//
+//            OutlinedTextField(
+//                value = viewModel.username,
+//                onValueChange = { viewModel.updateUsername(it) },
+//                label = { Text("Usuário") },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//
+//            OutlinedTextField(
+//                value = viewModel.password,
+//                onValueChange = { viewModel.updatePassword(it) },
+//                label = { Text("Senha") },
+//                visualTransformation = if (viewModel.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+//                keyboardOptions = KeyboardOptions(
+//                    keyboardType = KeyboardType.Password,
+//                    imeAction = ImeAction.Done
+//                ),
+//                trailingIcon = {
+//                    IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
+//                        Icon(imageVector = if (viewModel.isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = if (viewModel.isPasswordVisible) "Hide password" else "Show password")
+//                    }
+//                },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//
+//            OutlinedTextField(
+//                value = viewModel.confirmationPassword,
+//                onValueChange = { viewModel.updateConfirmationPassword(it) },
+//                label = { Text("Confirmar senha") },
+//                visualTransformation = if (viewModel.isConfirmationPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+//                keyboardOptions = KeyboardOptions(
+//                    keyboardType = KeyboardType.Password,
+//                    imeAction = ImeAction.Done
+//                ),
+//                trailingIcon = {
+//                    IconButton(onClick = { viewModel.toggleConfirmationPasswordVisibility() }) {
+//                        Icon(imageVector = if (viewModel.isConfirmationPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = if (viewModel.isConfirmationPasswordVisible) "Hide password" else "Show password")
+//                    }
+//                },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 24.dp)
+//            ) {
+//                Button(
+//                    onClick = {
+//                        viewModel.createAccount(
+//                            onSuccess = { goToLoginScreen() },
+//                            onError = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
+//                        )
+//                    },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text("Criar Conta")
+//                }
+//            }
+//        }
+//    }
+//}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinViewModel()) {
@@ -50,33 +169,24 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
                 title = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Cadastro de usuário",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        "Criar Conta", // Título mais direto e amigável
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineSmall // Consistente com título da TopAppBar de Finalize o Cadastro
+                    )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { goToLoginScreen() }) {
+                    IconButton(onClick = goToLoginScreen) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.onSurface
-
+                            contentDescription = "Voltar para tela de login", // Descrição clara para acessibilidade
+                            // Removido 'tint' para usar a cor padrão do tema (onSurface)
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior,
+                scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
@@ -84,76 +194,95 @@ fun SignupScreen(goToLoginScreen: () -> Unit, viewModel: SignupViewModel = koinV
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
-                .safeContentPadding(),
+                .imePadding() // Garante que o conteúdo role com o teclado
+                .verticalScroll(rememberScrollState()) // Adiciona scroll para lidar com o teclado
+                .padding(horizontal = 24.dp, vertical = 16.dp), // Ajusta padding horizontal e vertical
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
 
-            Text(text = "Preencha os dados para começar a utilizar a carteirinha digital do seu pet")
-
-            OutlinedTextField(
-                value = viewModel.username,
-                onValueChange = { viewModel.updateUsername(it) },
-                label = { Text("Usuário") },
-                modifier = Modifier.fillMaxWidth()
+            // Texto introdutório mais alinhado com o contexto
+            Text(
+                text = "Cadastre-se para começar a utilizar a carteirinha digital do seu pet.",
+                style = MaterialTheme.typography.bodyLarge, // Estilo de texto mais legível
+                modifier = Modifier.padding(bottom = 32.dp) // Mais espaçamento após o texto introdutório
             )
 
             OutlinedTextField(
+                value = viewModel.username,
+                onValueChange = viewModel::updateUsername,
+                label = { Text("Usuário") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next), // Indica que há um próximo campo
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp)) // Espaçamento consistente entre campos
+
+            OutlinedTextField(
                 value = viewModel.password,
-                onValueChange = { viewModel.updatePassword(it) },
+                onValueChange = viewModel::updatePassword,
                 label = { Text("Senha") },
                 visualTransformation = if (viewModel.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Next // Indica que há um próximo campo
                 ),
                 trailingIcon = {
-                    IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
-                        Icon(imageVector = if (viewModel.isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = if (viewModel.isPasswordVisible) "Hide password" else "Show password")
+                    IconButton(onClick = viewModel::togglePasswordVisibility) {
+                        Icon(
+                            imageVector = if (viewModel.isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (viewModel.isPasswordVisible) "Ocultar senha" else "Mostrar senha"
+                        )
                     }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(16.dp)) // Espaçamento consistente entre campos
+
             OutlinedTextField(
                 value = viewModel.confirmationPassword,
-                onValueChange = { viewModel.updateConfirmationPassword(it) },
+                onValueChange = viewModel::updateConfirmationPassword,
                 label = { Text("Confirmar senha") },
                 visualTransformation = if (viewModel.isConfirmationPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Done // Indica que é o último campo
                 ),
                 trailingIcon = {
-                    IconButton(onClick = { viewModel.toggleConfirmationPasswordVisibility() }) {
-                        Icon(imageVector = if (viewModel.isConfirmationPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = if (viewModel.isConfirmationPasswordVisible) "Hide password" else "Show password")
+                    IconButton(onClick = viewModel::toggleConfirmationPasswordVisibility) {
+                        Icon(
+                            imageVector = if (viewModel.isConfirmationPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (viewModel.isConfirmationPasswordVisible) "Ocultar confirmação de senha" else "Mostrar confirmação de senha"
+                        )
                     }
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Column(
+            Spacer(modifier = Modifier.height(32.dp)) // Mais espaçamento antes do botão de ação
+
+            Button(
+                onClick = {
+                    viewModel.createAccount(
+                        onSuccess = goToLoginScreen,
+                        onError = { message ->
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp)
+                    .height(56.dp) // Altura padrão do M3 para botões de ação
             ) {
-                Button(
-                    onClick = {
-                        viewModel.createAccount(
-                            onSuccess = { goToLoginScreen() },
-                            onError = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Criar Conta")
-                }
+                Text("Criar Conta", style = MaterialTheme.typography.titleMedium) // Estilo de texto do botão
             }
         }
     }
 }
-
 
 @Composable
 @Preview(showBackground = true)

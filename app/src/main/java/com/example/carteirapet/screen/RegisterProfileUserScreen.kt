@@ -2,6 +2,7 @@ package com.example.carteirapet.screen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,21 +11,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -32,12 +39,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,23 +73,15 @@ fun RegisterProfileUserScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
                 title = {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            "Finalize o seu cadastro",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        "Finalize o seu cadastro",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 },
-                navigationIcon = {
+                actions = {
                     IconButton(onClick = {
                         viewModel.logout(
                             goToLoginScreen
@@ -89,9 +90,8 @@ fun RegisterProfileUserScreen(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            imageVector = Icons.Default.Logout, // Ícone de Logout
+                            contentDescription = "Sair da conta" // Descrição clara para acessibilidade
                         )
                     }
                 },
@@ -103,14 +103,11 @@ fun RegisterProfileUserScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .safeContentPadding()
-                .padding(16.dp),
+                .imePadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            item {
-                Text(text = "Olá, para continuar, você deve preencher alguns dados referentes ao seu perfil.")
-            }
             item {
                 UserRegistrationForm({ goToHomeScreen(if (viewModel.isVet) 1 else 0) }, viewModel)
             }
@@ -119,6 +116,7 @@ fun RegisterProfileUserScreen(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileUserViewModel) {
     val context = LocalContext.current
@@ -133,35 +131,70 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
 
         when (viewModel.currentStep) {
             1 -> {
-                // Step 1: Personal information
                 Text(
                     "Etapa 1: Informações Pessoais",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge, // Título da seção
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp) // Espaçamento e padding
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Radio buttons for user type
-                    Text(text = "Você é um:")
+                    Text(
+                        text = "Você é um:",
+                        style = MaterialTheme.typography.bodyMedium, // Estilo de texto para rótulos
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-
-                        RadioButton(
-                            selected = !viewModel.isVet,
-                            onClick = { viewModel.updateIsVet(false) }
-                        )
-                        Text("Tutor")
-                        Spacer(modifier = Modifier.width(16.dp))
-                        RadioButton(
-                            selected = viewModel.isVet,
-                            onClick = { viewModel.updateIsVet(true) }
-                        )
-                        Text("Médico Veterinário")
+                        // RadioButton e Text juntos para acessibilidade e toque.
+                        // O M3 encoraja o uso de 'selectable' modificador em Box/Surface
+                        // para grupos de seleção, mas para pares RadioButton+Text, assim é ok.
+                        CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                            Row(
+                                modifier = Modifier
+                                    .selectable(
+                                        selected = !viewModel.isVet,
+                                        onClick = { viewModel.updateIsVet(false) },
+                                        role = Role.RadioButton
+                                    )
+                                    .padding(end = 8.dp), // Ajuste de padding
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = !viewModel.isVet,
+                                    onClick = null // onClick no selectable
+                                )
+                                Text(
+                                    "Tutor",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Row(
+                                modifier = Modifier
+                                    .selectable(
+                                        selected = viewModel.isVet,
+                                        onClick = { viewModel.updateIsVet(true) },
+                                        role = Role.RadioButton
+                                    )
+                                    .padding(start = 8.dp), // Ajuste de padding
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = viewModel.isVet,
+                                    onClick = null // onClick no selectable
+                                )
+                                Text(
+                                    "Médico Veterinário",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp)) // Aumentando espaçamento
 
                 // Personal information fields
                 PersonalInformationForm(
@@ -177,7 +210,7 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     onCpfChange = viewModel::updateCpf
                 )
                 if (viewModel.isVet) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp)) // Consistência no espaçamento
                     OutlinedTextField(
                         value = viewModel.crmv,
                         onValueChange = viewModel::updateCrmv,
@@ -186,27 +219,28 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp)) // Mais espaçamento antes do botão
 
                 // Button to go to step 2
                 Button(
                     onClick = { viewModel.goToNextStep() },
                     enabled = viewModel.validateRequiredFieldsInFirstStep(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp) // Altura padrão para botões M3
                 ) {
-                    Text("Próximo")
+                    Text("Próximo", style = MaterialTheme.typography.titleMedium) // Estilo de texto do botão
                 }
             }
 
             2 -> {
-                // Step 2: Address information
                 Text(
                     "Etapa 2: Dados de Endereço",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge, // Consistência com o título da Etapa 1
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(24.dp)) // Mais espaçamento antes dos botões
                 AddressInformationForm(
                     isSearchingCep = viewModel.isSearchingCep,
                     cep = viewModel.cep,
@@ -224,13 +258,15 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Navigation buttons
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(
+                    // Usando OutlinedButton para ações secundárias, como "Voltar"
+                    OutlinedButton(
                         onClick = { viewModel.goToPreviousStep() },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
                     ) {
-                        Text("Voltar")
+                        Text("Voltar", style = MaterialTheme.typography.titleMedium)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Button(
@@ -246,9 +282,11 @@ fun UserRegistrationForm(goToHomeScreen: () -> Unit, viewModel: RegisterProfileU
                                     ).show()
                                 })
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
                     ) {
-                        Text("Concluir")
+                        Text("Concluir", style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }
@@ -276,42 +314,45 @@ fun PersonalInformationForm(
             value = firstName,
             onValueChange = onFirstNameChange,
             label = { Text("Nome *") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true // Campos de texto de linha única para melhor UX
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Espaçamento consistente
         OutlinedTextField(
             value = lastName,
             onValueChange = onLastNameChange,
             label = { Text("Sobrenome *") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         PhoneInput(phoneNumber, onPhoneNumberChange)
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
             enabled = enableEmail,
             label = { Text("Email *") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             enabled = enableCpf,
             value = cpf,
             onValueChange = {
-                if (it.length <= 11) { // Limitar a entrada a 11 caracteres
+                if (it.length <= 11) {
                     onCpfChange(it)
                 }
             },
             label = { Text("CPF *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            visualTransformation = CpfVisualTransformation()
+            visualTransformation = CpfVisualTransformation(),
+            singleLine = true
         )
-
     }
 }
 
@@ -335,62 +376,78 @@ fun AddressInformationForm(
         OutlinedTextField(
             value = cep,
             onValueChange = {
-                if (it.length <= 8) { // Limitar a entrada a 8 caracteres (formato numérico do CEP)
+                if (it.length <= 8) {
                     onCepChange(it)
                 }
             },
             label = { Text("CEP *") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            visualTransformation = CepVisualTransformation()
+            visualTransformation = CepVisualTransformation(),
+            singleLine = true
         )
         if (isSearchingCep){
-            Text(text = "Buscando cep...")
+            // Usando LinearProgressIndicator para indicar busca de CEP
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp), // Espaçamento adequado
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Buscando CEP...",
+                style = MaterialTheme.typography.bodySmall, // Texto de dica
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = street,
             onValueChange = onStreetChange,
             label = { Text("Rua *") },
             enabled = !isSearchingCep,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = city,
             onValueChange = onCityChange,
             label = { Text("Cidade *") },
             enabled = !isSearchingCep,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = state,
             onValueChange = onStateChange,
             label = { Text("Estado *") },
             enabled = !isSearchingCep,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = number,
             onValueChange = { newValue ->
-                // Permite apenas números inteiros
                 if (newValue.all { it.isDigit() }) {
                     onNumberChange(newValue)
                 }
             },
             label = { Text("Número *") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = complement,
             onValueChange = onComplementChange,
-            label = { Text("Complemento *") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Complemento") }, // Complemento geralmente não é obrigatório
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
     }
 }
@@ -400,40 +457,69 @@ fun ProgressBar(steps: Int, currentStep: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(vertical = 16.dp), // Ajustando padding vertical
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         for (i in 0 until steps) {
-            StepCircle(isActive = i < currentStep, i + 1)
+            StepCircle(isActive = i < currentStep, step = i + 1)
 
             if (i < steps - 1) {
-                val color =
-                    if (i < currentStep) Color(MaterialTheme.colorScheme.primary.value) else Color.Gray
-                Box(
+                // Usando LinearProgressIndicator para a linha, que se alinha melhor com M3
+                val progress = if (i < currentStep - 1) 1f else 0f
+                LinearProgressIndicator(
+                    progress = progress,
                     modifier = Modifier
                         .height(4.dp)
-                        .weight(1f) // Preencher o espaço disponível
-                        .background(color)
+                        .weight(1f),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant // Cor de fundo para a "trilha"
                 )
             }
         }
     }
 }
 
+
 @Composable
 fun StepCircle(isActive: Boolean, step: Int) {
-    val color = if (isActive) Color(MaterialTheme.colorScheme.primary.value) else Color.Gray
-    val textColor =
-        if (isActive) Color(MaterialTheme.colorScheme.onPrimary.value) else Color.DarkGray
+    // Cor de fundo da bolinha
+    val backgroundColor = if (isActive) {
+        MaterialTheme.colorScheme.primary // Primário para ativo
+    } else {
+        // Usamos surfaceContainerHighest para um fundo inativo mais escuro e com melhor contraste
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
+
+    // Cor do texto
+    val textColor = if (isActive) {
+        MaterialTheme.colorScheme.onPrimary // Texto claro para bolinha primária
+    } else {
+        // Usamos onSurface para garantir bom contraste com surfaceContainerHighest
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    // Cor da borda (opcional, mas pode ajudar a definir o limite do círculo inativo)
+    val borderColor = if (isActive) {
+        MaterialTheme.colorScheme.primary // Borda com a mesma cor primária para ativo
+    } else {
+        // Usamos outline ou outlineVariant para a borda do inativo
+        MaterialTheme.colorScheme.outline
+    }
+
     Box(
         modifier = Modifier
-            .size(24.dp)
+            .size(32.dp) // Tamanho um pouco maior para melhor toque e visual
             .clip(CircleShape)
-            .background(color),
+            .background(backgroundColor) // Aplica a cor de fundo
+            .border(2.dp, borderColor, CircleShape), // Adiciona uma borda
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "$step", color = textColor)
+        Text(
+            text = "$step",
+            color = textColor,
+            style = MaterialTheme.typography.labelLarge // Estilo de texto M3 para rótulos pequenos
+        )
     }
 }
 
@@ -445,18 +531,17 @@ fun PhoneInput(
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { newValue ->
-            // Limita o número de caracteres digitados
             if (newValue.length <= 11) {
-                onPhoneNumberChange(newValue.filter { it.isDigit() }) // Aceita apenas números
+                onPhoneNumberChange(newValue.filter { it.isDigit() })
             }
         },
         label = { Text("Celular *") },
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        visualTransformation = PhoneVisualTransformation()
+        visualTransformation = PhoneVisualTransformation(),
+        singleLine = true // Adicionando singleLine
     )
 }
-
 
 @Composable
 @Preview(showBackground = true)

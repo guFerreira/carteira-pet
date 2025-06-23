@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,47 +63,63 @@ import com.example.carteirapet.viewModels.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
+
 @Composable
-fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: (screen: String) -> Unit, onRegisterProfileUserNavigate: () -> Unit, viewModel: LoginViewModel = koinViewModel()) {
+fun LoginScreen(
+    onSignUpClick: () -> Unit,
+    onLoginSuccess: (screen: String) -> Unit,
+    onRegisterProfileUserNavigate: () -> Unit,
+    viewModel: LoginViewModel = koinViewModel()
+) {
     val loginState = viewModel.loginState
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 24.dp) // Padding horizontal um pouco maior para respiro
             .safeContentPadding()
             .imePadding()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Seção do Logo e Títulos
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 48.dp)
+                .padding(bottom = 48.dp) // Espaçamento maior para separar do formulário
         ) {
             Image(
-                painter = painterResource(id = R.drawable.carteirinha),
-                contentDescription = "logo",
+                painter = painterResource(id = R.drawable.logo_grande),
+                contentDescription = "Logo do aplicativo Carteirinha", // Descrição mais específica
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .size(180.dp)
-
+                    .size(180.dp) // Tamanho fixo para o logo, controlando o preenchimento da largura
+                    .padding(bottom = 16.dp) // Espaçamento entre o logo e o título
             )
-            Text(text = "Carteirinha", fontSize = 36.sp)
-            Text(text = "O registro digital das vacinas do seu pet", fontSize = 12.sp)
+            Text(
+                text = "Carteirinha",
+                style = MaterialTheme.typography.displaySmall, // Título principal (h1 ou h2 no M3)
+                color = MaterialTheme.colorScheme.primary // Usando a cor primária do tema
+            )
+            Spacer(modifier = Modifier.height(4.dp)) // Pequeno espaçamento
+            Text(
+                text = "O registro digital das vacinas do seu pet",
+                style = MaterialTheme.typography.bodyLarge, // Subtítulo com texto de corpo maior
+                color = MaterialTheme.colorScheme.onSurfaceVariant // Cor para textos secundários
+            )
         }
 
-//        QRCodeScannerScreen()
-
+        // Campos de Formulário
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = viewModel.username,
                 onValueChange = { viewModel.onUsernameChanged(it) },
                 label = { Text("Usuário") },
+                singleLine = true, // Campos de texto de linha única para formulários
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.height(16.dp)) // Espaçamento consistente entre campos
 
             OutlinedTextField(
                 value = viewModel.password,
@@ -115,49 +132,70 @@ fun LoginScreen(onSignUpClick: () -> Unit, onLoginSuccess: (screen: String) -> U
                 ),
                 trailingIcon = {
                     IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
-                        Icon(imageVector = if (viewModel.isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = if (viewModel.isPasswordVisible) "Hide password" else "Show password")
+                        Icon(
+                            imageVector = if (viewModel.isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (viewModel.isPasswordVisible) "Esconder senha" else "Mostrar senha" // Descrições mais claras
+                        )
                     }
                 },
+                singleLine = true, // Campos de texto de linha única
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
+        // Botões de Ação
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp)
+                .padding(top = 32.dp) // Aumenta o espaçamento antes dos botões
         ) {
             Button(
-                onClick = { viewModel.login(onLoginSuccess, onRegisterProfileUserNavigate)},
+                onClick = { viewModel.login(onLoginSuccess, onRegisterProfileUserNavigate) },
                 enabled = viewModel.isLoginEnabled,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp) // Altura padrão do M3 para botões de ação
             ) {
-                Text("Entrar")
+                Text("Entrar", style = MaterialTheme.typography.titleMedium) // Estilo de texto do botão
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp)) // Espaçamento consistente entre botões
 
-            ElevatedButton(
+            // Usando um TextButton ou OutlinedButton para "Criar conta"
+            // Elevated Button é uma opção, mas TextButton ou OutlinedButton
+            // podem ser mais adequados para ações secundárias ou de navegação para fora do fluxo principal.
+            // Vou sugerir TextButton para uma aparência mais leve para "Criar conta".
+            TextButton( // Alterado de ElevatedButton para TextButton
                 onClick = { onSignUpClick() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.elevatedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary, // Cor de fundo baseada no tema
-                    contentColor = MaterialTheme.colorScheme.onSecondary // Cor do conteúdo (texto/ícone) baseada no tema
-                )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
-                Text("Criar conta")
+                Text("Criar conta", style = MaterialTheme.typography.titleMedium)
             }
         }
 
         // Observa o estado do login e exibe a UI apropriada
+        // Colocando os indicadores de estado abaixo dos botões e com espaçamento
+        Spacer(modifier = Modifier.height(24.dp)) // Espaçamento antes dos indicadores de estado
+
         when (loginState) {
             is LoginState.Loading -> {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.size(48.dp)) // Tamanho padrão para CircularProgressIndicator
             }
             is LoginState.Success -> {
-                Text(text = (loginState as LoginState.Success).message)
+                Text(
+                    text = loginState.message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary // Cor primária para sucesso
+                )
             }
             is LoginState.Error -> {
-                Text(text = (loginState as LoginState.Error).error, color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = loginState.error,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error // Cor de erro do tema
+                )
             }
             else -> {}
         }

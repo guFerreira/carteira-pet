@@ -17,30 +17,43 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun CardUser(name: String, isVeterinary: Boolean? = false) {
-    Column(
+fun CardUser(userName: String, isVeterinary: Boolean? = false) {
+    // Usamos um Card do Material 3 para dar a ele a aparência de um cartão
+    Card(
+        colors = CardDefaults.cardColors(
+            // surfaceContainerHigh é uma boa escolha para um card de destaque
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Adiciona uma elevação sutil
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 16.dp) // Espaçamento vertical para o card, separando-o do topo e da lista
     ) {
-        Text(
-            text = "Olá, ${name}!",
-            fontWeight = FontWeight.Normal,
-            fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
+        Column(
+            modifier = Modifier
+                .padding(16.dp) // Padding interno para o conteúdo do card
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Olá, ${userName}!",
+                // Usando headlineSmall para um título de destaque, mais impactante
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface // Cor principal para o texto
+            )
 
-        Spacer(modifier = Modifier.height(8.dp)) // Espaço entre título e subtítulo
+            Spacer(modifier = Modifier.height(8.dp)) // Espaço entre título e subtítulo (8dp é um bom padrão)
 
-        Text(
-            text = if (isVeterinary == true) {
-                "Você pode visualizar as solicitações de vacinas relacionadas a você!"
-            } else {
-                "Selecione um de seus pets para visualizar as suas vacinas"
-            },
-            fontWeight = FontWeight.Light,
-            fontSize = 16.sp, // Tamanho adequado para texto secundário
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
+            Text(
+                text = if (isVeterinary == true) {
+                    "Você pode visualizar as solicitações de vacinas relacionadas a você!"
+                } else {
+                    "Selecione um de seus pets para visualizar as suas vacinas"
+                },
+                // Usando bodyLarge para o texto de corpo, mais legível
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant // Cor secundária para o subtítulo
+            )
+        }
     }
-
 }

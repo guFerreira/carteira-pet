@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
@@ -24,15 +25,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -54,10 +66,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carteirapet.repositories.VaccineRequestResponse
+import com.example.carteirapet.screen.components.Logo
 import com.example.carteirapet.screen.components.QRCodeVaccine
 import com.example.carteirapet.screen.components.ShareLinkButton
 import com.example.carteirapet.viewModels.CreateVaccineRequestViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -100,16 +114,7 @@ fun RegisterVaccineScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Vaccines,
-                            contentDescription = "Nova Vacina",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Nova Vacina",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Logo()
                     }
                 },
                 navigationIcon = {
@@ -128,7 +133,6 @@ fun RegisterVaccineScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .safeContentPadding()
                 .padding(16.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
@@ -151,51 +155,103 @@ fun RegisterVaccineScreen(
                 if (viewModel.vaccineRequest == null) {
                     CreateVaccineRequestContent(petId = petId, viewModel = viewModel)
                 } else {
-                    VaccineRequestCreatedContent(vaccineRequest = viewModel.vaccineRequest!!, petId = petId, onConclude = goToVaccineCardScreen)
+                    VaccineRequestCreatedContent(vaccineRequest = viewModel.vaccineRequest!!, onConclude = goToVaccineCardScreen)
                 }
             }
         }
     }
 }
-
 @Composable
-fun CreateVaccineRequestContent(petId: Int?, viewModel: CreateVaccineRequestViewModel){
-    Column {
+fun CreateVaccineRequestContent(
+    modifier: Modifier = Modifier, // Este modifier vem do Scaffold e já contém o padding do TopAppBar
+    petId: Int?,
+    viewModel: CreateVaccineRequestViewModel
+) {
+    // A MÁGICA ACONTECE AQUI:
+    // O Column precisa preencher todo o espaço que o Scaffold deu a ele.
+    Column(
+        modifier = modifier // 1. Aplica o padding do Scaffold
+            .fillMaxSize()    // 2. MANDA A COLUNA OCUPAR TODO O ESPAÇO RESTANTE
+            .padding(16.dp),  // 3. Adiciona um padding interno para o conteúdo
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // ... (Text, Spacer, Card, etc. continuam iguais)
+
         Text(
-            text = "Crie um novo registro de vacina para seu pet." +
-                    " Esse registro só pode ser aceito, preenchido e assinado pelo seu médico veterinário."
+            text = "Gerar um código de autorização para o veterinário aplicar uma vacina.",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.size(8.dp))
 
-        Text(text = "Cada registro de vacina criado tem um tempo de expiração de 1 hora para que possa ser aceito pelo seu médico veterinário.")
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = "Após a criação, será gerado um QRcode e um link que pode ser escaneado ou enviado para seu médico veterinário.")
-        Spacer(modifier = Modifier.size(8.dp))
+// Card para agrupar as informações importantes, dando destaque e organização.
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                // ListItem é ideal para exibir um ícone + texto, melhorando a leitura.
+                ListItem(
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.AdminPanelSettings,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    headlineContent = { Text("Aprovação Veterinária") },
+                    supportingContent = { Text("O registro só pode ser preenchido e assinado pelo seu veterinário.") }
+                )
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                ListItem(
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    headlineContent = { Text("Expira em 1 hora") },
+                    supportingContent = { Text("O código gerado deve ser usado pelo veterinário dentro de uma hora.") }
+                )
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                ListItem(
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.QrCode2,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    headlineContent = { Text("Gera QR Code e Link") },
+                    supportingContent = { Text("Compartilhe o código gerado para que o veterinário acesse a solicitação.") }
+                )
+            }
+        }
 
-        Text(text = "Vamos começar? \uD83D\uDE0A")
-        Spacer(modifier = Modifier.size(16.dp))
-        Column(
+        // AGORA ISTO VAI FUNCIONAR:
+        // Como o Column tem altura máxima, este Spacer tem espaço para "empurrar" o botão.
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                if (petId != null) {
+                    viewModel.createVaccineRequest(
+                        petId = petId,
+                        onSuccessful = {},
+                        onError = {})
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .height(48.dp) // Ajustei para 48dp, um ótimo valor de toque
         ) {
-            Button(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.onPrimary),
-                onClick = {
-                    if (petId != null) {
-                        viewModel.createVaccineRequest(
-                            petId = petId,
-                            onSuccessful = {},
-                            onError = {})
-                    }
-                }
-            ) {
-                Text(text = "Criar solicitação de vacina")
-            }
+            Icon(
+                Icons.Default.QrCode2,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = "Gerar Código de Solicitação")
         }
     }
 }
@@ -203,139 +259,154 @@ fun CreateVaccineRequestContent(petId: Int?, viewModel: CreateVaccineRequestView
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VaccineRequestCreatedContent(
+    modifier: Modifier = Modifier,
     vaccineRequest: VaccineRequestResponse,
-    petId: Int?,
     onConclude: () -> Unit
 ) {
-    // Tentar parsear as datas com fallback
-    val requestDateInstant = try {
-        Instant.parse(vaccineRequest.requestDate)
-    } catch (e: DateTimeParseException) {
-        Instant.now() // Fallback para data atual
+    // --- LÓGICA DO CRONÔMETRO (Mantida, pois já é robusta) ---
+
+    // Fallback seguro para as datas
+    val expirationDateInstant = remember(vaccineRequest.expirationDate) {
+        try {
+            Instant.parse(vaccineRequest.expirationDate)
+        } catch (e: DateTimeParseException) {
+            Instant.now().plusSeconds(3600)
+        }
     }
-    val expirationDateInstant = try {
-        Instant.parse(vaccineRequest.expirationDate)
-    } catch (e: DateTimeParseException) {
-        Instant.now().plusSeconds(3600) // Fallback para 1 hora a partir de agora
+    val totalDuration = remember(vaccineRequest.requestDate, expirationDateInstant) {
+        val requestDateInstant = try {
+            Instant.parse(vaccineRequest.requestDate)
+        } catch (e: DateTimeParseException) {
+            Instant.now()
+        }
+        (expirationDateInstant.toEpochMilli() - requestDateInstant.toEpochMilli()).coerceAtLeast(1)
     }
 
-    // Converter para fuso horário local
-    val requestDate = requestDateInstant.atZone(ZoneId.systemDefault())
-    val expirationDate = expirationDateInstant.atZone(ZoneId.systemDefault())
-    val totalDuration = expirationDate.toInstant().toEpochMilli() - requestDate.toInstant().toEpochMilli()
-
-    // Estado para progresso e tempo restante
-    var progress by remember { mutableFloatStateOf(1f) }
     var timeRemainingMillis by remember { mutableFloatStateOf(totalDuration.toFloat()) }
 
-    // Atualizar progresso em tempo real
-    LaunchedEffect(Unit) {
-        while (true) {
-            val currentTime = Instant.now().toEpochMilli()
-            timeRemainingMillis = (expirationDate.toInstant().toEpochMilli() - currentTime).toFloat()
-            progress = if (timeRemainingMillis > 0) timeRemainingMillis / totalDuration else 0f
-            delay(1000L) // Atualiza a cada segundo
+    // Usar o ID da requisição como chave garante que o efeito reinicie se a requisição mudar.
+    LaunchedEffect(key1 = vaccineRequest.id) {
+        while (coroutineContext.isActive && timeRemainingMillis > 0) {
+            val now = Instant.now().toEpochMilli()
+            timeRemainingMillis = (expirationDateInstant.toEpochMilli() - now).toFloat()
+            delay(1000L)
         }
+        timeRemainingMillis = 0f // Garante que o tempo zere ao final
     }
 
-    // Animação suave para a barra de progresso
+    val progress = (timeRemainingMillis / totalDuration).coerceIn(0f, 1f)
+
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
+        animationSpec = tween(durationMillis = 1000),
+        label = "ProgressAnimation"
     )
 
-    // Formatar datas para exibição
-    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+    // Formatação do tempo para exibição
     val minutesRemaining = (timeRemainingMillis / 1000 / 60).toInt()
     val secondsRemaining = (timeRemainingMillis / 1000 % 60).toInt()
+    val isExpired = timeRemainingMillis <= 0
+
+    // Condição de cor mais legível (ex: muda quando faltam menos de 5 minutos)
+    val isUrgent = timeRemainingMillis < 5 * 60 * 1000 && !isExpired
+    val progressColor = when {
+        isExpired -> MaterialTheme.colorScheme.error
+        isUrgent -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.primary
+    }
+
+    // --- LAYOUT COM MATERIAL 3 ---
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Solicitação de vacina criada com sucesso!",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center
+        Icon(
+            imageVector = Icons.Filled.CheckCircle,
+            contentDescription = "Sucesso",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(64.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(
-            text = "Peça ao seu médico veterinário para aceitar a solicitação escaneando o QR code ou acessando o link abaixo.",
-            style = MaterialTheme.typography.bodyMedium,
+            text = "Solicitação criada!",
+            style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "QR Code",
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                fontWeight = FontWeight(800)
+        Text(
+            text = "Apresente o QR Code ou compartilhe o link com o veterinário para continuar.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- CARD AJUSTADO ---
+        // 1. Não ocupa mais a largura toda (sem fillMaxWidth).
+        // 2. Tem uma cor de container explícita para contraste.
+        Card(
+            shape = MaterialTheme.shapes.large, // Cantos mais arredondados
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-            Spacer(modifier = Modifier.size(2.dp))
+        ) {
             Column(
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(32.dp)
-                    )
-                    .padding(24.dp),
+                modifier = Modifier.padding(24.dp), // Padding generoso dentro do card
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                QRCodeVaccine(inputText = "app://moo/createVaccineRequest/${vaccineRequest.id}")
+                // Container do QR Code para dar um destaque visual
+                Box(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium) // Cantos arredondados para o QR
+                        .background(MaterialTheme.colorScheme.onPrimary) // Fundo branco para o QR Code
+                        .padding(12.dp) // Um preenchimento para o QR Code não colar nas bordas
+                ) {
+                    QRCodeVaccine(inputText = "app://moo/createVaccineRequest/${vaccineRequest.id}")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                ShareLinkButton(url = "app://moo/createVaccineRequest/${vaccineRequest.id}")
             }
         }
 
-        ShareLinkButton(url = "app://moo/createVaccineRequest/${vaccineRequest.id ?: 1}")
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Informações de expiração e barra de progresso
+        // Seção de expiração
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = if (timeRemainingMillis > 0) {
-                    "Tempo para o link expirar: $minutesRemaining min $secondsRemaining s"
-                } else {
-                    "Solicitação expirada"
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (progress > 0.3f) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                text = if (isExpired) "Solicitação expirada" else "Expira em: $minutesRemaining min $secondsRemaining s",
+                style = MaterialTheme.typography.titleSmall,
+                color = progressColor
             )
-            if (timeRemainingMillis > 0) {
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    color = if (progress > 0.3f) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                )
-            }
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth(0.7f) // Um pouco menor que a tela toda para elegância
+                    .height(8.dp),
+                color = progressColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         }
 
-    }
-}
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true, widthDp = 360, heightDp = 640, name = "Expirado")
-@Composable
-fun VaccineRequestCreatedContentPreviewExpired() {
-    MaterialTheme {
-        VaccineRequestCreatedContent(
-            vaccineRequest = VaccineRequestResponse(
-                id = 1,
-                status = "CRIADO",
-                animalName = "Rex",
-                animalSpecies = "Cachorro",
-                requestDate = "2025-04-28T15:01:20.249Z",
-                expirationDate = "2025-04-28T15:01:20.249Z" // Já expirado
-            ),
-            petId = 1,
-            onConclude = {}
-        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botão de conclusão com estilo secundário
+        OutlinedButton(
+            onClick = onConclude,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Concluir")
+        }
     }
 }

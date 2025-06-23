@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.carteirapet.repositories.VaccineRequestResponse
 import com.example.carteirapet.screen.components.StatusIndicator
@@ -43,22 +44,30 @@ fun VaccineCreatedCard(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            // tertiaryContainer é uma ótima cor para "pendências" ou "informações"
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Status no topo, centralizado
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(
+                    text = "Solicitação de Registro",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
                 StatusIndicator(status = vaccineRequest.status)
             }
+
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -72,26 +81,18 @@ fun VaccineCreatedCard(
 
             // Tempo restante até expiração
             vaccineRequest.expirationDate?.let {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Timer,
-                        contentDescription = "Ícone de tempo",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    ExpirationCountdown(expirationDate = it)
-                }
+                ExpirationCountdown(expirationDate = it, contentColor = MaterialTheme.colorScheme.onTertiaryContainer)
             }
         }
     }
 }
 
 @Composable
-fun ExpirationCountdown(expirationDate: String) {
+fun ExpirationCountdown(
+    expirationDate: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
     var remainingText by remember { mutableStateOf(DateUtils.getTimeRemainingText(expirationDate)) }
 
     LaunchedEffect(expirationDate) {
@@ -100,11 +101,22 @@ fun ExpirationCountdown(expirationDate: String) {
             delay(1000L)
         }
     }
-
-    Text(
-        text = "Tempo restante até a expiração: $remainingText",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Timer,
+            contentDescription = "Ícone de tempo",
+            tint = contentColor,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "Tempo restante até a expiração: $remainingText",
+            style = MaterialTheme.typography.bodySmall,
+            color = contentColor
+        )
+    }
 }
 

@@ -20,16 +20,19 @@ import qrgenerator.qrkitpainter.solidBrush
 
 @Composable
 fun QRCodeVaccine(inputText: String) {
-    val onTertiaryContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
+    // RECOMENDAÇÃO: Use onSurface para garantir o melhor contraste em qualquer tema.
+    val qrCodeColor = MaterialTheme.colorScheme.tertiary
+
     val painter = rememberQrKitPainter(
         data = inputText,
         options = {
             qrColors {
-                darkColorBrush = QrKitBrush.solidBrush(onTertiaryContainerColor)
-                frameColorBrush = QrKitBrush.solidBrush(onTertiaryContainerColor)
+                // Aplica a cor escolhida aos elementos do QR code
+                darkColorBrush = QrKitBrush.solidBrush(qrCodeColor)
+                frameColorBrush = QrKitBrush.solidBrush(qrCodeColor)
             }
-
             qrShapes {
+                // Suas configurações de forma
                 ballShape = getSelectedQrBall(QrBallType.SquareQrBall())
                 darkPixelShape = getSelectedPixel(SquarePixel())
                 frameShape = getSelectedQrFrame(QrFrameType.SquareQrFrame())
@@ -39,7 +42,8 @@ fun QRCodeVaccine(inputText: String) {
     )
 
     Image(
-        painter = painter, contentDescription = null, modifier = Modifier.size(180.dp)
+        painter = painter,
+        contentDescription = "QR Code para a solicitação de vacina", // Adicionado contentDescription
+        modifier = Modifier.size(180.dp)
     )
-
 }

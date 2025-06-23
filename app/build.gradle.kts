@@ -121,6 +121,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
 
+    implementation("androidx.compose.foundation:foundation-layout-android:1.6.8") // Ou a versão mais recente
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.8")
 //    implementation("androidx.camera:camera-core:1.3.0")
 //    implementation("androidx.camera:camera-camera2:1.3.0")
 //    implementation("androidx.camera:camera-lifecycle:1.3.0")
